@@ -1,0 +1,53 @@
+{
+  "timestamp": "2026-11-05T21:37:35.672132+00:00",
+  "benchmark_results": {
+    "pdf": {
+      "engine": "pymupdf_extractor",
+      "avg_latency_ms": 792.02,
+      "min_latency_ms": 752.69,
+      "throughput_docs_per_sec": 1.3
+    },
+    "docx": {
+      "engine": "docx_extractor",
+      "avg_latency_ms": 33.79,
+      "min_latency_ms": 30.68,
+      "throughput_docs_per_sec": 29.6
+    },
+    "doc": {
+      "engine": "legacy_doc_extractor",
+      "avg_latency_ms": 1.78,
+      "min_latency_ms": 1.19,
+      "throughput_docs_per_sec": 562.1
+    },
+    "txt": {
+      "engine": "plain_text_extractor",
+      "avg_latency_ms": 0.41,
+      "min_latency_ms": 0.37,
+      "throughput_docs_per_sec": 2410.5
+    },
+    "md": {
+      "engine": "markdown_extractor",
+      "avg_latency_ms": 0.16,
+      "min_latency_ms": 0.14,
+      "throughput_docs_per_sec": 6191.1
+    },
+    "rtf": {
+      "engine": "rtf_extractor",
+      "avg_latency_ms": 0.18,
+      "min_latency_ms": 0.15,
+      "throughput_docs_per_sec": 5615.1
+    },
+    "odt": {
+      "engine": "odt_extractor",
+      "avg_latency_ms": 0.24,
+      "min_latency_ms": 0.22,
+      "throughput_docs_per_sec": 4116.9
+    },
+    "epub": {
+      "engine": "epub_extractor",
+      "avg_latency_ms": 1.34,
+      "min_latency_ms": 1.21,
+      "throughput_docs_per_sec": 745.6
+    }
+  }
+}

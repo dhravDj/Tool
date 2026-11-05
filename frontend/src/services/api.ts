@@ -4,8 +4,13 @@ import {
   APIResponse,
   BatchDetectionResponseData,
   BatchSummary,
+  CanonicalDocument,
   DetectionCapabilitiesData,
   DetectionResultData,
+  ExtractionCapabilitiesResponse,
+  ExtractionManifest,
+  ExtractionRequest,
+  ExtractionStatusResponse,
   FileRecordSummary,
   FormatDetailData,
   FormatListResponseData,
@@ -83,4 +88,35 @@ export const api = {
 
   getDetectionCapabilities: (): Promise<DetectionCapabilitiesData> =>
     request<DetectionCapabilitiesData>("/system/detection-capabilities"),
+
+  // Phase 3: Document Content Extraction Endpoints
+  extractDocument: (fileId: string, payload?: ExtractionRequest): Promise<ExtractionManifest> =>
+    request<ExtractionManifest>(`/files/${encodeURIComponent(fileId)}/extract`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload || {}),
+    }),
+
+  getExtractionStatus: (fileId: string): Promise<ExtractionStatusResponse> =>
+    request<ExtractionStatusResponse>(`/files/${encodeURIComponent(fileId)}/extraction`),
+
+  getCanonicalDocument: (fileId: string): Promise<CanonicalDocument> =>
+    request<CanonicalDocument>(`/files/${encodeURIComponent(fileId)}/extraction/result`),
+
+  getExtractedMarkdown: async (fileId: string, raw = false): Promise<string> => {
+    if (raw) {
+      const response = await fetch(`${API_BASE}/files/${encodeURIComponent(fileId)}/extraction/markdown?raw=true`);
+      return response.text();
+    }
+    const res = await request<{ file_id: string; markdown: string }>(
+      `/files/${encodeURIComponent(fileId)}/extraction/markdown`
+    );
+    return res.markdown;
+  },
+
+  getExtractionManifest: (fileId: string): Promise<ExtractionManifest> =>
+    request<ExtractionManifest>(`/files/${encodeURIComponent(fileId)}/extraction/manifest`),
+
+  getExtractionCapabilities: (): Promise<ExtractionCapabilitiesResponse> =>
+    request<ExtractionCapabilitiesResponse>("/extraction/capabilities"),
 };

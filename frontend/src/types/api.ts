@@ -221,3 +221,123 @@ export interface BatchSummary {
   created_at: string;
   updated_at: string;
 }
+
+// ----------------------------------------------------------------------
+// Phase 3: Document Content Extraction Schemas
+// ----------------------------------------------------------------------
+
+export type BlockType =
+  | "heading"
+  | "paragraph"
+  | "list"
+  | "list_item"
+  | "table"
+  | "table_row"
+  | "table_cell"
+  | "code"
+  | "equation"
+  | "caption"
+  | "header"
+  | "footer"
+  | "image_reference"
+  | "unknown";
+
+export type ExtractionStatus =
+  | "queued"
+  | "processing"
+  | "completed"
+  | "completed_with_warnings"
+  | "failed"
+  | "unsupported"
+  | "password_required"
+  | "cancelled";
+
+export interface CanonicalBlock {
+  block_id: string;
+  block_type: BlockType;
+  text: string;
+  reading_order: number;
+  page_number: number;
+  bounding_box?: [number, number, number, number] | null;
+  confidence?: number | null;
+  extraction_engine: string;
+  provenance: string;
+  warnings?: string[];
+  metadata?: Record<string, unknown>;
+}
+
+export interface CanonicalPage {
+  page_number: number;
+  width?: number | null;
+  height?: number | null;
+  rotation?: number;
+  is_scanned: boolean;
+  ocr_applied: boolean;
+  blocks: CanonicalBlock[];
+  metadata?: Record<string, unknown>;
+}
+
+export interface CanonicalDocument {
+  document_id: string;
+  original_filename: string;
+  detected_format: string;
+  extraction_status: ExtractionStatus;
+  metadata: Record<string, unknown>;
+  page_count: number;
+  extraction_engine: string;
+  extraction_version: string;
+  created_at: string;
+  pages: CanonicalPage[];
+  blocks: CanonicalBlock[];
+  warnings: string[];
+  errors: string[];
+}
+
+export interface ExtractionManifest {
+  document_id: string;
+  original_filename: string;
+  detected_format: string;
+  extraction_engine: string;
+  extraction_version: string;
+  processing_timestamp: string;
+  execution_time_seconds: number;
+  page_count: number;
+  extracted_block_count: number;
+  scanned_page_count: number;
+  ocr_page_count: number;
+  ocr_engine?: string | null;
+  overall_confidence: number;
+  warnings: string[];
+  errors: string[];
+  output_files: Record<string, string>;
+  assets: Array<Record<string, unknown>>;
+}
+
+export interface ExtractionStatusResponse {
+  file_id: string;
+  status: string;
+  engine: string;
+  detected_format: string;
+  page_count: number;
+  block_count: number;
+  scanned_pages: number;
+  ocr_applied_pages: number;
+  warnings: string[];
+  errors: string[];
+  output_files: Record<string, string>;
+  created_at: string;
+}
+
+export interface ExtractionCapabilitiesResponse {
+  supported_formats: string[];
+  engines: string[];
+  ocr_enabled: boolean;
+  ocr_engine: string | null;
+  ocr_available: boolean;
+}
+
+export interface ExtractionRequest {
+  password?: string;
+  extract_images?: boolean;
+  options?: Record<string, unknown>;
+}

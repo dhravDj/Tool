@@ -24,6 +24,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { LoadingState } from "@/components/ui/LoadingState";
 import { PageContainer } from "@/components/ui/PageContainer";
+import { DocumentExtractionView } from "@/components/DocumentExtractionView";
 import { api } from "@/services/api";
 import { FileRecordSummary, FormatDetailData } from "@/types/api";
 
@@ -32,6 +33,7 @@ export const FileLibraryPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [inspectingFile, setInspectingFile] = useState<FileRecordSummary | null>(null);
+  const [modalTab, setModalTab] = useState<"extraction" | "detection">("extraction");
 
   // Queries
   const {
@@ -343,98 +345,131 @@ export const FileLibraryPage: React.FC = () => {
         </div>
       )}
 
-      {/* File Record Inspection Modal */}
+      {/* File Record Inspection & Extraction Modal */}
       {inspectingFile && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="rounded-xl border border-border bg-card w-full max-w-2xl max-h-[85vh] overflow-y-auto p-6 shadow-xl">
+          <div className="rounded-xl border border-border bg-card w-full max-w-4xl max-h-[90vh] overflow-y-auto p-6 shadow-2xl space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-border">
-              <div className="flex items-center gap-2">
-                <FileBox className="h-5 w-5 text-primary" />
-                <h3 className="font-semibold text-foreground text-sm">
-                  File Record & Detection Inspection
-                </h3>
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
+                  <FileBox className="h-5 w-5 text-primary" />
+                  <h3 className="font-semibold text-foreground text-sm truncate max-w-xs">
+                    {inspectingFile.original_filename}
+                  </h3>
+                </div>
+                <div className="flex items-center rounded-lg bg-muted p-0.5 text-xs">
+                  <button
+                    onClick={() => setModalTab("extraction")}
+                    className={`px-3 py-1 rounded-md font-medium transition ${
+                      modalTab === "extraction"
+                        ? "bg-card text-foreground shadow-sm"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    Content Extraction
+                  </button>
+                  <button
+                    onClick={() => setModalTab("detection")}
+                    className={`px-3 py-1 rounded-md font-medium transition ${
+                      modalTab === "detection"
+                        ? "bg-card text-foreground shadow-sm"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    Detection Provenance
+                  </button>
+                </div>
               </div>
               <button
                 onClick={() => setInspectingFile(null)}
-                className="text-muted-foreground hover:text-foreground transition"
+                className="text-muted-foreground hover:text-foreground transition p-1"
               >
-                <X className="h-4 w-4" />
+                <X className="h-5 w-5" />
               </button>
             </div>
 
-            <div className="mt-4 space-y-4 text-xs">
-              <div className="grid grid-cols-2 gap-3 p-3 rounded-lg bg-background border border-border/60">
-                <div>
-                  <span className="text-muted-foreground block text-[11px]">Filename:</span>
-                  <span className="font-medium text-foreground">{inspectingFile.original_filename}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground block text-[11px]">File ID:</span>
-                  <span className="font-mono text-[10px] text-foreground">{inspectingFile.id}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground block text-[11px]">Detected MIME:</span>
-                  <span className="font-mono text-foreground">
-                    {inspectingFile.detected_mime_type || "N/A"}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground block text-[11px]">Format & Category:</span>
-                  <span className="font-medium capitalize text-foreground">
-                    {inspectingFile.detection_format_id || "unknown"} (
-                    {inspectingFile.format_category || "unknown"})
-                  </span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground block text-[11px]">SHA-256 Checksum:</span>
-                  <span className="font-mono text-[10px] truncate block text-foreground">
-                    {inspectingFile.sha256}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground block text-[11px]">Detection Engine:</span>
-                  <span className="text-foreground">
-                    v{inspectingFile.detection_engine_version || "2.0.0"}
-                  </span>
-                </div>
-              </div>
-
-              {/* Evidence Log */}
-              {inspectingFile.detection_evidence && inspectingFile.detection_evidence.length > 0 && (
-                <div>
-                  <h4 className="font-semibold text-foreground mb-2 flex items-center gap-1.5">
-                    <CheckCircle className="h-4 w-4 text-emerald-500" />
-                    Detection Evidence Log
-                  </h4>
-                  <div className="space-y-1.5">
-                    {inspectingFile.detection_evidence.map((ev, i) => (
-                      <div
-                        key={i}
-                        className="rounded bg-background p-2 border border-border/40 text-[11px] flex items-center justify-between"
-                      >
-                        <span className="font-semibold uppercase text-foreground">{ev.signal}</span>
-                        <span className="font-mono text-[10px] text-muted-foreground">
-                          {ev.details}
-                        </span>
-                        <span className="text-emerald-600 dark:text-emerald-400 font-medium">
-                          {Math.round(ev.confidence_score * 100)}%
-                        </span>
-                      </div>
-                    ))}
+            {modalTab === "extraction" ? (
+              <DocumentExtractionView
+                fileId={inspectingFile.id}
+                filename={inspectingFile.original_filename}
+                formatId={inspectingFile.detection_format_id || inspectingFile.extension}
+                onClose={() => setInspectingFile(null)}
+              />
+            ) : (
+              <div className="space-y-4 text-xs">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 p-3 rounded-lg bg-background border border-border/60">
+                  <div>
+                    <span className="text-muted-foreground block text-[11px]">Filename:</span>
+                    <span className="font-medium text-foreground">{inspectingFile.original_filename}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground block text-[11px]">File ID:</span>
+                    <span className="font-mono text-[10px] text-foreground">{inspectingFile.id}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground block text-[11px]">Detected MIME:</span>
+                    <span className="font-mono text-foreground">
+                      {inspectingFile.detected_mime_type || "N/A"}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground block text-[11px]">Format & Category:</span>
+                    <span className="font-medium capitalize text-foreground">
+                      {inspectingFile.detection_format_id || "unknown"} (
+                      {inspectingFile.format_category || "unknown"})
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground block text-[11px]">SHA-256 Checksum:</span>
+                    <span className="font-mono text-[10px] truncate block text-foreground">
+                      {inspectingFile.sha256}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground block text-[11px]">Detection Engine:</span>
+                    <span className="text-foreground">
+                      v{inspectingFile.detection_engine_version || "2.0.0"}
+                    </span>
                   </div>
                 </div>
-              )}
 
-              {/* Metadata */}
-              {inspectingFile.file_metadata && Object.keys(inspectingFile.file_metadata).length > 0 && (
-                <div>
-                  <h4 className="font-semibold text-foreground mb-1.5">Extracted Header Metadata:</h4>
-                  <pre className="bg-background rounded p-2 text-[10px] font-mono text-muted-foreground overflow-x-auto max-h-36">
-                    {JSON.stringify(inspectingFile.file_metadata, null, 2)}
-                  </pre>
-                </div>
-              )}
-            </div>
+                {/* Evidence Log */}
+                {inspectingFile.detection_evidence && inspectingFile.detection_evidence.length > 0 && (
+                  <div>
+                    <h4 className="font-semibold text-foreground mb-2 flex items-center gap-1.5">
+                      <CheckCircle className="h-4 w-4 text-emerald-500" />
+                      Detection Evidence Log
+                    </h4>
+                    <div className="space-y-1.5">
+                      {inspectingFile.detection_evidence.map((ev, i) => (
+                        <div
+                          key={i}
+                          className="rounded bg-background p-2 border border-border/40 text-[11px] flex items-center justify-between"
+                        >
+                          <span className="font-semibold uppercase text-foreground">{ev.signal}</span>
+                          <span className="font-mono text-[10px] text-muted-foreground">
+                            {ev.details}
+                          </span>
+                          <span className="text-emerald-600 dark:text-emerald-400 font-medium">
+                            {Math.round(ev.confidence_score * 100)}%
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Metadata */}
+                {inspectingFile.file_metadata && Object.keys(inspectingFile.file_metadata).length > 0 && (
+                  <div>
+                    <h4 className="font-semibold text-foreground mb-1.5">Extracted Header Metadata:</h4>
+                    <pre className="bg-background rounded p-2 text-[10px] font-mono text-muted-foreground overflow-x-auto max-h-36">
+                      {JSON.stringify(inspectingFile.file_metadata, null, 2)}
+                    </pre>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       )}

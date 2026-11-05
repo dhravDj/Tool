@@ -44,7 +44,9 @@ class Settings(BaseSettings):
         if isinstance(v, str):
             if v.startswith("[") and v.endswith("]"):
                 try:
-                    return json.loads(v)
+                    loaded = json.loads(v)
+                    if isinstance(loaded, list):
+                        return [str(x) for x in loaded]
                 except Exception:
                     pass
             return [i.strip() for i in v.split(",") if i.strip()]
@@ -118,7 +120,15 @@ class Settings(BaseSettings):
     S3_BUCKET_NAME: str = "documind-storage"
     S3_REGION: str = "us-east-1"
 
-    # 5. AI Engine Configuration (Local-first & Sovereign)
+    # 5. Extraction & OCR Configuration (Phase 3)
+    OCR_ENABLED: bool = True
+    OCR_ENGINE: str = "tesseract"
+    OCR_CONFIDENCE_THRESHOLD: float = 0.60
+    OCR_DENSITY_THRESHOLD_CHARS: int = 40  # Trigger OCR if page text chars < 40
+    MAX_EXTRACTION_PAGE_LIMIT: int = 1000  # Defensive cap against page exhaustion
+    EXTRACTION_TIMEOUT_SECONDS: int = 120
+
+    # 6. AI Engine Configuration (Local-first & Sovereign)
     AI_MODE: str = "local"  # local | cloud | hybrid
     LOCAL_MODEL_PROVIDER: str = "ollama"
     LOCAL_INFERENCE_DEVICE: str = "cpu"

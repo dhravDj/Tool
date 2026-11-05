@@ -83,3 +83,4 @@ frontend/.dist/
 *.swo
 .DS_Store
 Thumbs.db
+*.tsbuildinfo

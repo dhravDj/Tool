@@ -165,7 +165,8 @@ class FormatRegistry:
                 magic_signatures=[OLE2_SIGNATURE],
                 is_container=True,
                 container_type="ole2",
-                support_status=SupportStatus.DETECTED_BUT_NOT_IMPLEMENTED,
+                support_status=SupportStatus.DETECTED_AND_SUPPORTED,
+                extraction_plugin_id="legacy_doc_extractor",
                 description="Legacy binary Microsoft Word format",
             )
         )
@@ -179,7 +180,8 @@ class FormatRegistry:
                 extensions=["odt"],
                 is_container=True,
                 container_type="zip",
-                support_status=SupportStatus.DETECTED_BUT_NOT_IMPLEMENTED,
+                support_status=SupportStatus.DETECTED_AND_SUPPORTED,
+                extraction_plugin_id="odt_extractor",
                 description="Open Document Format for text documents",
             )
         )
@@ -193,6 +195,7 @@ class FormatRegistry:
                 extensions=["rtf"],
                 magic_signatures=[RTF_SIGNATURE],
                 support_status=SupportStatus.DETECTED_AND_SUPPORTED,
+                extraction_plugin_id="rtf_extractor",
                 description="Rich Text Format specification",
             )
         )
@@ -207,6 +210,19 @@ class FormatRegistry:
                 support_status=SupportStatus.DETECTED_AND_SUPPORTED,
                 extraction_plugin_id="text_extractor",
                 description="Unformatted plain text in UTF-8 or ASCII",
+            )
+        )
+        self.register(
+            FileFormatDefinition(
+                format_id="md",
+                canonical_name="Markdown",
+                display_name="Markdown Document",
+                category=FormatCategory.DOCUMENT,
+                mime_types=["text/markdown", "text/x-markdown"],
+                extensions=["md", "markdown"],
+                support_status=SupportStatus.DETECTED_AND_SUPPORTED,
+                extraction_plugin_id="markdown_extractor",
+                description="Lightweight markup language formatted text",
             )
         )
 
@@ -903,6 +919,7 @@ class FormatRegistry:
                 is_container=True,
                 container_type="zip",
                 support_status=SupportStatus.DETECTED_AND_SUPPORTED,
+                extraction_plugin_id="epub_extractor",
                 description="Standard XML and HTML digital e-book publication",
             )
         )

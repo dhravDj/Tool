@@ -236,18 +236,19 @@ class TextDetector:
                     structure_type="javascript",
                 )
 
-        # 8. Markdown or Plain Text
+        # 8. Markdown
         if (
             stripped.startswith("# ")
             or stripped.startswith("## ")
             or extension_hint in ("md", "markdown")
         ):
+            md_format = format_registry.get_by_id("md")
             return TextDetectionResult(
                 is_text=True,
                 encoding=encoding,
                 has_bom=has_bom,
-                detected_format=format_registry.get_by_id("txt"),
-                confidence=0.75,
+                detected_format=md_format or format_registry.get_by_id("txt"),
+                confidence=0.85 if extension_hint in ("md", "markdown") else 0.75,
                 structure_type="markdown",
             )
 

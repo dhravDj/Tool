@@ -5,6 +5,7 @@ import tempfile
 import uuid
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any
 
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -30,7 +31,7 @@ from app.modules.formats.registry import format_registry
 router = APIRouter(prefix="/files", tags=["Universal File Detection"])
 
 
-def _convert_result_to_schema(res, persisted_id: str | None = None) -> DetectionResultSchema:
+def _convert_result_to_schema(res: Any, persisted_id: str | None = None) -> DetectionResultSchema:
     """Helper to convert detection dataclass to Pydantic schema."""
     return DetectionResultSchema(
         format_id=res.format_id,

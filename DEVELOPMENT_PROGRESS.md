@@ -1,7 +1,7 @@
 # DocuMind AI — Development Progress Tracker
 
-**Current Platform Version:** 0.2.0  
-**Active Phase:** Phase 2: Universal File Detection Engine  
+**Current Platform Version:** 0.3.0  
+**Active Phase:** Phase 3: Document Content Extraction Engine  
 **Phase Status:** **COMPLETE (100%)**  
 **Last Updated:** November 6, 2026  
 
@@ -13,7 +13,98 @@
 | :--- | :--- | :--- | :--- |
 | **Phase 1** | Foundation, Architecture & Engineering Setup | **COMPLETE (100%)** | Clean architecture, PostgreSQL 16 + Redis 7 Docker, Alembic, 23 backend tests, 6 frontend tests. |
 | **Phase 2** | Universal File Detection Engine | **COMPLETE (100%)** | 7-step multi-signal detection pipeline, 17 categories, 45+ formats, 67 backend tests, 7 frontend tests, 929 files/s benchmark. |
-| **Phase 3** | Document Extraction Engines | **PENDING** | Awaiting user instructions and Phase 3 kickoff. |
+| **Phase 3** | Document Extraction Engines | **COMPLETE (100%)** | 8 format extractors (PDF, DOCX, DOC, TXT, MD, RTF, ODT, EPUB), Canonical AST schema, GFM Markdown, Manifest, OCR routing, 85 backend tests, 8 frontend tests, 82% coverage. |
+| **Phase 4** | Structured & Tabular Extraction Engines | **PENDING** | Awaiting user instructions and Phase 4 kickoff (XLSX, XLS, CSV, TSV, Parquet). |
+
+---
+
+## 2. Completed Phase 3 Milestones
+
+### 2.1 Extraction Adapters (`backend/app/modules/extraction/adapters/`)
+- [x] **PDF (`PDFExtractor`)**:
+  - `PyMuPDF` (`fitz`) native text block and coordinate extraction.
+  - Native table detection via `page.find_tables()`, converting cells to markdown tables.
+  - Page-level scanned detection (< 40 digital chars + images) with `OCRRouter`.
+  - Encrypted / password-protected document detection throwing `PasswordRequiredError`.
+  - Embedded image asset export (`extract_images` option).
+  - Page dimensions, rotation, and document metadata extraction.
+- [x] **DOCX (`DocxExtractor`)**:
+  - `python-docx` structural XML extraction.
+  - Headings 1–6, sequential body paragraphs, bulleted and numbered lists.
+  - Tabular grids with row and cell matrices.
+  - Headers, footers, hyperlinks, and core document properties.
+- [x] **Legacy DOC (`LegacyDocExtractor`)**:
+  - Pure-Python binary extraction via `olefile`.
+  - OLE summary streams (`\x05SummaryInformation`).
+  - Safe UTF-16LE / ASCII text run extraction from `WordDocument` stream.
+  - Security safeguard: zero macro execution; VBA streams audited and flagged as warnings.
+- [x] **TXT (`PlainTextExtractor`)**:
+  - Encoding discovery with BOM (UTF-8-SIG, UTF-16, UTF-32).
+  - Robust fallback: UTF-8 -> CP1252 -> ISO-8859-1 (Latin-1).
+  - Semantic paragraph division preserving indentation.
+- [x] **Markdown (`MarkdownExtractor`)**:
+  - Frontmatter YAML parsing.
+  - Headings 1–6, fenced code blocks with language, GFM tables, list items.
+- [x] **RTF (`RTFExtractor`)**:
+  - Formatted text stripping with `striprtf`.
+  - Heading and paragraph separation.
+- [x] **ODT (`ODTExtractor`)**:
+  - Direct OpenDocument XML parsing (`content.xml`, `meta.xml`).
+  - Headings (`text:h`), paragraphs (`text:p`), lists (`text:list`), tables (`table:table`).
+- [x] **EPUB (`EPUBExtractor`)**:
+  - Dublin Core metadata parsing via `ebooklib`.
+  - Spine reading order preservation across multi-part chapters.
+  - HTML chapter parsing via `BeautifulSoup4`.
+
+### 2.2 Canonical Document Schema & Output Generators
+- [x] `CanonicalDocument`, `CanonicalPage`, `CanonicalBlock`, `ExtractionManifest`, `BlockType`, `ExtractionStatus`.
+- [x] `JSONGenerator`: Canonical JSON format export.
+- [x] `MarkdownGenerator`: Deterministic GitHub Flavored Markdown (GFM) export.
+- [x] `ManifestGenerator`: Operational execution manifest with timing, confidence, warning lists, and artifact paths.
+- [x] `OCRRouter` & `TesseractOCRAdapter`: Asynchronous OCR fallback with word-level confidence and density threshold checks.
+
+### 2.3 Extraction Pipeline Orchestrator (`backend/app/modules/extraction/pipeline.py`)
+- [x] Central adapter registry (`register_extractor`, `get_extractor`, `list_supported_formats`).
+- [x] End-to-end orchestration: detection verification -> adapter resolution -> content extraction -> output generation -> filesystem persistence (`storage/processed/{file_id}/`) -> database recording (`extraction_records` and `files` status).
+- [x] Page limit enforcement (`MAX_EXTRACTION_PAGE_LIMIT = 1000`) and timeouts (`EXTRACTION_TIMEOUT_SECONDS = 300`).
+- [x] Integrated all 8 extractors into platform `plugin_registry`.
+
+### 2.4 REST API Endpoints (`backend/app/api/v1/endpoints/extraction.py`)
+- [x] `POST /api/v1/files/{file_id}/extract`: Trigger extraction job with password and asset options.
+- [x] `GET /api/v1/files/{file_id}/extraction`: Extraction status and artifact summary.
+- [x] `GET /api/v1/files/{file_id}/extraction/result`: Canonical document JSON.
+- [x] `GET /api/v1/files/{file_id}/extraction/markdown`: Generated GFM Markdown (`?raw=true` supported).
+- [x] `GET /api/v1/files/{file_id}/extraction/manifest`: Execution manifest.
+- [x] `GET /api/v1/extraction/capabilities`: Supported formats, active engines, and OCR availability.
+
+### 2.5 Frontend Integration (`frontend/`)
+- [x] Updated `src/types/api.ts` with Phase 3 extraction types and manifest schemas.
+- [x] Enhanced `src/services/api.ts` with extraction client API methods.
+- [x] Created `DocumentExtractionView.tsx`: Interactive multi-tab inspection panel (Markdown Preview, Page & Block Explorer with bounding boxes and table rendering, Canonical JSON, and Manifest).
+- [x] Integrated into `FileLibraryPage.tsx` with modal tab switching between "Detection Provenance" and "Content Extraction".
+- [x] One-click download actions for extracted Markdown, Canonical JSON, and Manifest.
+
+### 2.6 Quality Assurance & Benchmark
+- [x] **85 backend tests passing** in 4.41s (**100% pass rate**).
+- [x] **8 frontend Vitest tests passing** in 1.17s (**100% pass rate**).
+- [x] **82% backend code coverage**.
+- [x] **0 Ruff lint errors**, **0 Mypy type errors**, **0 TypeScript build errors**.
+- [x] Performance profiling benchmark (`scripts/benchmark_extraction.py`):
+  - Markdown: 6,191 docs/s (0.16 ms)
+  - RTF: 5,615 docs/s (0.18 ms)
+  - ODT: 4,116 docs/s (0.24 ms)
+  - Plain Text: 2,410 docs/s (0.41 ms)
+  - EPUB: 745 docs/s (1.34 ms)
+  - Legacy DOC: 562 docs/s (1.78 ms)
+  - DOCX: 29.6 docs/s (33.79 ms)
+  - PDF: 1.3 docs/s (792 ms across 5 pages + full vector table discovery)
+
+---
+
+## 3. Next Phase
+
+- **Phase 4:** Structured & Tabular Extraction Engines (XLSX, XLS, CSV, TSV, Parquet).
+- Awaiting user instruction before initiating Phase 4.
 
 ---
 

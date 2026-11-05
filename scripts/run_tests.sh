@@ -8,7 +8,10 @@ echo "=================================================="
 echo "[*] Checking Python code formatting & linting with Ruff..."
 .venv/bin/ruff check backend
 echo "[*] Running static typing checks with mypy..."
-.venv/bin/mypy backend/app
+(
+    cd backend
+    ../.venv/bin/mypy app
+)
 echo "[*] Executing backend unit & integration tests with pytest..."
 (
     cd backend

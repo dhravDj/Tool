@@ -16,6 +16,16 @@ from app.core.logging import logger, request_id_ctx, setup_logging
 from app.infrastructure.database.session import engine
 from app.infrastructure.queue.redis import redis_manager
 from app.infrastructure.storage.local import local_storage
+from app.modules.extraction.adapters import (
+    DocxExtractor,
+    EPUBExtractor,
+    LegacyDocExtractor,
+    MarkdownExtractor,
+    ODTExtractor,
+    PDFExtractor,
+    PlainTextExtractor,
+    RTFExtractor,
+)
 from app.modules.files.detection.detector import universal_detector
 from app.plugins.registry.registry import plugin_registry
 from app.plugins.samples.mock_ai_provider import MockLocalAIProvider
@@ -37,9 +47,17 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     await local_storage.initialize()
     logger.info("Storage subsystem initialized successfully.")
 
-    # 3. Register Phase 1 plugins & Phase 2 Universal File Detector
+    # 3. Register Phase 1 & 2 plugins, Phase 3 document extractors
     plugin_registry.register(local_storage)
     plugin_registry.register(universal_detector)
+    plugin_registry.register(PDFExtractor())
+    plugin_registry.register(DocxExtractor())
+    plugin_registry.register(LegacyDocExtractor())
+    plugin_registry.register(PlainTextExtractor())
+    plugin_registry.register(MarkdownExtractor())
+    plugin_registry.register(RTFExtractor())
+    plugin_registry.register(ODTExtractor())
+    plugin_registry.register(EPUBExtractor())
     plugin_registry.register(MockTextDetectorPlugin())
     plugin_registry.register(MockTextExtractorPlugin())
     plugin_registry.register(MockLocalAIProvider())
