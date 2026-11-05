@@ -15,8 +15,13 @@ import {
   FormatDetailData,
   FormatListResponseData,
   HealthCheckResponse,
+  ImageAnalysisStatusResponse,
+  ImageAskResponse,
+  ImageDocument,
+  ImageManifest,
   PluginListResponse,
   SystemStatusData,
+  VisionModelCapabilities,
 } from "@/types/api";
 
 const API_BASE = "/api/v1";
@@ -119,4 +124,28 @@ export const api = {
 
   getExtractionCapabilities: (): Promise<ExtractionCapabilitiesResponse> =>
     request<ExtractionCapabilitiesResponse>("/extraction/capabilities"),
+
+  // Phase 4: Image & Visual Intelligence Endpoints
+  getImageIntelligenceCapabilities: (): Promise<VisionModelCapabilities> =>
+    request<VisionModelCapabilities>("/image-intelligence/capabilities"),
+
+  analyzeImage: (fileId: string, options?: Record<string, unknown>): Promise<ImageManifest> =>
+    request<ImageManifest>(`/files/${encodeURIComponent(fileId)}/analyze-image`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(options || {}),
+    }),
+
+  getImageAnalysisStatus: (fileId: string): Promise<ImageAnalysisStatusResponse> =>
+    request<ImageAnalysisStatusResponse>(`/files/${encodeURIComponent(fileId)}/image-analysis`),
+
+  getCanonicalImageDocument: (fileId: string): Promise<ImageDocument> =>
+    request<ImageDocument>(`/files/${encodeURIComponent(fileId)}/image-analysis/result`),
+
+  askImageQuestion: (fileId: string, question: string, focusRegionId?: string): Promise<ImageAskResponse> =>
+    request<ImageAskResponse>(`/files/${encodeURIComponent(fileId)}/ask-image`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ question, focus_region_id: focusRegionId }),
+    }),
 };

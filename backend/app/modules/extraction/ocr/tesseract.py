@@ -33,6 +33,27 @@ class TesseractOCRAdapter(OCRAdapterInterface):
     def is_available(self) -> bool:
         return bool(HAS_PYTESSERACT and self._tesseract_cmd)
 
+    def get_diagnostics(self) -> dict[str, Any]:
+        """Return comprehensive diagnostic status and language packs."""
+        version = None
+        languages: list[str] = []
+        if self.is_available:
+            try:
+                version = str(pytesseract.get_tesseract_version())
+                languages = pytesseract.get_languages(config="")
+            except Exception:
+                version = "installed (version lookup failed)"
+
+        return {
+            "engine": self.name,
+            "has_pytesseract": HAS_PYTESSERACT,
+            "tesseract_cmd": self._tesseract_cmd,
+            "is_available": self.is_available,
+            "version": version,
+            "languages": languages,
+            "install_guide": "Install Tesseract via 'sudo apt-get install -y tesseract-ocr tesseract-ocr-eng' on Linux or 'brew install tesseract' on macOS.",
+        }
+
     async def extract_text_from_image(
         self,
         image_bytes: bytes,

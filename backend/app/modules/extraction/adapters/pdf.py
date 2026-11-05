@@ -60,6 +60,7 @@ class PDFExtractor(BaseDocumentExtractor):
         doc_id = options.get("document_id") or uuid.uuid4().hex
         password = options.get("password")
         extract_images = options.get("extract_images", False)
+        extract_tables = options.get("extract_tables", True)
         assets_dir = options.get("assets_dir")
 
         try:
@@ -110,45 +111,44 @@ class PDFExtractor(BaseDocumentExtractor):
                 page_blocks: list[CanonicalBlock] = []
                 extracted_table_rects: list[pymupdf.Rect] = []
 
-                # 1. Table Detection via PyMuPDF find_tables()
-                try:
-                    tabs = page.find_tables()
-                    for tab_idx, tab in enumerate(tabs):
-                        tab_rect = pymupdf.Rect(tab.bbox)
-                        extracted_table_rects.append(tab_rect)
-                        table_data = tab.extract()
+                # 1. Table Detection via PyMuPDF find_tables() (Configurable)
+                if extract_tables:
+                    try:
+                        tabs = page.find_tables()
+                        for tab_idx, tab in enumerate(tabs):
+                            tab_rect = pymupdf.Rect(tab.bbox)
+                            extracted_table_rects.append(tab_rect)
+                            table_data = tab.extract()
 
-                        # Format markdown-like representation of table
-                        table_text = self._format_table_text(table_data)
+                            # Format markdown-like representation of table
+                            table_text = self._format_table_text(table_data)
 
-                        block = CanonicalBlock(
-                            block_id=self._generate_block_id(page_num, len(page_blocks)),
-                            block_type=BlockType.TABLE,
-                            text=table_text,
-                            reading_order=global_reading_order,
-                            page_number=page_num,
-                            bounding_box=[tab_rect.x0, tab_rect.y0, tab_rect.x1, tab_rect.y1],
-                            confidence=0.95,
-                            extraction_engine=self.engine_name,
-                            provenance="native_table",
-                            metadata={
-                                "table_grid": table_data,
-                                "row_count": len(table_data),
-                                "col_count": len(table_data[0]) if table_data else 0,
-                                "table_index": tab_idx,
-                            },
-                        )
-                        page_blocks.append(block)
-                        all_blocks.append(block)
-                        global_reading_order += 1
-                except Exception as exc:
-                    warnings.append(f"Page {page_num}: Table extraction failed: {exc}")
+                            block = CanonicalBlock(
+                                block_id=self._generate_block_id(page_num, len(page_blocks)),
+                                block_type=BlockType.TABLE,
+                                text=table_text,
+                                reading_order=global_reading_order,
+                                page_number=page_num,
+                                bounding_box=[tab_rect.x0, tab_rect.y0, tab_rect.x1, tab_rect.y1],
+                                confidence=0.95,
+                                extraction_engine=self.engine_name,
+                                provenance="native_table",
+                                metadata={
+                                    "table_grid": table_data,
+                                    "row_count": len(table_data),
+                                    "col_count": len(table_data[0]) if table_data else 0,
+                                    "table_index": tab_idx,
+                                },
+                            )
+                            page_blocks.append(block)
+                            all_blocks.append(block)
+                            global_reading_order += 1
+                    except Exception as exc:
+                        warnings.append(f"Page {page_num}: Table extraction failed: {exc}")
 
-                # 2. Extract Native Text Blocks
-                # flags: pymupdf.TEXT_DEHYPHENATE | pymupdf.TEXT_PRESERVE_LIGATURES
+                # 2. Extract Native Text Blocks with Reading Order Optimization
                 text_blocks = page.get_text("blocks")
-                # Sort blocks primarily by y0, secondarily by x0 (natural reading order)
-                sorted_blocks = sorted(text_blocks, key=lambda b: (round(b[1], -1), b[0]))
+                sorted_blocks = self._sort_blocks_reading_order(text_blocks, width)
 
                 total_page_digital_chars = 0
                 for b_idx, block_tuple in enumerate(sorted_blocks):
@@ -307,6 +307,42 @@ class PDFExtractor(BaseDocumentExtractor):
             )
         finally:
             doc.close()
+
+    def _sort_blocks_reading_order(self, blocks: list[Any], page_width: float) -> list[Any]:
+        """Sort blocks considering multi-column or single-column layout structure."""
+        if not blocks:
+            return []
+
+        midpoint = page_width / 2.0
+        left_col = []
+        right_col = []
+        spanning = []
+
+        for b in blocks:
+            x0, _y0, x1, _y1 = b[:4]
+            if x1 <= midpoint + (page_width * 0.05):
+                left_col.append(b)
+            elif x0 >= midpoint - (page_width * 0.05):
+                right_col.append(b)
+            else:
+                spanning.append(b)
+
+        # If distinct two-column distribution with minimal spanning text
+        if len(left_col) >= 2 and len(right_col) >= 2 and len(spanning) <= len(blocks) * 0.3:
+            left_col.sort(key=lambda b: (round(b[1], -1), b[0]))
+            right_col.sort(key=lambda b: (round(b[1], -1), b[0]))
+
+            header_spanning = [b for b in spanning if b[1] < min(left_col[0][1], right_col[0][1])]
+            footer_spanning = [b for b in spanning if b[1] >= max(left_col[-1][3], right_col[-1][3])]
+            mid_spanning = [b for b in spanning if b not in header_spanning and b not in footer_spanning]
+
+            header_spanning.sort(key=lambda b: (round(b[1], -1), b[0]))
+            mid_spanning.sort(key=lambda b: (round(b[1], -1), b[0]))
+            footer_spanning.sort(key=lambda b: (round(b[1], -1), b[0]))
+
+            return header_spanning + left_col + mid_spanning + right_col + footer_spanning
+
+        return sorted(blocks, key=lambda b: (round(b[1], -1), b[0]))
 
     def _format_table_text(self, grid: list[list[Any]]) -> str:
         """Render a table grid as clean Markdown-compatible text."""

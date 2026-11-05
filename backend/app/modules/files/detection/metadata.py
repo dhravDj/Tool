@@ -45,6 +45,15 @@ class SafeMetadataExtractor:
             elif format_id in ("jpeg", "jpg"):
                 meta = cls._extract_jpeg_metadata(file_path)
                 metadata.update(meta)
+            elif format_id == "webp":
+                meta = cls._extract_webp_metadata(file_path)
+                metadata.update(meta)
+            elif format_id == "tiff":
+                meta = cls._extract_tiff_metadata(file_path)
+                metadata.update(meta)
+            elif format_id == "svg":
+                meta = cls._extract_svg_metadata(file_path)
+                metadata.update(meta)
             elif format_id == "gif":
                 meta = cls._extract_gif_metadata(file_path)
                 metadata.update(meta)
@@ -102,7 +111,6 @@ class SafeMetadataExtractor:
     @staticmethod
     def _extract_jpeg_metadata(file_path: Path) -> dict[str, Any]:
         with open(file_path, "rb") as f:
-            # Read first 16KB to locate SOF0 / SOF2 marker
             data = f.read(16384)
         if len(data) < 4 or data[:2] != b"\xff\xd8":
             return {}
@@ -113,13 +121,121 @@ class SafeMetadataExtractor:
                 offset += 1
                 continue
             marker = data[offset + 1]
-            # Baseline DCT (0xC0) or Progressive DCT (0xC2)
             if marker in (0xC0, 0xC2):
                 height, width = struct.unpack(">HH", data[offset + 5 : offset + 9])
                 return {"dimensions": {"width": width, "height": height}}
-            # Advance length
             length = struct.unpack(">H", data[offset + 2 : offset + 4])[0]
             offset += 2 + length
+        return {}
+
+    @staticmethod
+    def _extract_webp_metadata(file_path: Path) -> dict[str, Any]:
+        try:
+            with open(file_path, "rb") as f:
+                header = f.read(64)
+            if len(header) < 30 or header[:4] != b"RIFF" or header[8:12] != b"WEBP":
+                return {}
+
+            subchunk = header[12:16]
+            if subchunk == b"VP8 ":
+                # Keyframe header starts at offset 23
+                if len(header) >= 30 and header[20:23] == b"\x9d\x01\x2a":
+                    w, h = struct.unpack("<HH", header[26:30])
+                    return {"dimensions": {"width": w & 0x3FFF, "height": h & 0x3FFF}, "format_variant": "lossy"}
+            elif subchunk == b"VP8L":
+                # Lossless 1-byte 0x2f signature, 4 bytes width/height bitstream
+                if len(header) >= 25 and header[20] == 0x2F:
+                    b1, b2, b3, b4 = header[21:25]
+                    width = 1 + (((b2 & 0x3F) << 8) | b1)
+                    height = 1 + (((b4 & 0x0F) << 10) | (b3 << 2) | ((b2 & 0xC0) >> 6))
+                    return {"dimensions": {"width": width, "height": height}, "format_variant": "lossless"}
+            elif subchunk == b"VP8X":
+                if len(header) >= 30:
+                    width = 1 + struct.unpack("<I", header[24:27] + b"\x00")[0]
+                    height = 1 + struct.unpack("<I", header[27:30] + b"\x00")[0]
+                    flags = header[20]
+                    has_animation = bool(flags & 0x02)
+                    has_alpha = bool(flags & 0x10)
+                    return {
+                        "dimensions": {"width": width, "height": height},
+                        "format_variant": "extended",
+                        "has_animation": has_animation,
+                        "has_alpha": has_alpha,
+                    }
+        except Exception:
+            pass
+        return {}
+
+    @staticmethod
+    def _extract_tiff_metadata(file_path: Path) -> dict[str, Any]:
+        try:
+            with open(file_path, "rb") as f:
+                header = f.read(1024)
+            if len(header) < 8:
+                return {}
+
+            is_le = header[:2] == b"II"
+            endian = "<" if is_le else ">"
+            magic = struct.unpack(f"{endian}H", header[2:4])[0]
+            if magic != 42:
+                return {}
+
+            ifd_offset = struct.unpack(f"{endian}I", header[4:8])[0]
+            if ifd_offset + 2 <= len(header):
+                num_entries = struct.unpack(f"{endian}H", header[ifd_offset : ifd_offset + 2])[0]
+                width = None
+                height = None
+                for i in range(min(num_entries, 30)):
+                    entry_start = ifd_offset + 2 + (i * 12)
+                    if entry_start + 12 > len(header):
+                        break
+                    tag, ttype, _count, val = struct.unpack(
+                        f"{endian}HHI4s", header[entry_start : entry_start + 12]
+                    )
+                    parsed_val = (
+                        struct.unpack(f"{endian}H", val[:2])[0]
+                        if ttype == 3
+                        else struct.unpack(f"{endian}I", val)[0]
+                    )
+                    if tag == 256:  # ImageWidth
+                        width = parsed_val
+                    elif tag == 257:  # ImageLength
+                        height = parsed_val
+
+                if width and height:
+                    return {"dimensions": {"width": width, "height": height}}
+        except Exception:
+            pass
+        return {}
+
+    @staticmethod
+    def _extract_svg_metadata(file_path: Path) -> dict[str, Any]:
+        try:
+            with open(file_path, encoding="utf-8", errors="ignore") as f:
+                head = f.read(4096)
+            # Find svg tag
+            svg_match = re.search(r"<svg\b([^>]*)>", head, re.IGNORECASE)
+            if svg_match:
+                attrs = svg_match.group(1)
+                w_match = re.search(r'width=["\']([\d\.]+)', attrs)
+                h_match = re.search(r'height=["\']([\d\.]+)', attrs)
+                vb_match = re.search(r'viewBox=["\']([\d\.\s,-]+)["\']', attrs)
+                meta: dict[str, Any] = {"is_vector": True}
+                if w_match and h_match:
+                    meta["dimensions"] = {
+                        "width": int(float(w_match.group(1))),
+                        "height": int(float(h_match.group(1))),
+                    }
+                elif vb_match:
+                    parts = re.split(r"[\s,]+", vb_match.group(1).strip())
+                    if len(parts) == 4:
+                        meta["dimensions"] = {
+                            "width": int(float(parts[2])),
+                            "height": int(float(parts[3])),
+                        }
+                return meta
+        except Exception:
+            pass
         return {}
 
     @staticmethod
@@ -148,12 +264,10 @@ class SafeMetadataExtractor:
         meta: dict[str, Any] = {}
         with open(file_path, "rb") as f:
             head = f.read(1024)
-            # Find version string: %PDF-1.x
             match = re.search(rb"%PDF-(\d+\.\d+)", head)
             if match:
                 meta["pdf_version"] = match.group(1).decode("ascii")
 
-            # Lightweight approximate page count (scan up to 256KB from end of file)
             f.seek(0, os.SEEK_END)
             size = f.tell()
             seek_pos = max(0, size - 262144)

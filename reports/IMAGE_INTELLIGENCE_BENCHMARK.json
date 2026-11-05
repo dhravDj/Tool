@@ -1,0 +1,62 @@
+{
+  "png_1080p": {
+    "format": "png",
+    "file_size_kb": 8.39,
+    "avg_latency_ms": 288.35,
+    "min_latency_ms": 279.64,
+    "max_latency_ms": 304.86,
+    "throughput_images_per_sec": 3.47,
+    "regions_detected": 6,
+    "scene_type": "photo_or_artwork"
+  },
+  "jpeg_720p": {
+    "format": "jpeg",
+    "file_size_kb": 14.68,
+    "avg_latency_ms": 106.43,
+    "min_latency_ms": 103.89,
+    "max_latency_ms": 115.35,
+    "throughput_images_per_sec": 9.4,
+    "regions_detected": 6,
+    "scene_type": "photo_or_artwork"
+  },
+  "webp_square": {
+    "format": "webp",
+    "file_size_kb": 0.54,
+    "avg_latency_ms": 35.55,
+    "min_latency_ms": 35.45,
+    "max_latency_ms": 35.69,
+    "throughput_images_per_sec": 28.13,
+    "regions_detected": 8,
+    "scene_type": "photo_or_artwork"
+  },
+  "tiff_scan": {
+    "format": "tiff",
+    "file_size_kb": 2578.26,
+    "avg_latency_ms": 96.99,
+    "min_latency_ms": 94.4,
+    "max_latency_ms": 99.18,
+    "throughput_images_per_sec": 10.31,
+    "regions_detected": 1,
+    "scene_type": "document_page"
+  },
+  "bmp_raw": {
+    "format": "bmp",
+    "file_size_kb": 900.05,
+    "avg_latency_ms": 37.6,
+    "min_latency_ms": 37.42,
+    "max_latency_ms": 37.75,
+    "throughput_images_per_sec": 26.6,
+    "regions_detected": 8,
+    "scene_type": "photo_or_artwork"
+  },
+  "svg_vector": {
+    "format": "svg",
+    "file_size_kb": 0.31,
+    "avg_latency_ms": 3.73,
+    "min_latency_ms": 3.47,
+    "max_latency_ms": 3.95,
+    "throughput_images_per_sec": 268.1,
+    "regions_detected": 1,
+    "scene_type": "document_page"
+  }
+}

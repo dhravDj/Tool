@@ -341,3 +341,147 @@ export interface ExtractionRequest {
   extract_images?: boolean;
   options?: Record<string, unknown>;
 }
+
+// ============================================================================
+// Phase 4: Image & Visual Intelligence Interfaces
+// ============================================================================
+
+export type RegionType = "text" | "object" | "diagram" | "chart" | "table" | "face" | "background";
+
+export interface ImageMetadata {
+  format: string;
+  width: int_number;
+  height: int_number;
+  aspect_ratio: number;
+  color_mode: string;
+  channels: number;
+  bit_depth: number;
+  file_size: number;
+  dpi?: [number, number] | null;
+  has_transparency: boolean;
+  is_animated: boolean;
+  frame_count: number;
+  duration_ms?: number | null;
+  exif_scrubbed: Record<string, unknown>;
+  gps_redacted: boolean;
+}
+
+type int_number = number;
+
+export interface ImageRegion {
+  region_id: string;
+  region_type: RegionType;
+  bounding_box: [number, number, number, number]; // [ymin, xmin, ymax, xmax] normalized (0.0 to 1.0)
+  pixel_box?: [number, number, number, number] | null; // [x0, y0, x1, y1]
+  label: string;
+  text?: string | null;
+  confidence: number;
+  provenance: string;
+  reading_order?: number | null;
+  attributes: Record<string, unknown>;
+}
+
+export interface DiagramAnalysis {
+  is_diagram: boolean;
+  diagram_type: string;
+  nodes: Array<{
+    node_id: string;
+    label: string;
+    shape?: string;
+    bounding_box?: number[];
+  }>;
+  connectors_count: number;
+  flow_direction: string;
+  confidence: number;
+}
+
+export interface ChartAnalysis {
+  is_chart: boolean;
+  chart_type: string;
+  title?: string | null;
+  x_axis_label?: string | null;
+  y_axis_label?: string | null;
+  legend_items: string[];
+  series_data: Array<{
+    label?: string;
+    value?: number;
+    unit?: string;
+  }>;
+  confidence: number;
+}
+
+export interface ImageAnalysis {
+  caption: string;
+  scene_type: string;
+  detected_objects: string[];
+  dominant_colors: string[];
+  diagram: DiagramAnalysis;
+  chart: ChartAnalysis;
+  ocr_full_text: string;
+  ocr_word_count: number;
+  ocr_average_confidence: number;
+}
+
+export interface ImageDocument {
+  image_id: string;
+  file_id: string;
+  filename: string;
+  metadata: ImageMetadata;
+  analysis: ImageAnalysis;
+  regions: ImageRegion[];
+  preprocessed_artifacts: Record<string, string>;
+  warnings: string[];
+  created_at: string;
+}
+
+export interface ImageManifest {
+  image_id: string;
+  file_id: string;
+  filename: string;
+  status: string;
+  processing_time_seconds: number;
+  engines_used: Record<string, string>;
+  artifacts: Record<string, string>;
+  warnings: string[];
+  errors: string[];
+}
+
+export interface VisionModelCapabilities {
+  supported_formats: string[];
+  ocr_engine: string;
+  ocr_available: boolean;
+  default_vision_engine: string;
+  available_vision_engines: string[];
+  hardware_acceleration: string;
+  max_image_dimension_px: number;
+  privacy_gps_scrubbing: boolean;
+  preprocessing_steps: string[];
+}
+
+export interface ImageAskRequest {
+  question: string;
+  focus_region_id?: string | null;
+}
+
+export interface ImageAskResponse {
+  question: string;
+  answer: string;
+  confidence: number;
+  grounding_region_ids: string[];
+  reasoning?: string | null;
+}
+
+export interface ImageAnalysisStatusResponse {
+  file_id: string;
+  status: string;
+  format: string;
+  width: number;
+  height: number;
+  color_mode: string;
+  ocr_word_count: number;
+  detected_objects_count: number;
+  has_charts: boolean;
+  has_diagrams: boolean;
+  artifacts: Record<string, string>;
+  manifest?: ImageManifest | null;
+}

@@ -101,6 +101,7 @@ module = [
     "PIL.*",
     "yaml.*",
     "olefile.*",
+    "defusedxml.*",
 ]
 ignore_missing_imports = true
 

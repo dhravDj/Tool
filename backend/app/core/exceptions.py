@@ -54,6 +54,13 @@ class PluginError(DocuMindError):
     error_code = "PLUGIN_ERROR"
 
 
+class ProcessingError(DocuMindError):
+    """Raised when an extraction or visual processing operation fails."""
+
+    status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+    error_code = "PROCESSING_ERROR"
+
+
 class AuthenticationError(DocuMindError):
     """Raised when authentication credentials are invalid or missing."""
 

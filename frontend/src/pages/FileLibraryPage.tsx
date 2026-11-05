@@ -25,6 +25,7 @@ import { ErrorState } from "@/components/ui/ErrorState";
 import { LoadingState } from "@/components/ui/LoadingState";
 import { PageContainer } from "@/components/ui/PageContainer";
 import { DocumentExtractionView } from "@/components/DocumentExtractionView";
+import { ImageIntelligenceView } from "@/components/ImageIntelligenceView";
 import { api } from "@/services/api";
 import { FileRecordSummary, FormatDetailData } from "@/types/api";
 
@@ -33,7 +34,7 @@ export const FileLibraryPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [inspectingFile, setInspectingFile] = useState<FileRecordSummary | null>(null);
-  const [modalTab, setModalTab] = useState<"extraction" | "detection">("extraction");
+  const [modalTab, setModalTab] = useState<"extraction" | "image_intelligence" | "detection">("extraction");
 
   // Queries
   const {
@@ -271,7 +272,10 @@ export const FileLibraryPage: React.FC = () => {
 
                   <div className="flex items-center gap-2 self-end md:self-center shrink-0">
                     <button
-                      onClick={() => setInspectingFile(file)}
+                      onClick={() => {
+                        setInspectingFile(file);
+                        setModalTab(file.format_category === "image" ? "image_intelligence" : "extraction");
+                      }}
                       className="rounded border border-border px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground transition flex items-center gap-1"
                     >
                       <Info className="h-3.5 w-3.5" />
@@ -366,7 +370,17 @@ export const FileLibraryPage: React.FC = () => {
                         : "text-muted-foreground hover:text-foreground"
                     }`}
                   >
-                    Content Extraction
+                    Document Content
+                  </button>
+                  <button
+                    onClick={() => setModalTab("image_intelligence")}
+                    className={`px-3 py-1 rounded-md font-medium transition ${
+                      modalTab === "image_intelligence"
+                        ? "bg-card text-foreground shadow-sm"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    Image Intelligence
                   </button>
                   <button
                     onClick={() => setModalTab("detection")}
@@ -394,6 +408,12 @@ export const FileLibraryPage: React.FC = () => {
                 filename={inspectingFile.original_filename}
                 formatId={inspectingFile.detection_format_id || inspectingFile.extension}
                 onClose={() => setInspectingFile(null)}
+              />
+            ) : modalTab === "image_intelligence" ? (
+              <ImageIntelligenceView
+                fileId={inspectingFile.id}
+                filename={inspectingFile.original_filename}
+                format={inspectingFile.detection_format_id || inspectingFile.extension}
               />
             ) : (
               <div className="space-y-4 text-xs">

@@ -1,4 +1,4 @@
-"""Local filesystem storage provider implementation."""
+"""Local filesystem storage provider implementation with path safety and asset partitioning."""
 
 import shutil
 from pathlib import Path
@@ -12,17 +12,17 @@ from app.plugins.interfaces.storage import StorageProviderInterface
 
 
 class LocalStorageProvider(StorageProviderInterface):
-    """Stores files on the local filesystem partitioned by category and date."""
+    """Stores files on the local filesystem partitioned by category and date with path containment."""
 
     def __init__(self, root_dir: Path | None = None):
-        self.root = root_dir or Path(settings.STORAGE_LOCAL_ROOT).resolve()
+        self.root = (root_dir or Path(settings.STORAGE_LOCAL_ROOT)).resolve()
 
     @property
     def metadata(self) -> PluginMetadata:
         return PluginMetadata(
             name="local_storage_provider",
-            version="1.0.0",
-            description="Default local filesystem storage provider.",
+            version="1.1.0",
+            description="Default local filesystem storage provider with path containment and asset partitioning.",
             plugin_type=PluginType.STORAGE,
             supported_formats=["*"],
             required_dependencies=[],
@@ -31,9 +31,19 @@ class LocalStorageProvider(StorageProviderInterface):
             is_available=True,
         )
 
+    def _resolve_safe_path(self, storage_path: str) -> Path:
+        """Resolve a relative storage path, guaranteeing it remains contained within self.root."""
+        clean_path = storage_path.lstrip("/\\")
+        target = (self.root / clean_path).resolve()
+        try:
+            target.relative_to(self.root)
+        except ValueError as err:
+            raise StorageError(f"Directory traversal detected for path: {storage_path}") from err
+        return target
+
     async def initialize(self, config: dict[str, Any] | None = None) -> None:
         """Ensure storage directory trees exist with correct permissions."""
-        for folder in ["uploads", "temporary", "processed", "assets"]:
+        for folder in ["uploads", "temporary", "processed", "assets", "images", "preprocessed"]:
             path = self.root / folder
             path.mkdir(parents=True, exist_ok=True)
         logger.info(f"LocalStorageProvider initialized at {self.root}")
@@ -59,9 +69,13 @@ class LocalStorageProvider(StorageProviderInterface):
         folder: str = "uploads",
     ) -> str:
         """Save file bytes or stream into storage and return the relative storage path."""
-        target_dir = self.root / folder
-        target_dir.mkdir(parents=True, exist_ok=True)
-        target_path = target_dir / destination_key
+        rel_key = (
+            f"{folder.strip('/')}/{destination_key.lstrip('/')}"
+            if folder.strip("/")
+            else destination_key.lstrip("/")
+        )
+        target_path = self._resolve_safe_path(rel_key)
+        target_path.parent.mkdir(parents=True, exist_ok=True)
 
         try:
             if isinstance(content, bytes):
@@ -69,21 +83,21 @@ class LocalStorageProvider(StorageProviderInterface):
             else:
                 with open(target_path, "wb") as f:
                     shutil.copyfileobj(content, f)
-            return f"{folder}/{destination_key}"
+            return rel_key
         except Exception as e:
             logger.error(f"Failed to save file {destination_key}: {e}", exc_info=True)
             raise StorageError(f"Could not write file to storage: {e}") from e
 
     async def read_file(self, storage_path: str) -> bytes:
         """Read full file content from relative storage path."""
-        target_path = self.root / storage_path
+        target_path = self._resolve_safe_path(storage_path)
         if not target_path.exists():
             raise StorageError(f"File not found in storage: {storage_path}")
         return target_path.read_bytes()
 
     async def delete_file(self, storage_path: str) -> bool:
         """Delete file from storage."""
-        target_path = self.root / storage_path
+        target_path = self._resolve_safe_path(storage_path)
         if target_path.exists():
             target_path.unlink()
             return True
@@ -91,12 +105,15 @@ class LocalStorageProvider(StorageProviderInterface):
 
     async def exists(self, storage_path: str) -> bool:
         """Check if file exists in storage."""
-        target_path = self.root / storage_path
+        target_path = self._resolve_safe_path(storage_path)
         return target_path.exists()
 
     def get_local_path(self, storage_path: str) -> Path | None:
         """Return absolute Path object on the local filesystem."""
-        return self.root / storage_path
+        try:
+            return self._resolve_safe_path(storage_path)
+        except StorageError:
+            return None
 
 
 # Global instance

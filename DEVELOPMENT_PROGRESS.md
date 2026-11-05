@@ -1,7 +1,7 @@
 # DocuMind AI — Development Progress Tracker
 
-**Current Platform Version:** 0.3.0  
-**Active Phase:** Phase 3: Document Content Extraction Engine  
+**Current Platform Version:** 0.4.0  
+**Active Phase:** Phase 4: Image & Visual Intelligence Engine + Foundation Improvements (Phase 1–3)  
 **Phase Status:** **COMPLETE (100%)**  
 **Last Updated:** November 6, 2026  
 
@@ -14,11 +14,81 @@
 | **Phase 1** | Foundation, Architecture & Engineering Setup | **COMPLETE (100%)** | Clean architecture, PostgreSQL 16 + Redis 7 Docker, Alembic, 23 backend tests, 6 frontend tests. |
 | **Phase 2** | Universal File Detection Engine | **COMPLETE (100%)** | 7-step multi-signal detection pipeline, 17 categories, 45+ formats, 67 backend tests, 7 frontend tests, 929 files/s benchmark. |
 | **Phase 3** | Document Extraction Engines | **COMPLETE (100%)** | 8 format extractors (PDF, DOCX, DOC, TXT, MD, RTF, ODT, EPUB), Canonical AST schema, GFM Markdown, Manifest, OCR routing, 85 backend tests, 8 frontend tests, 82% coverage. |
-| **Phase 4** | Structured & Tabular Extraction Engines | **PENDING** | Awaiting user instructions and Phase 4 kickoff (XLSX, XLS, CSV, TSV, Parquet). |
+| **Phase 4** | Image & Visual Intelligence Engine + Foundation Improvements | **COMPLETE (100%)** | Audit report, Redis TaskQueue, 7 image formats (PNG, JPG, WEBP, TIFF, BMP, SVG), non-destructive preprocessing, OCR subsystem, scene captioning, objects, diagrams, charts, grounded VQA, 106 backend tests, 9 frontend tests, 268 img/s benchmark. |
+| **Phase 5** | Structured & Tabular Extraction Engines | **PENDING** | Awaiting user instructions and Phase 5 kickoff (XLSX, XLS, CSV, TSV, Parquet). |
 
 ---
 
-## 2. Completed Phase 3 Milestones
+## 2. Completed Phase 4 Milestones
+
+### 2.1 Foundation Hardening (Phases 1–3)
+- [x] **Pre-Implementation Audit**: Authored `reports/PHASE_4_PRE_IMPLEMENTATION_AUDIT.md` covering architecture, debt, security risks, and optimization targets.
+- [x] **Task Queue Subsystem (`app/infrastructure/queue/redis.py`)**:
+  - Implemented `TaskQueue` with asynchronous enqueue/dequeue, exponential backoff retries, dead-letter queue (`dlq:`) routing, and transparent in-memory fallback.
+- [x] **Storage Subsystem Path Containment (`app/infrastructure/storage/local.py`)**:
+  - Hardened `_resolve_safe_path` against directory traversal attacks (`..`).
+  - Added partitioned asset directories (`uploads`, `temporary`, `processed`, `assets`, `images`, `preprocessed`).
+- [x] **Phase 2 Detection Hardening (`app/modules/files/detection/metadata.py`)**:
+  - Implemented safe metadata extraction for all 7 image formats (PNG, JPEG, WEBP, TIFF, BMP, SVG, and GIF).
+- [x] **Phase 3 Extraction Optimizations**:
+  - `PDFExtractor`: Configurable table extraction (`extract_tables=False` option) and column-aware reading order sorting.
+  - `LegacyDocExtractor`: Added headless LibreOffice conversion fallback with strict security flags, falling back to pure-Python OLE stream.
+  - `OCRRouter` & `TesseractOCRAdapter`: Added comprehensive startup diagnostics (`get_diagnostics()`), language pack discovery, and startup logging.
+- [x] **Production Docker Runner**: Added `tesseract-ocr` and `tesseract-ocr-eng` packages to `infrastructure/docker/Dockerfile.backend`.
+
+### 2.2 Image & Visual Intelligence Engine (`app/modules/image_intelligence/`)
+- [x] **7 Supported Formats**: Standalone and document-extracted support for PNG, JPEG, WEBP, TIFF, BMP, SVG, and animated GIF.
+- [x] **Metadata & Privacy Sanitization (`metadata/extractor.py`)**:
+  - Enforced `PIL.Image.MAX_IMAGE_PIXELS = 89_478_485` decompression bomb ceiling.
+  - Vector SVG parsing via `defusedxml.ElementTree` protecting against XXE and SSRF attacks.
+  - **Automatic GPS & Identity Redaction:** Scrubbed GPS coordinates (`0x8825`), camera serials, and owner identities by default, asserting `gps_redacted: true`.
+- [x] **Non-Destructive Preprocessing Pipeline (`preprocessing/pipeline.py`)**:
+  - Original file preservation guarantee.
+  - EXIF auto-rotation (`ImageOps.exif_transpose`).
+  - Projection profile deskewing $[-15^\circ, +15^\circ]$.
+  - Grayscale conversion, contrast auto-enhancement, and unsharp masking.
+  - Otsu adaptive binarization for clean OCR recognition.
+  - Intelligent large image tiling (> 1536px) with $10\%$ overlap and normalized coordinate mapping.
+- [x] **Reusable OCR Subsystem (`ocr/engine.py`)**:
+  - Asynchronous PyTesseract execution.
+  - Word-level and line-level bounding box normalization $[ymin, xmin, ymax, xmax]$.
+  - Natural reading order reconstruction with vertical line clustering and horizontal sorting.
+  - Low-confidence scoring and warning flags.
+  - Graceful fallback when Tesseract is absent.
+- [x] **Vision Scene Understanding & Grounded VQA (`vision/engine.py`)**:
+  - High-level descriptive caption generation.
+  - Scene classification (`document_page`, `technical_diagram`, `statistical_chart`, `photo_or_artwork`).
+  - Object detection and bounding box isolation.
+  - Multi-palette dominant color clustering.
+  - **Grounded Visual Question Answering (VQA):** Answers queries regarding text, charts, diagrams, and visual objects with region ID grounding.
+- [x] **Structural Diagram & Chart Analyzers (`diagrams/`, `charts/`)**:
+  - Flowchart, sequence, and architecture diagram topology parsing (nodes, flow direction, connectors).
+  - Bar, line, and pie chart detection with title, axis labels, and numerical series reconstruction.
+- [x] **Canonical Schema & Output Generators (`schemas/`, `generators/`)**:
+  - Canonical JSON generator (`image_document.json`).
+  - Markdown report generator (`image_report.md`).
+  - Operational manifest generator (`image_manifest.json`).
+  - Clean OCR text exporter (`ocr_text.txt`).
+- [x] **Database & Alembic Migration**:
+  - Added `ImageAnalysisRecord` model in `app/infrastructure/database/models.py`.
+  - Applied Alembic migration `003_image_analysis_records.py` with foreign key cascades and indices.
+- [x] **REST API Endpoints (`app/api/v1/endpoints/image_intelligence.py`)**:
+  - `GET /api/v1/image-intelligence/capabilities`
+  - `POST /api/v1/files/{file_id}/analyze-image`
+  - `GET /api/v1/files/{file_id}/image-analysis`
+  - `GET /api/v1/files/{file_id}/image-analysis/result`
+  - `POST /api/v1/files/{file_id}/ask-image`
+- [x] **Frontend Image Intelligence Inspector (`frontend/src/components/ImageIntelligenceView.tsx`)**:
+  - Interactive visual viewport with color-coded bounding boxes (text, objects, diagrams, charts).
+  - AI visual summary card with dominant palette color chips.
+  - OCR text layer explorer with word counts and confidence.
+  - Diagram topology and statistical chart series data tables.
+  - Interactive Visual Question Answering (VQA) query form with grounded answers.
+  - Integrated seamlessly into `FileLibraryPage.tsx`.
+
+---
+
+## 3. Completed Phase 3 Milestones
 
 ### 2.1 Extraction Adapters (`backend/app/modules/extraction/adapters/`)
 - [x] **PDF (`PDFExtractor`)**:

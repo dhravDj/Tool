@@ -19,6 +19,19 @@ class OCRRouter:
     def is_ocr_available(self) -> bool:
         return settings.OCR_ENABLED and self.adapter.is_available
 
+    def get_diagnostics(self) -> dict[str, Any]:
+        """Return diagnostic status of OCR routing and underlying adapter."""
+        adapter_diag = {}
+        if hasattr(self.adapter, "get_diagnostics"):
+            adapter_diag = self.adapter.get_diagnostics()
+
+        return {
+            "ocr_enabled_in_settings": settings.OCR_ENABLED,
+            "density_threshold_chars": settings.OCR_DENSITY_THRESHOLD_CHARS,
+            "is_ready": self.is_ocr_available(),
+            "adapter": adapter_diag,
+        }
+
     def should_route_to_ocr(
         self,
         char_count: int,

@@ -27,6 +27,7 @@ from app.modules.extraction.adapters import (
     RTFExtractor,
 )
 from app.modules.files.detection.detector import universal_detector
+from app.modules.image_intelligence.pipeline import image_intelligence_pipeline
 from app.plugins.registry.registry import plugin_registry
 from app.plugins.samples.mock_ai_provider import MockLocalAIProvider
 from app.plugins.samples.mock_detector import MockTextDetectorPlugin
@@ -58,12 +59,22 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     plugin_registry.register(RTFExtractor())
     plugin_registry.register(ODTExtractor())
     plugin_registry.register(EPUBExtractor())
+    plugin_registry.register(image_intelligence_pipeline)
     plugin_registry.register(MockTextDetectorPlugin())
     plugin_registry.register(MockTextExtractorPlugin())
     plugin_registry.register(MockLocalAIProvider())
     plugin_registry.register(MockMarkdownFormatter())
     await plugin_registry.initialize_all()
     logger.info(f"Initialized {len(plugin_registry.list_plugins())} plugins in registry.")
+
+    # 4. Check OCR Subsystem readiness
+    from app.modules.extraction.ocr.router import ocr_router
+    ocr_status = ocr_router.get_diagnostics()
+    logger.info(
+        f"OCR Subsystem Status: ready={ocr_status['is_ready']}, "
+        f"adapter={ocr_status['adapter'].get('engine')}, "
+        f"tesseract_installed={ocr_status['adapter'].get('is_available')}"
+    )
 
     yield
 

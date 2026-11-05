@@ -109,6 +109,9 @@ class FileRecord(Base):
     extractions: Mapped[list["ExtractionRecord"]] = relationship(
         "ExtractionRecord", back_populates="file", cascade="all, delete-orphan"
     )
+    image_analyses: Mapped[list["ImageAnalysisRecord"]] = relationship(
+        "ImageAnalysisRecord", back_populates="file", cascade="all, delete-orphan"
+    )
 
     __table_args__ = (
         Index("ix_files_owner_status", "owner_id", "status"),
@@ -249,3 +252,48 @@ class SystemSetting(Base):
         onupdate=lambda: datetime.now(UTC),
         nullable=False,
     )
+
+
+class ImageAnalysisRecord(Base):
+    """Historical image intelligence analysis execution record and visual findings."""
+
+    __tablename__ = "image_analysis_records"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+    file_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True),
+        ForeignKey("files.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    status: Mapped[str] = mapped_column(String(32), default="completed", index=True, nullable=False)
+    format: Mapped[str] = mapped_column(String(32), index=True, nullable=False)
+    width: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    height: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    color_mode: Mapped[str] = mapped_column(String(32), default="RGB", nullable=False)
+    has_transparency: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    is_animated: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    ocr_word_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    ocr_text: Mapped[str | None] = mapped_column(Text, nullable=True)
+    detected_objects_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    caption: Mapped[str | None] = mapped_column(Text, nullable=True)
+    has_charts: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    has_diagrams: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    artifacts: Mapped[dict[str, Any]] = mapped_column(JSON_TYPE, default=dict, nullable=False)
+    analysis_metadata: Mapped[dict[str, Any]] = mapped_column(
+        "metadata", JSON_TYPE, default=dict, nullable=False
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        default=lambda: datetime.now(UTC),
+        nullable=False,
+    )
+
+    # Relationships
+    file: Mapped["FileRecord"] = relationship("FileRecord", back_populates="image_analyses")
+

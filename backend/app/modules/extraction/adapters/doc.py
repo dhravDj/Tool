@@ -114,6 +114,10 @@ class LegacyDocExtractor(BaseDocumentExtractor):
             except Exception as exc:
                 warnings.append(f"antiword execution failed: {exc}")
 
+        # Check for headless LibreOffice conversion if antiword is unavailable
+        if not extracted_text:
+            extracted_text = self._extract_with_libreoffice(file_path, warnings)
+
         # Fallback: Pure-Python WordDocument Stream Extraction
         if not extracted_text:
             extracted_text = self._extract_from_word_stream(file_path, warnings)
@@ -174,6 +178,50 @@ class LegacyDocExtractor(BaseDocumentExtractor):
             warnings=warnings,
             errors=errors,
         )
+
+    def _extract_with_libreoffice(self, file_path: Path, warnings: list[str]) -> str:
+        """Safely convert legacy DOC to text using LibreOffice in headless sandbox mode."""
+        lo_bin = shutil.which("libreoffice") or shutil.which("soffice")
+        if not lo_bin:
+            return ""
+
+        import subprocess
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            try:
+                # Security flags: --headless, --nodefault, --nolockcheck, --nologo, --norestore
+                # Strict 15-second timeout, zero interactive prompts, no network
+                cmd = [
+                    lo_bin,
+                    "--headless",
+                    "--nodefault",
+                    "--nolockcheck",
+                    "--nologo",
+                    "--norestore",
+                    "--convert-to",
+                    "txt:Text",
+                    "--outdir",
+                    str(temp_path),
+                    str(file_path),
+                ]
+                res = subprocess.run(
+                    cmd,
+                    capture_output=True,
+                    text=True,
+                    timeout=15,
+                    check=False,
+                )
+                if res.returncode == 0:
+                    txt_files = list(temp_path.glob("*.txt"))
+                    if txt_files and txt_files[0].stat().st_size > 0:
+                        return txt_files[0].read_text(encoding="utf-8", errors="ignore").strip()
+            except subprocess.TimeoutExpired:
+                warnings.append("LibreOffice conversion timed out after 15s; falling back to OLE stream parser.")
+            except Exception as exc:
+                warnings.append(f"LibreOffice conversion failed: {exc}")
+        return ""
 
     def _extract_from_word_stream(self, file_path: Path, warnings: list[str]) -> str:
         """Extract text chunks safely from the binary WordDocument stream."""

@@ -9,6 +9,7 @@ from app.api.v1.endpoints import (
     files,
     formats,
     health,
+    image_intelligence,
     plugins,
     system,
 )
@@ -23,3 +24,4 @@ api_router.include_router(batches.router)
 api_router.include_router(formats.router)
 api_router.include_router(detection.router)
 api_router.include_router(extraction.router)
+api_router.include_router(image_intelligence.router)
