@@ -2,6 +2,8 @@
 
 from enum import Enum
 
+from app.modules.formats.categories import FormatCategory
+
 
 class FileStatus(str, Enum):
     PENDING = "pending"
@@ -37,14 +39,4 @@ class AIMode(str, Enum):
     HYBRID = "hybrid"
 
 
-class FormatCategory(str, Enum):
-    DOCUMENT = "document"
-    SPREADSHEET = "spreadsheet"
-    PRESENTATION = "presentation"
-    IMAGE = "image"
-    AUDIO = "audio"
-    VIDEO = "video"
-    ARCHIVE = "archive"
-    CODE = "code"
-    STRUCTURED_DATA = "structured_data"
-    UNKNOWN = "unknown"
+__all__ = ["AIMode", "BatchStatus", "FileStatus", "FormatCategory", "JobStatus"]

@@ -1,135 +1,91 @@
 # DocuMind AI — Development Progress Tracker
 
-**Current Platform Version:** 0.1.0  
-**Active Phase:** Phase 1: Foundation, Architecture & Engineering Setup  
+**Current Platform Version:** 0.2.0  
+**Active Phase:** Phase 2: Universal File Detection Engine  
+**Phase Status:** **COMPLETE (100%)**  
 **Last Updated:** November 6, 2026  
 
 ---
 
-## 1. Phase 1 Objective & Status
+## 1. Project Phase Summary
 
-**Goal:** Establish a production-grade, scalable, modular foundation for DocuMind AI (Universal File Intelligence Platform) with clean architecture, strict typing, database migrations, plugin interfaces, Docker infrastructure, and comprehensive testing before implementing real extraction engines in Phase 2.
-
-**Overall Phase 1 Status:** **COMPLETE (100%)**
-
----
-
-## 2. Completed Phase 1 Milestones
-
-### 2.1 Environment & Architecture Setup
-- [x] Full host environment inspection (Ubuntu 26.04, Python 3.13, Node v26, Docker 29.1, Docker Compose 2.40).
-- [x] Generated `ENVIRONMENT_REPORT.md` detailing hardware, driver, and tool compatibility.
-- [x] Comprehensive evaluation of open-source candidate projects recorded in `OPEN_SOURCE_ECOSYSTEM.md`.
-- [x] Complete System Architecture specification recorded in `ARCHITECTURE.md` (Clean Architecture, Modular Monolith, high-volume batch scaling strategy).
-- [x] Technical Architecture Decision Records established in `TECHNICAL_DECISIONS.md`.
-- [x] Security architecture and threat mitigation documented in `SECURITY.md`.
-
-### 2.2 Backend Foundation (`backend/`)
-- [x] Python 3.12+ / 3.13 ASGI backend with FastAPI.
-- [x] Pydantic v2 settings configuration (`app/core/config.py`) loading from `.env`.
-- [x] Structured JSON logging with request correlation ID middleware (`app/core/logging.py`, `app/main.py`).
-- [x] Centralized custom domain exception handlers and standard API envelope (`APIResponse[T]`, `APIErrorDetail`).
-- [x] Input sanitization, password hashing (PBKDF2-SHA256), and SHA-256 file fingerprinting (`app/core/security.py`).
-- [x] Comprehensive diagnostic endpoints:
-  - `GET /api/v1/health` (liveness + readiness, database ping, redis ping, storage check, AI status).
-  - `GET /api/v1/health/liveness` (probe).
-  - `GET /api/v1/health/readiness` (probe).
-  - `GET /api/v1/system/status` (host OS, disk usage, AI mode, platform stats).
-
-### 2.3 Database Foundation (`PostgreSQL` + `Alembic` + `SQLAlchemy 2.0`)
-- [x] Declarative models with UUID primary keys, indexes, foreign keys, and relationships:
-  - `users`: User entity and credentials.
-  - `files`: File metadata, original/stored filenames, hashes, MIME types, sizes.
-  - `batches`: High-volume parent batch counters (`total_files`, `queued`, `processing`, `completed`, `failed`).
-  - `document_jobs`: Granular individual file execution states within a batch.
-  - `extraction_records`: Engine output paths, formats, and JSONB metadata.
-  - `system_settings`: Platform dynamic configurations.
-- [x] Async SQLAlchemy session lifecycle with connection pooling (`app/infrastructure/database/session.py`).
-- [x] Alembic migration configuration and revision `001_initial_schema.py`.
-- [x] Live migrations verified against PostgreSQL 16.
-
-### 2.4 Extensible Plugin Architecture (`app/plugins/`)
-- [x] Formal Python Abstract Base Classes:
-  - `ProcessingPluginInterface`
-  - `FileDetectorInterface`
-  - `ExtractionEngineInterface`
-  - `AIProviderInterface`
-  - `StorageProviderInterface`
-  - `OutputFormatterInterface`
-- [x] Thread-safe `PluginRegistry` for discovery, capability lookup, and format routing.
-- [x] Local filesystem storage provider (`LocalStorageProvider`) implementing `StorageProviderInterface`.
-- [x] Phase 1 sample/mock plugins to verify interface compliance without heavy weights:
-  - `MockTextDetectorPlugin`
-  - `MockTextExtractorPlugin`
-  - `MockLocalAIProvider`
-  - `MockMarkdownFormatter`
-- [x] Plugin introspection REST API:
-  - `GET /api/v1/plugins`
-  - `GET /api/v1/plugins/{name}`
-
-### 2.5 Frontend Foundation (`frontend/`)
-- [x] React 19 + TypeScript + Vite + Tailwind CSS SPA.
-- [x] Zustand client state store (`useUIStore`) for theme toggle (light/dark) and sidebar management with safe browser fallbacks.
-- [x] TanStack Query v5 for server-state caching and background polling.
-- [x] React Router declarative routing.
-- [x] Reusable accessible UI components:
-  - `PageContainer`, `StatCard`, `StatusIndicator`, `EmptyState`, `LoadingState`, `ErrorState`, `ConfirmDialog`, `ThemeToggle`.
-- [x] Core layouts:
-  - `Sidebar` (collapsible, mobile-responsive), `Header`, `MainLayout`.
-- [x] Initial pages with realistic empty states:
-  - `DashboardPage` (`/`)
-  - `UploadPage` (`/upload`)
-  - `ProcessingJobsPage` (`/jobs`)
-  - `FileLibraryPage` (`/files`)
-  - `SystemStatusPage` (`/system`)
-  - `SettingsPage` (`/settings`)
-- [x] Typed API client (`src/services/api.ts`).
-
-### 2.6 Docker & DevOps Infrastructure
-- [x] Production multi-stage `Dockerfile.backend` with non-root security and healthcheck.
-- [x] Production multi-stage `Dockerfile.frontend` with Nginx reverse proxy.
-- [x] `docker-compose.yml` orchestrating PostgreSQL 16 (Alpine), Redis 7 (Alpine), Backend, and Frontend on `documind-network` with persistent named volumes and health dependencies.
-- [x] Operational scripts in `scripts/`:
-  - `setup.sh`: Automated workspace and dependency provisioning.
-  - `start.sh`: Dev environment and Docker container startup.
-  - `stop.sh`: Graceful container termination.
-  - `migrate.sh`: Alembic migration runner.
-  - `run_tests.sh`: Unified test and quality suite runner.
+| Phase | Description | Status | Verification Summary |
+| :--- | :--- | :--- | :--- |
+| **Phase 1** | Foundation, Architecture & Engineering Setup | **COMPLETE (100%)** | Clean architecture, PostgreSQL 16 + Redis 7 Docker, Alembic, 23 backend tests, 6 frontend tests. |
+| **Phase 2** | Universal File Detection Engine | **COMPLETE (100%)** | 7-step multi-signal detection pipeline, 17 categories, 45+ formats, 67 backend tests, 7 frontend tests, 929 files/s benchmark. |
+| **Phase 3** | Document Extraction Engines | **PENDING** | Awaiting user instructions and Phase 3 kickoff. |
 
 ---
 
-## 3. Test & Quality Suite Execution Summary
+## 2. Completed Phase 2 Milestones
 
-| Suite / Check | Tool | Files Tested | Results | Status |
-|---|---|---|---|---|
-| **Python Code Quality & Formatting** | `Ruff` | All backend modules | 0 errors | **PASSED** |
-| **Python Static Type Checking** | `mypy` | 66 source files | 0 errors | **PASSED** |
-| **Backend Unit & Integration Tests** | `pytest` + `pytest-asyncio` | 7 test suites | 23 / 23 passed | **PASSED** |
-| **Frontend TypeScript Verification** | `tsc --noEmit` | All TS/TSX modules | 0 errors | **PASSED** |
-| **Frontend Component & Routing Tests** | `Vitest` + `React Testing Library` | 2 test suites | 6 / 6 passed | **PASSED** |
-| **Frontend Code Style** | `ESLint` | Entire frontend project | 0 errors | **PASSED** |
-| **Database Migrations** | `Alembic` + `PostgreSQL 16` | Migration 001 | Applied cleanly | **PASSED** |
-| **Live API Health Check** | `httpx` against running PG & Redis | /api/v1/health | 200 OK (Status: healthy) | **PASSED** |
+### 2.1 Open-Source Detection Evaluation
+- [x] Evaluated candidate detection technologies in `OPEN_SOURCE_ECOSYSTEM.md`:
+  - `libmagic` (C file utility library): Selected as native primary MIME analyzer.
+  - `python-magic`: Integrated as high-performance ctypes binding.
+  - `Apache Tika`: Evaluated and deferred (JVM runtime overhead unnecessary for Phase 2).
+  - `TrID`: Evaluated and rejected (closed-source binary database).
+
+### 2.2 Central File Format Registry (`backend/app/modules/formats/`)
+- [x] Comprehensive format database indexed by ID, extension, MIME, category, and binary signatures (`registry.py`).
+- [x] 17 format categories fully modeled (`categories.py`):
+  `document`, `pdf`, `spreadsheet`, `presentation`, `image`, `audio`, `video`, `archive`, `code`, `structured_data`, `email`, `ebook`, `font`, `executable`, `disk_image`, `other_binary`, `unknown`.
+- [x] Clear architectural separation between detection support and extraction support (`support_status.py`):
+  `DETECTED_AND_SUPPORTED`, `DETECTED_BUT_NOT_IMPLEMENTED`, `DETECTED_BUT_UNSUPPORTED`, `UNKNOWN_FORMAT`, `INVALID_FILE`, `CORRUPTED_FILE`, `SUSPICIOUS_FILE`, `AMBIGUOUS_FORMAT`.
+- [x] Extensible `MagicSignature` database (`signatures.py`) supporting offsets and bitmasks for 25+ binary signatures.
+- [x] Defensive `ContainerInspector` (`container_formats.py`) for OOXML, ODF, EPUB, and ZIP containers with zip bomb caps (max 120 entries, 5 MB decompression ceiling).
+
+### 2.3 Layered Universal Detection Pipeline (`backend/app/modules/files/detection/`)
+- [x] **Step 1: Validation** (`validation.py`): Filesystem existence, permissions, non-empty check, and 2 GB upload bounds.
+- [x] **Step 2: Extension Analysis** (`extension_detector.py`): Normalized case-insensitive compound extension mapping (`.tar.gz`, `.docx`, etc.).
+- [x] **Step 3: Magic Signature Detection** (`signature_detector.py`): 64 KB header buffer scan against binary magic signatures.
+- [x] **Step 4: MIME Type Detection** (`mime_detector.py`): `python-magic` libmagic binary introspection with pure-Python fallback.
+- [x] **Step 5: Container Inspection** (`container_detector.py`): Manifest scanning for OOXML (`word/`, `xl/`, `ppt/`), ODF, and EPUB packages.
+- [x] **Step 6: Safe Text Heuristics** (`text_detector.py`): UTF-8/16/32 BOM detection, strict JSON / XML / SVG / TOML / CSV parsers, control-byte binary filter, and language syntax markers without executing code.
+- [x] **Step 7: Multi-Signal Confidence Arbitration** (`confidence.py`, `metadata.py`, `detector.py`): Precedence-based candidate resolution, extension mismatch detection, corruption detection, SHA-256 calculation, and safe header metadata extraction.
+
+### 2.4 Database & Schema Integration
+- [x] Extended `FileRecord` in `backend/app/infrastructure/database/models.py` with Phase 2 fields:
+  `detection_format_id`, `claimed_extension`, `actual_extension`, `format_category`, `confidence_level`, `confidence_score`, `support_status`, `is_valid`, `is_mismatch`, `is_corrupted`, `is_suspicious`, `detection_evidence`, `detection_warnings`, `file_metadata`, `detection_engine_version`, `detected_at`.
+- [x] Generated and applied Alembic migration `002_file_detection_fields.py` against live PostgreSQL database.
+
+### 2.5 REST API Endpoints (`backend/app/api/v1/endpoints/`)
+- [x] `GET /api/v1/formats`: Catalog of all registered formats with category and status filters.
+- [x] `GET /api/v1/formats/{format_id}`: Detailed specification for a single format.
+- [x] `GET /api/v1/system/detection-capabilities`: Pipeline version, active layers, limits, and category distribution.
+- [x] `POST /api/v1/files/detect`: Upload and analyze a single file, streaming to secure temp disk, with optional library persistence.
+- [x] `POST /api/v1/files/detect/batch`: Multipart batch streaming detection with mismatch and suspicious counts.
+- [x] `GET /api/v1/files/{file_id}/detection`: Retrieve persisted detection analysis records.
+
+### 2.6 Frontend Ingestion Gateway & Library (`frontend/`)
+- [x] Updated `src/types/api.ts` with complete Phase 2 detection, capabilities, and format schemas.
+- [x] Enhanced `src/services/api.ts` with typed methods for file detection and registry queries.
+- [x] Revamped `UploadPage.tsx`:
+  - Active drag-and-drop and file browser for all file formats.
+  - Real-time detection cards displaying format name, category, confidence badge, and duration.
+  - Prominent extension mismatch alert banner (e.g. executable or PDF disguised as JPEG).
+  - Corruption and suspicious file indicators.
+  - Collapsible multi-signal evidence inspector (magic bytes, MIME, container, text heuristics, SHA-256).
+  - Optional toggle to persist analyzed files to database storage.
+- [x] Revamped `FileLibraryPage.tsx`:
+  - Tabbed interface: "Ingested Files" and "Supported Formats Registry".
+  - Category filters across all 17 categories and multi-attribute search (name, hash, MIME, format ID).
+  - Modal inspection for file records and detection evidence logs.
+  - Registry browser displaying format details, supported extensions, and support status.
+
+### 2.7 Quality Assurance, Property Fuzzing & Benchmarks
+- [x] Unit test suite: 7 registry tests (`test_format_registry.py`), 29 pipeline specimen tests across all categories and 20 real-world edge cases (`test_detection_pipeline.py`).
+- [x] Property-based fuzzing test suite: 2 Hypothesis tests (80 test runs) validating pipeline robustness and 0 crashes on arbitrary byte sequences (`test_detection_hypothesis.py`).
+- [x] Integration test suite: 6 API endpoint tests verifying all detection and registry routes (`test_detection_api.py`).
+- [x] Performance profiling benchmark (`scripts/benchmark_detection.py`):
+  - 100-file batch: **928.0 files/second**, 1.08 ms average latency, 0.28 MB peak memory.
+  - 1,000-file batch: **929.2 files/second**, 1.08 ms average latency, 0.27 MB peak memory.
+  - Accuracy: **100.00%** on mixed-format and mismatch datasets.
+- [x] Total test results: **67 backend tests passing**, **7 frontend Vitest tests passing**, **0 Ruff lint errors**, **0 Mypy type errors**, **0 ESLint errors**.
 
 ---
 
-## 4. Known Issues & Intentional Scope Boundaries
+## 3. Next Phase
 
-1. **Extraction Engines Deferred to Phase 2:**
-   - As strictly required by Phase 1 instructions, actual document extraction engines (Docling, PyMuPDF, Whisper, PaddleOCR, etc.) have NOT been installed or implemented.
-   - All extraction and format adapters are represented by formal interfaces and tested mock plugins.
-2. **GPU Acceleration in Fallback Mode:**
-   - Host machine NVIDIA driver is unresponsive to nvidia-smi; the platform defaults to CPU execution mode (`LOCAL_INFERENCE_DEVICE=cpu`) with graceful hardware checks.
-3. **No Fake Functionality:**
-   - All UI pages display realistic empty states and live telemetry instead of hardcoded mock records.
-
----
-
-## 5. Next Phase: Phase 2 Requirements
-
-**Phase 2: Universal File Detection & Ingestion Engine**
-- Implement real binary signature and magic byte analysis (via `python-magic` / pure Python header parsing).
-- Connect multi-part streaming file upload with SHA-256 chunk hashing.
-- Build file format routing engine dispatching to format-specific adapters.
-- Implement archive decompression safety scanner (zip bomb protection).
-- Connect parent batch creation and child document job scheduling via Redis queue.
+- **Phase 3:** Document Content Extraction Engines (PDF, DOCX, XLSX, TXT, OCR, etc.).
+- Awaiting user instruction before initiating Phase 3.

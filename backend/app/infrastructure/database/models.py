@@ -6,7 +6,9 @@ from typing import Any, Optional
 
 from sqlalchemy import (
     BigInteger,
+    Boolean,
     DateTime,
+    Float,
     ForeignKey,
     Index,
     Integer,
@@ -70,6 +72,28 @@ class FileRecord(Base):
     status: Mapped[str] = mapped_column(
         String(32), default=FileStatus.PENDING.value, index=True, nullable=False
     )
+    # Phase 2: Universal File Detection metadata
+    detection_format_id: Mapped[str | None] = mapped_column(String(64), index=True, nullable=True)
+    claimed_extension: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    actual_extension: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    format_category: Mapped[str | None] = mapped_column(String(32), index=True, nullable=True)
+    confidence_level: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    confidence_score: Mapped[float | None] = mapped_column(Float, nullable=True)
+    support_status: Mapped[str | None] = mapped_column(String(32), index=True, nullable=True)
+    is_valid: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    is_mismatch: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    is_corrupted: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    is_suspicious: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    detection_evidence: Mapped[dict[str, Any]] = mapped_column(
+        JSON_TYPE, default=dict, nullable=False
+    )
+    detection_warnings: Mapped[list[str]] = mapped_column(JSON_TYPE, default=list, nullable=False)
+    file_metadata: Mapped[dict[str, Any]] = mapped_column(JSON_TYPE, default=dict, nullable=False)
+    detection_engine_version: Mapped[str | None] = mapped_column(
+        String(32), default="2.0.0", nullable=True
+    )
+    detected_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),

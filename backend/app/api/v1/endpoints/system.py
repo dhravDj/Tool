@@ -9,6 +9,9 @@ from fastapi import APIRouter
 from app.core.config import settings
 from app.domain.enums import FormatCategory
 from app.domain.schemas.api_response import APIResponse
+from app.modules.files.detection.detector import UniversalFileDetector
+from app.modules.files.detection.mime_detector import HAS_MAGIC
+from app.modules.formats.registry import format_registry
 from app.plugins.registry.registry import plugin_registry
 
 router = APIRouter(prefix="/system", tags=["System Information"])
@@ -64,3 +67,67 @@ async def get_system_status() -> APIResponse[dict[str, Any]]:
     }
 
     return APIResponse.ok(data=system_info, message="System status retrieved.")
+
+
+@router.get("/detection-capabilities", response_model=APIResponse[dict[str, Any]])
+async def get_detection_capabilities() -> APIResponse[dict[str, Any]]:
+    """Retrieve Phase 2 Universal File Detection engine capabilities, registered formats, and pipeline layers."""
+    all_formats = format_registry.list_all()
+    categories_summary: dict[str, int] = {}
+    for cat in format_registry.list_categories():
+        categories_summary[cat.value] = len(format_registry.get_by_category(cat))
+
+    capabilities = {
+        "engine_version": UniversalFileDetector.ENGINE_VERSION,
+        "libmagic_active": HAS_MAGIC,
+        "total_registered_formats": len(all_formats),
+        "categories_count": len(categories_summary),
+        "formats_per_category": categories_summary,
+        "detection_pipeline_layers": [
+            {
+                "step": 1,
+                "name": "Validation",
+                "description": "Filesystem existence, permissions, symlink checks, non-empty, and strict size limit bounds (2GB default).",
+            },
+            {
+                "step": 2,
+                "name": "Extension Analysis",
+                "description": "Normalized case-insensitive compound extension mapping (.tar.gz, .docx, etc.).",
+            },
+            {
+                "step": 3,
+                "name": "Magic Byte Detection",
+                "description": "Extensible binary header & offset matching for PDF, PNG, JPEG, GIF, WEBP, ZIP, 7Z, GZ, RAR, MP3, WAV, FLAC, MP4, EBML, OLE2, ELF, PE, and Fonts.",
+            },
+            {
+                "step": 4,
+                "name": "MIME Inspection",
+                "description": "python-magic libmagic binary content introspection with pure-Python fallback.",
+            },
+            {
+                "step": 5,
+                "name": "Container Package Inspection",
+                "description": "Defensive ZIP/OOXML (DOCX, XLSX, PPTX), ODF (ODT, ODS, ODP), and EPUB internal manifest inspection with zip bomb mitigation.",
+            },
+            {
+                "step": 6,
+                "name": "Safe Text Heuristics",
+                "description": "UTF BOM identification, strict JSON / XML / SVG / HTML / TOML / CSV structural inspection, and language syntax markers.",
+            },
+            {
+                "step": 7,
+                "name": "Multi-Signal Confidence Arbitration",
+                "description": "Evidence aggregation, extension mismatch flagging, corruption detection, and polyglot risk assessment.",
+            },
+        ],
+        "limits": {
+            "max_file_size_bytes": settings.MAX_UPLOAD_SIZE_BYTES,
+            "max_archive_entries_scanned": 120,
+            "max_archive_decompressed_bytes": 5 * 1024 * 1024,
+            "max_magic_read_bytes": 65536,
+        },
+    }
+
+    return APIResponse.ok(
+        data=capabilities, message="Detection capabilities retrieved successfully."
+    )

@@ -2,8 +2,13 @@
 
 import {
   APIResponse,
+  BatchDetectionResponseData,
   BatchSummary,
+  DetectionCapabilitiesData,
+  DetectionResultData,
   FileRecordSummary,
+  FormatDetailData,
+  FormatListResponseData,
   HealthCheckResponse,
   PluginListResponse,
   SystemStatusData,
@@ -43,4 +48,39 @@ export const api = {
     request<FileRecordSummary[]>(`/files?limit=${limit}&offset=${offset}`),
   getBatches: (limit = 20, offset = 0) =>
     request<BatchSummary[]>(`/batches?limit=${limit}&offset=${offset}`),
+
+  // Phase 2 Detection Endpoints
+  detectFile: async (file: File, persist = true): Promise<DetectionResultData> => {
+    const formData = new FormData();
+    formData.append("file", file);
+    return request<DetectionResultData>(`/files/detect?persist=${persist}`, {
+      method: "POST",
+      body: formData,
+    });
+  },
+
+  detectBatch: async (files: File[], persist = true): Promise<BatchDetectionResponseData> => {
+    const formData = new FormData();
+    for (const file of files) {
+      formData.append("files", file);
+    }
+    return request<BatchDetectionResponseData>(`/files/detect/batch?persist=${persist}`, {
+      method: "POST",
+      body: formData,
+    });
+  },
+
+  getFileDetection: (fileId: string): Promise<DetectionResultData> =>
+    request<DetectionResultData>(`/files/${encodeURIComponent(fileId)}/detection`),
+
+  getFormats: (category?: string): Promise<FormatListResponseData> => {
+    const query = category ? `?category=${encodeURIComponent(category)}` : "";
+    return request<FormatListResponseData>(`/formats${query}`);
+  },
+
+  getFormatById: (formatId: string): Promise<FormatDetailData> =>
+    request<FormatDetailData>(`/formats/${encodeURIComponent(formatId)}`),
+
+  getDetectionCapabilities: (): Promise<DetectionCapabilitiesData> =>
+    request<DetectionCapabilitiesData>("/system/detection-capabilities"),
 };

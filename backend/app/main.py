@@ -16,6 +16,7 @@ from app.core.logging import logger, request_id_ctx, setup_logging
 from app.infrastructure.database.session import engine
 from app.infrastructure.queue.redis import redis_manager
 from app.infrastructure.storage.local import local_storage
+from app.modules.files.detection.detector import universal_detector
 from app.plugins.registry.registry import plugin_registry
 from app.plugins.samples.mock_ai_provider import MockLocalAIProvider
 from app.plugins.samples.mock_detector import MockTextDetectorPlugin
@@ -36,8 +37,9 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     await local_storage.initialize()
     logger.info("Storage subsystem initialized successfully.")
 
-    # 3. Register Phase 1 mock/foundational plugins
+    # 3. Register Phase 1 plugins & Phase 2 Universal File Detector
     plugin_registry.register(local_storage)
+    plugin_registry.register(universal_detector)
     plugin_registry.register(MockTextDetectorPlugin())
     plugin_registry.register(MockTextExtractorPlugin())
     plugin_registry.register(MockLocalAIProvider())

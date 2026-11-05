@@ -95,6 +95,117 @@ export interface FileRecordSummary {
   storage_path: string;
   status: "pending" | "stored" | "processing" | "processed" | "error" | "deleted";
   created_at: string;
+  detection_format_id?: string;
+  claimed_extension?: string;
+  actual_extension?: string;
+  format_category?: string;
+  confidence_level?: "high" | "medium" | "low" | "unknown";
+  confidence_score?: number;
+  support_status?: string;
+  is_valid?: boolean;
+  is_mismatch?: boolean;
+  is_corrupted?: boolean;
+  is_suspicious?: boolean;
+  detection_evidence?: Array<{
+    signal: string;
+    format_id?: string;
+    mime_type?: string;
+    confidence_score: number;
+    details: string;
+  }>;
+  detection_warnings?: string[];
+  file_metadata?: Record<string, unknown>;
+  detection_engine_version?: string;
+  detected_at?: string;
+}
+
+export interface DetectionEvidenceItem {
+  signal: string;
+  format_id?: string;
+  mime_type?: string;
+  confidence_score: number;
+  details: string;
+}
+
+export interface AlternativeCandidateItem {
+  format_id: string;
+  canonical_name: string;
+  confidence_score: number;
+  reason: string;
+}
+
+export interface DetectionResultData {
+  format_id: string;
+  canonical_name: string;
+  display_name: string;
+  mime_type: string;
+  extension: string;
+  claimed_extension?: string;
+  category: string;
+  confidence_level: "high" | "medium" | "low" | "unknown";
+  confidence_score: number;
+  support_status: string;
+  is_valid: boolean;
+  is_mismatch: boolean;
+  is_corrupted: boolean;
+  is_suspicious: boolean;
+  is_container: boolean;
+  container_type?: string;
+  evidence: DetectionEvidenceItem[];
+  warnings: string[];
+  alternative_candidates: AlternativeCandidateItem[];
+  metadata: Record<string, unknown>;
+  file_size: number;
+  sha256: string;
+  detection_duration_ms: number;
+  persisted_file_id?: string;
+}
+
+export interface BatchDetectionResponseData {
+  total_files: number;
+  successful_detections: number;
+  mismatched_extensions: number;
+  suspicious_files: number;
+  results: DetectionResultData[];
+}
+
+export interface FormatDetailData {
+  format_id: string;
+  canonical_name: string;
+  display_name: string;
+  category: string;
+  mime_types: string[];
+  extensions: string[];
+  is_container: boolean;
+  container_type?: string;
+  support_status: string;
+  extraction_plugin_id?: string;
+  version_info?: string;
+  description: string;
+}
+
+export interface FormatListResponseData {
+  total_formats: number;
+  formats: FormatDetailData[];
+}
+
+export interface DetectionCapabilitiesData {
+  engine_version: string;
+  libmagic_active: boolean;
+  total_registered_formats: number;
+  categories_count: number;
+  formats_per_category: Record<string, number>;
+  detection_pipeline_layers: Array<{
+    step: number;
+    name: string;
+    description: string;
+  }>;
+  limits: {
+    max_file_size_bytes: number;
+    max_archive_entries_scanned: number;
+    max_archive_decompressed_bytes: number;
+    max_magic_read_bytes: number;
+  };
 }
 
 export interface BatchSummary {
