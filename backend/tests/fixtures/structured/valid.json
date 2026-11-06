@@ -1,0 +1,10 @@
+{
+  "system": "DocuMind",
+  "version": "1.0",
+  "active": true,
+  "settings": {
+    "retries": 3,
+    "timeout": 30.5
+  },
+  "modules": ["code", "structured", "video", "audio"]
+}

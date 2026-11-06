@@ -124,6 +124,12 @@ class FileRecord(Base):
     video_analyses: Mapped[list["VideoAnalysisRecord"]] = relationship(
         "VideoAnalysisRecord", back_populates="file", cascade="all, delete-orphan"
     )
+    code_analyses: Mapped[list["CodeAnalysisRecord"]] = relationship(
+        "CodeAnalysisRecord", back_populates="file", cascade="all, delete-orphan"
+    )
+    structured_data_analyses: Mapped[list["StructuredDataAnalysisRecord"]] = relationship(
+        "StructuredDataAnalysisRecord", back_populates="file", cascade="all, delete-orphan"
+    )
 
     __table_args__ = (
         Index("ix_files_owner_status", "owner_id", "status"),
@@ -494,6 +500,99 @@ class VideoAnalysisRecord(Base):
 
     # Relationships
     file: Mapped["FileRecord"] = relationship("FileRecord", back_populates="video_analyses")
+
+
+class CodeAnalysisRecord(Base):
+    """Historical code intelligence analysis record, AST parsing, symbols, metrics, and diagnostics."""
+
+    __tablename__ = "code_analysis_records"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+    file_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True),
+        ForeignKey("files.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    status: Mapped[str] = mapped_column(String(32), default="completed", index=True, nullable=False)
+    language: Mapped[str] = mapped_column(String(32), index=True, nullable=False)
+    total_lines: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    code_lines: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    comment_lines: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    blank_lines: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    symbol_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    function_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    class_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    import_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    diagnostic_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    has_syntax_errors: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    cyclomatic_complexity: Mapped[float] = mapped_column(Float, default=1.0, nullable=False)
+    model_name: Mapped[str] = mapped_column(String(64), default="documind-code-v1", nullable=False)
+    engine_name: Mapped[str] = mapped_column(String(64), default="documind-code", nullable=False)
+    confidence: Mapped[float] = mapped_column(Float, default=1.0, nullable=False)
+    processing_duration: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
+    artifacts: Mapped[dict[str, Any]] = mapped_column(JSON_TYPE, default=dict, nullable=False)
+    code_metadata: Mapped[dict[str, Any]] = mapped_column(JSON_TYPE, default=dict, nullable=False)
+    warnings: Mapped[list[str]] = mapped_column(JSON_TYPE, default=list, nullable=False)
+    error_details: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        default=lambda: datetime.now(UTC),
+        nullable=False,
+    )
+
+    # Relationships
+    file: Mapped["FileRecord"] = relationship("FileRecord", back_populates="code_analyses")
+
+
+class StructuredDataAnalysisRecord(Base):
+    """Historical structured data intelligence analysis record, schema inference, data profiling."""
+
+    __tablename__ = "structured_data_analysis_records"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+    file_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True),
+        ForeignKey("files.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    status: Mapped[str] = mapped_column(String(32), default="completed", index=True, nullable=False)
+    format: Mapped[str] = mapped_column(String(32), index=True, nullable=False)
+    root_type: Mapped[str] = mapped_column(String(32), default="object", nullable=False)
+    record_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    field_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    max_depth: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
+    is_valid: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    compression: Mapped[str] = mapped_column(String(32), default="none", nullable=False)
+    model_name: Mapped[str] = mapped_column(String(64), default="documind-structured-v1", nullable=False)
+    engine_name: Mapped[str] = mapped_column(String(64), default="documind-structured", nullable=False)
+    confidence: Mapped[float] = mapped_column(Float, default=1.0, nullable=False)
+    processing_duration: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
+    artifacts: Mapped[dict[str, Any]] = mapped_column(JSON_TYPE, default=dict, nullable=False)
+    schema_definition: Mapped[dict[str, Any]] = mapped_column(JSON_TYPE, default=dict, nullable=False)
+    profile_data: Mapped[dict[str, Any]] = mapped_column(JSON_TYPE, default=dict, nullable=False)
+    warnings: Mapped[list[str]] = mapped_column(JSON_TYPE, default=list, nullable=False)
+    error_details: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        default=lambda: datetime.now(UTC),
+        nullable=False,
+    )
+
+    # Relationships
+    file: Mapped["FileRecord"] = relationship("FileRecord", back_populates="structured_data_analyses")
+
 
 
 

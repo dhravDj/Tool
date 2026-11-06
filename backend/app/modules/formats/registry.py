@@ -23,6 +23,7 @@ from app.modules.formats.signatures import (
     OGG_SIGNATURE,
     OLE2_SIGNATURE,
     OTF_SIGNATURE,
+    PARQUET_SIGNATURE,
     PDF_SIGNATURE,
     PE_MZ_SIGNATURE,
     PNG_SIGNATURE,
@@ -748,14 +749,38 @@ class FormatRegistry:
         )
         self.register(
             FileFormatDefinition(
+                format_id="jsx",
+                canonical_name="JavaScript XML Source Code",
+                display_name="React JSX File",
+                category=FormatCategory.CODE,
+                mime_types=["text/jsx", "application/javascript"],
+                extensions=["jsx"],
+                support_status=SupportStatus.DETECTED_AND_SUPPORTED,
+                description="JavaScript with XML syntax extension",
+            )
+        )
+        self.register(
+            FileFormatDefinition(
                 format_id="ts",
                 canonical_name="TypeScript Source Code",
                 display_name="TypeScript File",
                 category=FormatCategory.CODE,
                 mime_types=["application/x-typescript", "video/mp2t"],  # note .ts ambiguity
-                extensions=["ts", "mts", "cts", "tsx"],
+                extensions=["ts", "mts", "cts"],
                 support_status=SupportStatus.DETECTED_AND_SUPPORTED,
                 description="Typed superset of JavaScript source",
+            )
+        )
+        self.register(
+            FileFormatDefinition(
+                format_id="tsx",
+                canonical_name="TypeScript XML Source Code",
+                display_name="React TSX File",
+                category=FormatCategory.CODE,
+                mime_types=["text/tsx", "application/x-typescript"],
+                extensions=["tsx"],
+                support_status=SupportStatus.DETECTED_AND_SUPPORTED,
+                description="TypeScript with XML syntax extension",
             )
         )
         self.register(
@@ -816,6 +841,42 @@ class FormatRegistry:
                 extensions=["cpp", "cc", "cxx", "hpp"],
                 support_status=SupportStatus.DETECTED_AND_SUPPORTED,
                 description="C++ object-oriented programming language source",
+            )
+        )
+        self.register(
+            FileFormatDefinition(
+                format_id="go",
+                canonical_name="Go Source Code",
+                display_name="Go Source File",
+                category=FormatCategory.CODE,
+                mime_types=["text/x-go"],
+                extensions=["go"],
+                support_status=SupportStatus.DETECTED_AND_SUPPORTED,
+                description="Go systems programming language source code",
+            )
+        )
+        self.register(
+            FileFormatDefinition(
+                format_id="rs",
+                canonical_name="Rust Source Code",
+                display_name="Rust Source File",
+                category=FormatCategory.CODE,
+                mime_types=["text/x-rust", "text/rust"],
+                extensions=["rs"],
+                support_status=SupportStatus.DETECTED_AND_SUPPORTED,
+                description="Rust memory-safe systems programming language source",
+            )
+        )
+        self.register(
+            FileFormatDefinition(
+                format_id="php",
+                canonical_name="PHP Source Code",
+                display_name="PHP Source File",
+                category=FormatCategory.CODE,
+                mime_types=["application/x-httpd-php", "text/x-php"],
+                extensions=["php", "phtml"],
+                support_status=SupportStatus.DETECTED_AND_SUPPORTED,
+                description="PHP Hypertext Preprocessor script file",
             )
         )
         self.register(
@@ -890,7 +951,8 @@ class FormatRegistry:
                 category=FormatCategory.STRUCTURED_DATA,
                 mime_types=["application/vnd.apache.parquet"],
                 extensions=["parquet"],
-                support_status=SupportStatus.DETECTED_BUT_NOT_IMPLEMENTED,
+                magic_signatures=[PARQUET_SIGNATURE],
+                support_status=SupportStatus.DETECTED_AND_SUPPORTED,
                 description="Columnar storage format for high-throughput big data",
             )
         )

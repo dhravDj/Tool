@@ -1,7 +1,7 @@
 # DocuMind AI — Development Progress Tracker
 
-**Current Platform Version:** 0.8.0 (Video Intelligence)  
-**Active Task:** Phase 8 — Video Intelligence Engine  
+**Current Platform Version:** 0.9.0 (Code & Structured Data Intelligence)  
+**Active Task:** Phase 9 — Code & Structured Data Intelligence Engine  
 **Overall Status:** **STABLE & VERIFIED (100%)**  
 **Last Updated:** November 6, 2026  
 
@@ -19,6 +19,7 @@
 | **Phase 6** | Presentation Intelligence Engine | **HARDENED (100%)** | Complete 3-format support (PPTX, PPT, ODP), slide hierarchy, bullet nesting levels, tables, native charts with series & categories, embedded picture assets, speaker notes isolation, diagram node-edge graphs, grouped shapes, hidden slide detection, sandboxed LibreOffice conversion + native OLE2 binary stream parser fallback, zero macro execution, 4 output generators (JSON, MD, TXT, Manifest), 9 REST API endpoints, full React presentation viewer, 155 backend tests + 11 frontend tests (166 total passed). |
 | **Phase 7** | Audio Intelligence Engine | **COMPLETED (100%)** | Complete 6-format support (MP3, WAV, M4A, AAC, FLAC, OGG), FFmpeg decoding & 16kHz mono normalization, amplitude dynamics, silence detection, VAD windowed chunking, sovereign baseline acoustic transcription (`documind-acoustic-v1`), faster-whisper & whisper.cpp adapters, cloud adapter with strict user consent verification, multilingual transcription (Hindi Unicode, Hinglish, English), acoustic timbre diarization, sound event classification (Music, Silence, Applause, Noise), 6 export formats (JSON, MD, TXT, SRT, VTT, Manifest), 11 REST API endpoints, interactive React waveform audio player & transcript viewer, 174 backend tests + 12 frontend tests (186 total passed), RTF 0.0176, peak RSS 89.77 MB. |
 | **Phase 8** | Video Intelligence Engine | **COMPLETED (100%)** | Complete 5-format support (MP4, MKV, MOV, AVI, WEBM), incremental stream decoding, PTS handling, HSV scene boundary detection, keyframe perceptual hash deduplication, Tesseract OCR on keyframes, IoU multi-frame object tracking, visual event detection, FFmpeg audio extraction with Phase 7 audio intelligence integration (Devanagari Unicode & English speech transcription), unified multimodal timeline, 7 export generators, 14 REST API endpoints, interactive React video player with scene navigator & synchronized transcript, 191 backend tests + 13 frontend tests (204 total passed), RTF 0.0482, peak RSS 134.22 MB. |
+| **Phase 9** | Code & Structured Data Intelligence Engine | **COMPLETED (100%)** | Complete 19-format support (14 programming languages: PY, JS, TS, JSX, TSX, HTML, CSS, JAVA, C, CPP, GO, RS, PHP, SQL; 5 structured data formats: JSON, XML, YAML, TOML, PARQUET), non-executing AST symbol extraction (Python AST, SQLGlot), import and external dependency classification, static code diagnostics & security alerts (hardcoded credentials, unsafe legacy C functions, unsafe memory blocks, bare excepts, debugger statements), code complexity metrics (cyclomatic complexity, nesting depth, comment ratio), JSON duplicate key interceptor, defensive DefusedXML against XXE entity expansion, YAML safe loading with Billion Laughs alias bomb defense, TOML table hierarchy, zero-dataframe bounded memory Parquet profiling via PyArrow metadata & 50-row batching, PostgreSQL models `CodeAnalysisRecord` and `StructuredDataAnalysisRecord`, Alembic migration `008_code_structured_data_records`, 19 REST API endpoints, full React Code and Structured Data intelligence views with line-numbered source jumping & hierarchy browsing, 216 backend tests + 15 frontend tests (231 total passed), average parsing latency 4.59 ms (code) and 46.66 ms (structured), peak RSS under 210 KB. |
 
 ---
 
@@ -532,6 +533,66 @@
 
 ---
 
-## 7. Next Phase
+## 7. Phase 9 — Code & Structured Data Intelligence Engine
 
-- **Phase 9:** Code & Structured Data Intelligence Engine (strictly deferred pending explicit user instruction).
+### 7.1 Multi-Language Code Architecture (14 Languages)
+- [x] Supported formats in registry: `py`, `js`, `ts`, `jsx`, `tsx`, `html`, `css`, `java`, `c`, `cpp`, `go`, `rs`, `php`, `sql`.
+- [x] Abstract syntax tree (AST) symbol extraction via Python `ast` (classes, methods, functions, docstrings, typing).
+- [x] Static SQL DDL schema and query extraction via `sqlglot` (tables, columns, foreign keys, relationships).
+- [x] Import statement parsing and automatic dependency classification (Standard Library vs External 3rd-Party).
+- [x] Static security and vulnerability diagnostics:
+  - Hardcoded API credentials / private keys (`SEC-HARDCODED-SECRET`).
+  - Legacy buffer overflow functions in C (`SEC-C-STRCPY`, `gets`, `strcat`, `sprintf`).
+  - Unsafe blocks in Rust (`RUST-UNSAFE-BLOCK`).
+  - Direct `.unwrap()` calls in Rust (`RUST-UNWRAP-CALL`).
+  - Production `debugger;` statements in JavaScript (`JS-DEBUGGER-STMT`).
+  - Inline script execution in HTML (`HTML-INLINE-SCRIPT`).
+  - Bare exception handling in Python (`PY-BARE-EXCEPT`).
+- [x] Code complexity metrics: cyclomatic complexity, maximum nesting depth, comment ratio, average function length.
+
+### 7.2 Structured Data Intelligence Architecture (5 Formats)
+- [x] Supported structured formats: `json`, `xml`, `yaml`, `toml`, `parquet`.
+- [x] Duplicate key detection in JSON via `object_pairs_hook` intercepting duplicate keys before dictionary construction.
+- [x] Defensive XML parsing via `defusedxml.ElementTree.fromstring`, strictly blocking XML External Entity (XXE) expansion.
+- [x] Safe YAML parsing via `yaml.safe_load` with recursive anchor and alias density monitoring to prevent Billion Laughs memory exhaustion.
+- [x] TOML parsing via Python 3.11+ standard library `tomllib` with table and scalar hierarchy breakdown.
+- [x] Zero-dataframe Apache Parquet profiling via PyArrow (`pyarrow.parquet.ParquetFile`):
+  - Column statistics (`null_count`, `min_value`, `max_value`, `distinct_count`) read directly from metadata footers without loading data into memory.
+  - Candidate key detection for unique, non-null identifying columns.
+  - Bounded streaming batch extraction (`batch_size=50`) maintaining sub-200 KB heap footprint.
+
+### 7.3 Canonical Schemas & Generators
+- [x] `CodeDocument` canonical Pydantic model (`code_document.py`).
+- [x] `StructuredDataDocument` canonical Pydantic model (`structured_data_document.py`).
+- [x] Multi-format export generators:
+  - Code: `CodeJSONGenerator`, `CodeMarkdownGenerator`, `CodePlainTextGenerator`.
+  - Structured Data: `StructuredJSONGenerator`, `StructuredMarkdownGenerator`, `StructuredCSVGenerator`.
+
+### 7.4 Database Models & Alembic Migration
+- [x] Created `CodeAnalysisRecord` and `StructuredDataAnalysisRecord` in `backend/app/infrastructure/database/models.py`.
+- [x] Added `code_analyses` and `structured_data_analyses` relationships to `FileRecord`.
+- [x] Created Alembic migration `backend/migrations/versions/008_code_structured_data_records.py`.
+- [x] Verified bidirectional migration on PostgreSQL 16 (`alembic upgrade head`, downgrade, and re-upgrade).
+
+### 7.5 REST API & Interactive Frontend
+- [x] Implemented 10 REST API endpoints for Code Intelligence (`/api/v1/code-intelligence/...`).
+- [x] Implemented 9 REST API endpoints for Structured Data Intelligence (`/api/v1/structured-data-intelligence/...`).
+- [x] Implemented interactive React component `CodeIntelligenceView.tsx`: line numbers, syntax validation alerts, symbol filters, diagnostic code jump, and export downloads.
+- [x] Implemented interactive React component `StructuredDataIntelligenceView.tsx`: schema tree viewer, column profile cards, sample records table, candidate key badges, and export downloads.
+- [x] Integrated into `FileLibraryPage.tsx`.
+
+### 7.6 Verification & Performance Benchmarking
+- [x] **Backend Quality Suite:** **216 passed** in Pytest (12 code unit tests, 9 structured unit tests, 4 integration tests, 191 regression tests from Phases 1–8).
+- [x] **Frontend Quality Suite:** **15 passed** across 11 Vitest suites (2 new Phase 9 suites).
+- [x] **Typecheck & Linting:** 0 Ruff errors, 0 Mypy errors across 252 source files, 0 TypeScript errors.
+- [x] **Production Build:** `npm run build` compiled cleanly in 2.02s.
+- [x] **Performance Benchmark (`evaluate_phase_9.py`)**:
+  - Code Parsing Average Latency: **4.59 ms** (24.5 KB – 207.4 KB heap).
+  - Structured Data Average Latency: **46.66 ms** (Parquet at 3.40 ms, JSON at 1.82 ms).
+  - Security Interception Latency: **< 2.0 ms** (trapping XXE, corrupt Parquet, broken Python).
+
+---
+
+## 8. Next Phase
+
+- **Phase 10:** Archive & Nested File Processing Engine (strictly deferred pending explicit user instruction).

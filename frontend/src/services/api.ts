@@ -10,6 +10,13 @@ import {
   BatchDetectionResponseData,
   BatchSummary,
   CanonicalDocument,
+  CodeAnalysisOverview,
+  CodeCapabilities,
+  CodeDiagnostic,
+  CodeDocument,
+  CodeMetrics,
+  CodeSymbol,
+  DataProfile,
   DetectionCapabilitiesData,
   DetectionResultData,
   ExtractionCapabilitiesResponse,
@@ -28,12 +35,16 @@ import {
   PresentationCapabilities,
   PresentationDocument,
   PresentationManifest,
+  RelationshipEdge,
   SlideData,
   SlideSummary,
   Speaker,
   SpreadsheetCapabilities,
   SpreadsheetDocument,
   SpreadsheetManifest,
+  StructuredCapabilities,
+  StructuredDataAnalysisOverview,
+  StructuredDataDocument,
   SystemStatusData,
   TimelineEvent,
   VideoCapabilities,
@@ -349,4 +360,83 @@ export const api = {
 
   getVideoExportUrl: (fileId: string, format = "srt"): string =>
     `${API_BASE}/files/${encodeURIComponent(fileId)}/video-analysis/export/${encodeURIComponent(format)}`,
+
+  // Phase 9: Code Intelligence Methods
+  getCodeCapabilities: (): Promise<CodeCapabilities> =>
+    request<CodeCapabilities>("/code-intelligence/capabilities"),
+
+  analyzeCodeFile: (
+    fileId: string,
+    payload?: Record<string, unknown>
+  ): Promise<Record<string, unknown>> =>
+    request<Record<string, unknown>>(`/files/${encodeURIComponent(fileId)}/analyze-code`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload || {}),
+    }),
+
+  getCodeAnalysis: (fileId: string): Promise<CodeAnalysisOverview> =>
+    request<CodeAnalysisOverview>(`/files/${encodeURIComponent(fileId)}/code-analysis`),
+
+  getCodeDocumentResult: (fileId: string): Promise<CodeDocument> =>
+    request<CodeDocument>(`/files/${encodeURIComponent(fileId)}/code-analysis/result`),
+
+  getCodeSymbols: (fileId: string): Promise<CodeSymbol[]> =>
+    request<CodeSymbol[]>(`/files/${encodeURIComponent(fileId)}/code-analysis/symbols`),
+
+  getCodeDependencies: (
+    fileId: string
+  ): Promise<{ imports: unknown[]; dependencies: unknown[] }> =>
+    request<{ imports: unknown[]; dependencies: unknown[] }>(
+      `/files/${encodeURIComponent(fileId)}/code-analysis/dependencies`
+    ),
+
+  getCodeDiagnostics: (fileId: string): Promise<CodeDiagnostic[]> =>
+    request<CodeDiagnostic[]>(`/files/${encodeURIComponent(fileId)}/code-analysis/diagnostics`),
+
+  getCodeMetrics: (fileId: string): Promise<CodeMetrics> =>
+    request<CodeMetrics>(`/files/${encodeURIComponent(fileId)}/code-analysis/metrics`),
+
+  getCodeSource: (fileId: string): Promise<string> =>
+    fetch(`${API_BASE}/files/${encodeURIComponent(fileId)}/code-analysis/source`).then(r => r.text()),
+
+  getCodeExportUrl: (fileId: string, format = "json"): string =>
+    `${API_BASE}/files/${encodeURIComponent(fileId)}/code-analysis/export/${encodeURIComponent(format)}`,
+
+  // Phase 9: Structured Data Intelligence Methods
+  getStructuredCapabilities: (): Promise<StructuredCapabilities> =>
+    request<StructuredCapabilities>("/structured-data-intelligence/capabilities"),
+
+  analyzeStructuredDataFile: (
+    fileId: string,
+    payload?: Record<string, unknown>
+  ): Promise<Record<string, unknown>> =>
+    request<Record<string, unknown>>(`/files/${encodeURIComponent(fileId)}/analyze-structured-data`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload || {}),
+    }),
+
+  getStructuredDataAnalysis: (fileId: string): Promise<StructuredDataAnalysisOverview> =>
+    request<StructuredDataAnalysisOverview>(`/files/${encodeURIComponent(fileId)}/structured-data-analysis`),
+
+  getStructuredDataDocumentResult: (fileId: string): Promise<StructuredDataDocument> =>
+    request<StructuredDataDocument>(`/files/${encodeURIComponent(fileId)}/structured-data-analysis/result`),
+
+  getStructuredDataSchema: (fileId: string): Promise<Record<string, unknown>> =>
+    request<Record<string, unknown>>(`/files/${encodeURIComponent(fileId)}/structured-data-analysis/schema`),
+
+  getStructuredDataProfile: (fileId: string): Promise<DataProfile> =>
+    request<DataProfile>(`/files/${encodeURIComponent(fileId)}/structured-data-analysis/profile`),
+
+  getStructuredDataRelationships: (fileId: string): Promise<RelationshipEdge[]> =>
+    request<RelationshipEdge[]>(`/files/${encodeURIComponent(fileId)}/structured-data-analysis/relationships`),
+
+  getStructuredDataRecords: (fileId: string): Promise<{ records: Record<string, unknown>[]; total_records: number }> =>
+    request<{ records: Record<string, unknown>[]; total_records: number }>(
+      `/files/${encodeURIComponent(fileId)}/structured-data-analysis/records`
+    ),
+
+  getStructuredDataExportUrl: (fileId: string, format = "json"): string =>
+    `${API_BASE}/files/${encodeURIComponent(fileId)}/structured-data-analysis/export/${encodeURIComponent(format)}`,
 };

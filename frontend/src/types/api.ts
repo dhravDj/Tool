@@ -1239,4 +1239,224 @@ export interface VideoCapabilities {
   hardware: Record<string, unknown>;
 }
 
+// --------------------------------------------------------------------------
+// Phase 9: Code & Structured Data Intelligence Interfaces
+// --------------------------------------------------------------------------
+
+export interface CodeSymbol {
+  symbol_id: string;
+  name: string;
+  symbol_type: string;
+  start_line: number;
+  end_line: number;
+  parent_symbol?: string | null;
+  visibility: string;
+  parameters: string[];
+  return_type?: string | null;
+  documentation?: string | null;
+  source_reference?: string | null;
+}
+
+export interface CodeImport {
+  statement: string;
+  module_name: string;
+  imported_symbols: string[];
+  is_relative: boolean;
+  is_external: boolean;
+  line_number: number;
+}
+
+export interface CodeDependency {
+  name: string;
+  version_constraint?: string | null;
+  dependency_type: string;
+  package_manager?: string | null;
+  is_direct: boolean;
+}
+
+export interface CodeMetrics {
+  total_lines: number;
+  code_lines: number;
+  comment_lines: number;
+  blank_lines: number;
+  function_count: number;
+  class_count: number;
+  import_count: number;
+  comment_ratio: number;
+  avg_function_length: number;
+  max_function_length: number;
+  cyclomatic_complexity: number;
+  nesting_depth: number;
+  duplicate_code_candidates: string[];
+}
+
+export interface CodeDiagnostic {
+  diagnostic_id: string;
+  rule_id: string;
+  severity: "error" | "warning" | "info" | "hint" | string;
+  message: string;
+  file_path: string;
+  start_line: number;
+  end_line: number;
+  column: number;
+  tool_name: string;
+  evidence?: string | null;
+  suggested_remediation?: string | null;
+}
+
+export interface SyntaxValidationResult {
+  is_valid: boolean;
+  parser_used: string;
+  errors: string[];
+}
+
+export interface CodeModelInfo {
+  engine_name: string;
+  parser_type: string;
+  is_compiler: boolean;
+  capabilities: string[];
+}
+
+export interface CodeDocument {
+  document_id: string;
+  source_file_id: string;
+  language: string;
+  encoding: string;
+  file_metadata: Record<string, unknown>;
+  symbols: CodeSymbol[];
+  imports: CodeImport[];
+  dependencies: CodeDependency[];
+  metrics: CodeMetrics;
+  diagnostics: CodeDiagnostic[];
+  syntax_validation: SyntaxValidationResult;
+  source_references: string[];
+  processing_metadata: Record<string, unknown>;
+  model_information: CodeModelInfo;
+  warnings: string[];
+  status: string;
+}
+
+export interface CodeAnalysisOverview {
+  id: string;
+  file_id: string;
+  status: string;
+  language: string;
+  total_lines: number;
+  code_lines: number;
+  comment_lines: number;
+  blank_lines: number;
+  symbol_count: number;
+  function_count: number;
+  class_count: number;
+  import_count: number;
+  diagnostic_count: number;
+  has_syntax_errors: boolean;
+  cyclomatic_complexity: number;
+  model_name: string;
+  warnings: string[];
+  artifacts: Record<string, string>;
+  created_at: string;
+}
+
+export interface CodeCapabilities {
+  supported_languages: string[];
+  installed_parsers: string[];
+  features: string[];
+  max_file_size_bytes: number;
+}
+
+export interface ColumnStatistics {
+  min_value?: unknown;
+  max_value?: unknown;
+  null_count: number;
+  distinct_count?: number | null;
+  sample_values: unknown[];
+}
+
+export interface ColumnProfile {
+  name: string;
+  data_type: string;
+  physical_type?: string | null;
+  null_percentage: number;
+  is_unique: boolean;
+  is_candidate_key: boolean;
+  statistics?: ColumnStatistics | null;
+}
+
+export interface DataProfile {
+  total_rows: number;
+  total_columns: number;
+  candidate_keys: string[];
+  missing_cells_ratio: number;
+  column_profiles: ColumnProfile[];
+}
+
+export interface StructuredValidationResult {
+  is_valid: boolean;
+  syntax_valid: boolean;
+  duplicate_keys: string[];
+  schema_errors: string[];
+  security_warnings: string[];
+}
+
+export interface RelationshipEdge {
+  source_entity: string;
+  source_field: string;
+  target_entity: string;
+  target_field: string;
+  relationship_type: string;
+  confidence: number;
+}
+
+export interface StructuredModelInfo {
+  engine_name: string;
+  format_parser: string;
+  is_bounded_memory: boolean;
+  features_used: string[];
+}
+
+export interface StructuredDataDocument {
+  document_id: string;
+  source_file_id: string;
+  format: string;
+  root_type: string;
+  schema_definition: Record<string, unknown>;
+  hierarchy: unknown;
+  records: Record<string, unknown>[];
+  data_profile: DataProfile;
+  validation_results: StructuredValidationResult;
+  relationships: RelationshipEdge[];
+  metadata: Record<string, unknown>;
+  processing_metadata: Record<string, unknown>;
+  model_information: StructuredModelInfo;
+  warnings: string[];
+  status: string;
+  raw_preview: string;
+}
+
+export interface StructuredDataAnalysisOverview {
+  id: string;
+  file_id: string;
+  status: string;
+  format: string;
+  root_type: string;
+  record_count: number;
+  field_count: number;
+  max_depth: number;
+  is_valid: boolean;
+  compression: string;
+  model_name: string;
+  warnings: string[];
+  artifacts: Record<string, string>;
+  created_at: string;
+}
+
+export interface StructuredCapabilities {
+  supported_formats: string[];
+  installed_engines: string[];
+  features: string[];
+  max_file_size_bytes: number;
+}
+
+
 

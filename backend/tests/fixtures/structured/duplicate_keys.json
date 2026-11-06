@@ -1,0 +1,9 @@
+{
+  "user_id": 100,
+  "role": "admin",
+  "user_id": 200,
+  "settings": {
+    "theme": "dark",
+    "theme": "light"
+  }
+}

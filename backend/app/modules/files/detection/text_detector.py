@@ -214,29 +214,177 @@ class TextDetector:
                 structure_type="sql",
             )
 
-        # 7. Programming Language Markers
-        if extension_hint == "py" or "def " in stripped or "import " in stripped:
-            if re.search(r"^\s*(def|class|import|from\s+\w+\s+import)\b", stripped, re.MULTILINE):
-                return TextDetectionResult(
-                    is_text=True,
-                    encoding=encoding,
-                    has_bom=has_bom,
-                    detected_format=format_registry.get_by_id("py"),
-                    confidence=0.80,
-                    structure_type="python",
-                )
+        # 7. YAML Syntax
+        if extension_hint in ("yaml", "yml"):
+            return TextDetectionResult(
+                is_text=True,
+                encoding=encoding,
+                has_bom=has_bom,
+                detected_format=format_registry.get_by_id("yaml"),
+                confidence=0.90,
+                structure_type="yaml",
+            )
 
-        if extension_hint in ("js", "ts", "jsx", "tsx"):
-            if re.search(r"\b(const|let|var|function|export default|import\s+.*?from)\b", stripped):
-                fmt_id = "ts" if extension_hint in ("ts", "tsx") else "js"
-                return TextDetectionResult(
-                    is_text=True,
-                    encoding=encoding,
-                    has_bom=has_bom,
-                    detected_format=format_registry.get_by_id(fmt_id),
-                    confidence=0.80,
-                    structure_type="javascript",
-                )
+        # 8. Programming Language Markers
+        # C++
+        if extension_hint in ("cpp", "cxx", "cc", "hpp", "hxx") or (
+            "#include" in stripped
+            and ("std::" in stripped or "namespace " in stripped or "cout" in stripped)
+        ):
+            return TextDetectionResult(
+                is_text=True,
+                encoding=encoding,
+                has_bom=has_bom,
+                detected_format=format_registry.get_by_id("cpp"),
+                confidence=0.85,
+                structure_type="cpp",
+            )
+
+        # C
+        if extension_hint in ("c", "h") or ("#include <" in stripped or '#include "' in stripped):
+            return TextDetectionResult(
+                is_text=True,
+                encoding=encoding,
+                has_bom=has_bom,
+                detected_format=format_registry.get_by_id("c"),
+                confidence=0.85,
+                structure_type="c",
+            )
+
+        # Go
+        if extension_hint == "go" or (
+            re.search(r"^\s*package\s+\w+", stripped, re.MULTILINE) and "func " in stripped
+        ):
+            return TextDetectionResult(
+                is_text=True,
+                encoding=encoding,
+                has_bom=has_bom,
+                detected_format=format_registry.get_by_id("go"),
+                confidence=0.85,
+                structure_type="go",
+            )
+
+        # Rust
+        if extension_hint == "rs" or (
+            re.search(r"\b(fn\s+\w+|impl\s+|trait\s+|let\s+mut\s+)\b", stripped)
+            and "{" in stripped
+        ):
+            return TextDetectionResult(
+                is_text=True,
+                encoding=encoding,
+                has_bom=has_bom,
+                detected_format=format_registry.get_by_id("rs"),
+                confidence=0.85,
+                structure_type="rust",
+            )
+
+        # Java
+        if extension_hint == "java" or (
+            re.search(
+                r"\b(public\s+class|public\s+interface|package\s+[\w.]+;)\b",
+                stripped,
+            )
+        ):
+            return TextDetectionResult(
+                is_text=True,
+                encoding=encoding,
+                has_bom=has_bom,
+                detected_format=format_registry.get_by_id("java"),
+                confidence=0.85,
+                structure_type="java",
+            )
+
+        # PHP
+        if extension_hint in ("php", "phtml") or "<?php" in stripped:
+            return TextDetectionResult(
+                is_text=True,
+                encoding=encoding,
+                has_bom=has_bom,
+                detected_format=format_registry.get_by_id("php"),
+                confidence=0.85,
+                structure_type="php",
+            )
+
+        # CSS
+        if extension_hint == "css" or (
+            re.search(
+                r"(\.[a-zA-Z_-][\w-]*|#[a-zA-Z_-][\w-]*|body|html|div)\s*\{[^}]*:[^}]*\}",
+                stripped,
+            )
+        ):
+            return TextDetectionResult(
+                is_text=True,
+                encoding=encoding,
+                has_bom=has_bom,
+                detected_format=format_registry.get_by_id("css"),
+                confidence=0.85,
+                structure_type="css",
+            )
+
+        # JSX / TSX / TS / JS
+        if extension_hint == "jsx":
+            return TextDetectionResult(
+                is_text=True,
+                encoding=encoding,
+                has_bom=has_bom,
+                detected_format=format_registry.get_by_id("jsx"),
+                confidence=0.85,
+                structure_type="jsx",
+            )
+
+        if extension_hint == "tsx":
+            return TextDetectionResult(
+                is_text=True,
+                encoding=encoding,
+                has_bom=has_bom,
+                detected_format=format_registry.get_by_id("tsx"),
+                confidence=0.85,
+                structure_type="tsx",
+            )
+
+        if extension_hint in ("ts", "mts", "cts") or (
+            extension_hint is None
+            and re.search(r"\b(interface\s+\w+|type\s+\w+\s*=|as\s+const)\b", stripped)
+        ):
+            return TextDetectionResult(
+                is_text=True,
+                encoding=encoding,
+                has_bom=has_bom,
+                detected_format=format_registry.get_by_id("ts"),
+                confidence=0.85,
+                structure_type="typescript",
+            )
+
+        if extension_hint in ("js", "mjs", "cjs") or (
+            re.search(r"\b(const|let|var|function|export\s+default)\b", stripped)
+            and "{" in stripped
+        ):
+            return TextDetectionResult(
+                is_text=True,
+                encoding=encoding,
+                has_bom=has_bom,
+                detected_format=format_registry.get_by_id("js"),
+                confidence=0.85,
+                structure_type="javascript",
+            )
+
+        # Python
+        if extension_hint == "py" or (
+            extension_hint is None
+            and re.search(
+                r"^\s*(def|class|from\s+\w+\s+import)\b",
+                stripped,
+                re.MULTILINE,
+            )
+        ):
+            return TextDetectionResult(
+                is_text=True,
+                encoding=encoding,
+                has_bom=has_bom,
+                detected_format=format_registry.get_by_id("py"),
+                confidence=0.85,
+                structure_type="python",
+            )
 
         # 8. Markdown
         if (

@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  web:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    environment:
+      ENV: production
+  api:
+    image: documind:latest
+    environment:
+      PORT: 8000

@@ -313,6 +313,14 @@ MACHO_64_LE = MagicSignature(
     description="Apple Mach-O 64-bit little-endian binary",
 )
 
+# Structured Data
+PARQUET_SIGNATURE = MagicSignature(
+    signature_bytes=b"PAR1",
+    offset=0,
+    name="PARQUET_MAGIC",
+    description="Apache Parquet columnar storage format",
+)
+
 # Fonts
 WOFF_SIGNATURE = MagicSignature(
     signature_bytes=b"wOFF",

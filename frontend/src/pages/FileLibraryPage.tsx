@@ -30,6 +30,8 @@ import { PresentationIntelligenceView } from "@/components/PresentationIntellige
 import { SpreadsheetIntelligenceView } from "@/components/SpreadsheetIntelligenceView";
 import { AudioIntelligenceView } from "@/components/AudioIntelligenceView";
 import { VideoIntelligenceView } from "@/components/VideoIntelligenceView";
+import { CodeIntelligenceView } from "@/components/CodeIntelligenceView";
+import { StructuredDataIntelligenceView } from "@/components/StructuredDataIntelligenceView";
 import { api } from "@/services/api";
 import { FileRecordSummary, FormatDetailData } from "@/types/api";
 
@@ -39,7 +41,7 @@ export const FileLibraryPage: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [inspectingFile, setInspectingFile] = useState<FileRecordSummary | null>(null);
   const [modalTab, setModalTab] = useState<
-    "extraction" | "image_intelligence" | "spreadsheet_intelligence" | "presentation_intelligence" | "audio_intelligence" | "video_intelligence" | "detection"
+    "extraction" | "image_intelligence" | "spreadsheet_intelligence" | "presentation_intelligence" | "audio_intelligence" | "video_intelligence" | "code_intelligence" | "structured_data_intelligence" | "detection"
   >("extraction");
 
   // Queries
@@ -157,9 +159,28 @@ export const FileLibraryPage: React.FC = () => {
       (f.detection_format_id || f.actual_extension || f.claimed_extension || "").toLowerCase()
     );
 
+  const isCode = (f: FileRecordSummary) =>
+    f.format_category === "code" ||
+    [
+      "py", "js", "ts", "jsx", "tsx", "html", "css",
+      "java", "c", "cpp", "go", "rs", "php", "sql",
+    ].includes(
+      (f.detection_format_id || f.actual_extension || f.claimed_extension || "").toLowerCase()
+    );
+
+  const isStructuredData = (f: FileRecordSummary) =>
+    f.format_category === "structured_data" ||
+    ["json", "xml", "yaml", "yml", "toml", "parquet", "pq"].includes(
+      (f.detection_format_id || f.actual_extension || f.claimed_extension || "").toLowerCase()
+    );
+
   const handleInspect = (file: FileRecordSummary) => {
     setInspectingFile(file);
-    if (isVideo(file)) {
+    if (isCode(file)) {
+      setModalTab("code_intelligence");
+    } else if (isStructuredData(file)) {
+      setModalTab("structured_data_intelligence");
+    } else if (isVideo(file)) {
       setModalTab("video_intelligence");
     } else if (isAudio(file)) {
       setModalTab("audio_intelligence");
@@ -472,7 +493,31 @@ export const FileLibraryPage: React.FC = () => {
                       Presentation Intelligence
                     </button>
                   )}
-                  {!isSpreadsheet(inspectingFile) && !isImage(inspectingFile) && !isPresentation(inspectingFile) && !isAudio(inspectingFile) && !isVideo(inspectingFile) && (
+                  {isCode(inspectingFile) && (
+                    <button
+                      onClick={() => setModalTab("code_intelligence")}
+                      className={`px-3 py-1 rounded-md font-medium transition ${
+                        modalTab === "code_intelligence"
+                          ? "bg-card text-foreground shadow-sm"
+                          : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      Code Intelligence
+                    </button>
+                  )}
+                  {isStructuredData(inspectingFile) && (
+                    <button
+                      onClick={() => setModalTab("structured_data_intelligence")}
+                      className={`px-3 py-1 rounded-md font-medium transition ${
+                        modalTab === "structured_data_intelligence"
+                          ? "bg-card text-foreground shadow-sm"
+                          : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      Structured Data
+                    </button>
+                  )}
+                  {!isSpreadsheet(inspectingFile) && !isImage(inspectingFile) && !isPresentation(inspectingFile) && !isAudio(inspectingFile) && !isVideo(inspectingFile) && !isCode(inspectingFile) && !isStructuredData(inspectingFile) && (
                     <button
                       onClick={() => setModalTab("extraction")}
                       className={`px-3 py-1 rounded-md font-medium transition ${
@@ -504,7 +549,19 @@ export const FileLibraryPage: React.FC = () => {
               </button>
             </div>
 
-            {modalTab === "spreadsheet_intelligence" ? (
+            {modalTab === "code_intelligence" ? (
+              <CodeIntelligenceView
+                fileId={inspectingFile.id}
+                filename={inspectingFile.original_filename}
+                onClose={() => setInspectingFile(null)}
+              />
+            ) : modalTab === "structured_data_intelligence" ? (
+              <StructuredDataIntelligenceView
+                fileId={inspectingFile.id}
+                filename={inspectingFile.original_filename}
+                onClose={() => setInspectingFile(null)}
+              />
+            ) : modalTab === "spreadsheet_intelligence" ? (
               <SpreadsheetIntelligenceView
                 fileId={inspectingFile.id}
                 filename={inspectingFile.original_filename}

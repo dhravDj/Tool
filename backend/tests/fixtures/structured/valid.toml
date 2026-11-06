@@ -1,0 +1,13 @@
+[project]
+name = "documind"
+version = "0.9.0"
+description = "Universal file intelligence platform"
+
+[database]
+host = "localhost"
+port = 5432
+enabled = true
+
+[features]
+code_intelligence = true
+structured_data = true
