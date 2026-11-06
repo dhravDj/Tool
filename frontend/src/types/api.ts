@@ -485,3 +485,180 @@ export interface ImageAnalysisStatusResponse {
   artifacts: Record<string, string>;
   manifest?: ImageManifest | null;
 }
+
+// --------------------------------------------------------------------------
+// Phase 5: Spreadsheet Intelligence Interfaces
+// --------------------------------------------------------------------------
+
+export interface CellStyle {
+  font_name?: string | null;
+  font_size?: number | null;
+  bold: boolean;
+  italic: boolean;
+  underline: boolean;
+  font_color?: string | null;
+  fill_color?: string | null;
+  horizontal_align?: string | null;
+  vertical_align?: string | null;
+  number_format?: string | null;
+  has_border: boolean;
+}
+
+export interface CellData {
+  address: string;
+  row: number;
+  column: number;
+  raw_value: unknown;
+  formatted_value?: string | null;
+  data_type: "string" | "number" | "boolean" | "date" | "time" | "datetime" | "formula" | "empty" | "error";
+  formula?: string | null;
+  cached_value?: unknown;
+  style?: CellStyle | null;
+  hyperlink?: string | null;
+  comment?: string | null;
+}
+
+export interface ColumnProfiling {
+  column_index: number;
+  column_letter: string;
+  column_name?: string | null;
+  inferred_type: string;
+  total_count: number;
+  null_count: number;
+  unique_count: number;
+  min_value?: unknown;
+  max_value?: unknown;
+  mean?: number | null;
+  median?: number | null;
+  std_dev?: number | null;
+  is_candidate_key: boolean;
+  frequent_values: Array<{ value: string; count: number }>;
+}
+
+export interface ColumnData {
+  column_index: number;
+  column_letter: string;
+  name?: string | null;
+  width?: number | null;
+  is_hidden: boolean;
+  profiling?: ColumnProfiling | null;
+}
+
+export interface RowData {
+  row_index: number;
+  height?: number | null;
+  is_hidden: boolean;
+  cells: CellData[];
+}
+
+export interface TableMetadata {
+  name: string;
+  display_name: string;
+  reference_range: string;
+  columns: string[];
+  has_totals_row: boolean;
+}
+
+export interface ChartMetadata {
+  title?: string | null;
+  chart_type: string;
+  data_range?: string | null;
+  series_count: number;
+}
+
+export interface WorksheetProfiling {
+  total_rows: number;
+  total_columns: number;
+  populated_cells: number;
+  empty_rows_count: number;
+  duplicate_rows_count: number;
+  candidate_primary_keys: string[];
+  column_profiles: ColumnProfiling[];
+}
+
+export interface WorksheetData {
+  sheet_id: string;
+  name: string;
+  position: number;
+  visibility: "visible" | "hidden" | "very_hidden";
+  dimensions?: string | null;
+  total_rows: number;
+  total_columns: number;
+  merged_ranges: string[];
+  columns: ColumnData[];
+  rows: RowData[];
+  tables: TableMetadata[];
+  charts: ChartMetadata[];
+  validations: unknown[];
+  conditional_formats: unknown[];
+  profiling?: WorksheetProfiling | null;
+}
+
+export interface WorkbookMetadata {
+  filename: string;
+  format: string;
+  creator?: string | null;
+  last_modified_by?: string | null;
+  created_at?: string | null;
+  modified_at?: string | null;
+  sheet_count: number;
+  calculation_settings: Record<string, unknown>;
+  properties: Record<string, unknown>;
+}
+
+export interface SpreadsheetDocument {
+  document_id: string;
+  file_id: string;
+  schema_version: string;
+  workbook_metadata: WorkbookMetadata;
+  worksheets: WorksheetData[];
+  defined_names: Array<{ name: string; value: string; scope: string }>;
+  relationships: Array<Record<string, unknown>>;
+  assets: Array<Record<string, unknown>>;
+  warnings: string[];
+  extraction_metadata: Record<string, unknown>;
+  created_at: string;
+}
+
+export interface SpreadsheetManifest {
+  document_id: string;
+  file_id: string;
+  source_filename: string;
+  source_format: string;
+  status: string;
+  engine_name: string;
+  engine_version: string;
+  processing_time_seconds: number;
+  worksheet_count: number;
+  total_rows: number;
+  total_columns: number;
+  total_cells: number;
+  formula_count: number;
+  artifacts: Record<string, string>;
+  warnings: string[];
+  errors: string[];
+}
+
+export interface SpreadsheetCapabilities {
+  supported_formats: string[];
+  max_upload_size_mb: number;
+  max_rows_limit: number;
+  max_columns_limit: number;
+  formula_extraction_supported: boolean;
+  formula_execution_allowed: boolean;
+  parquet_export_available: boolean;
+  supported_encodings: string[];
+}
+
+export interface WorksheetSummary {
+  sheet_id: string;
+  name: string;
+  position: number;
+  visibility: string;
+  dimensions?: string | null;
+  total_rows: number;
+  total_columns: number;
+  has_merged_cells: boolean;
+  tables_count: number;
+  charts_count: number;
+}

@@ -135,6 +135,34 @@ class ContainerInspector:
         return result
 
     @classmethod
+    def inspect_ole2_container(cls, buffer: bytes) -> ContainerInspectionResult:
+        """Inspect OLE2 / Compound File Binary Format (DOC, XLS, PPT, MSG)."""
+        result = ContainerInspectionResult(is_container=True, container_type="ole2")
+        if len(buffer) < 512 or buffer[:8] != b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1":
+            return result
+
+        # Check for signature streams in directory sectors
+        if b"W\x00o\x00r\x00k\x00b\x00o\x00o\x00k\x00" in buffer or b"B\x00o\x00o\x00k\x00" in buffer:
+            result.identified_format_id = "xls"
+            result.manifest_entries = ["stream:Workbook"]
+        elif b"W\x00o\x00r\x00d\x00D\x00o\x00c\x00u\x00m\x00e\x00n\x00t\x00" in buffer:
+            result.identified_format_id = "doc"
+            result.manifest_entries = ["stream:WordDocument"]
+        elif b"P\x00o\x00w\x00e\x00r\x00P\x00o\x00i\x00n\x00t\x00" in buffer:
+            result.identified_format_id = "ppt"
+            result.manifest_entries = ["stream:PowerPoint Document"]
+        elif (
+            b"_\x00_\x00s\x00u\x00b\x00s\x00t\x00g\x001\x00.\x000\x00" in buffer
+            or b"_\x00_\x00p\x00r\x00o\x00p\x00e\x00r\x00t\x00i\x00e\x00s\x00" in buffer
+        ):
+            result.identified_format_id = "msg"
+            result.manifest_entries = ["stream:OutlookMessage"]
+        else:
+            result.identified_format_id = "doc"
+
+        return result
+
+    @classmethod
     def inspect_isobmff_container(cls, buffer: bytes) -> ContainerInspectionResult:
         """Inspect ISO Base Media File Format ftyp major brand (MP4, M4A, MOV, HEIC)."""
         result = ContainerInspectionResult(is_container=True, container_type="isobmff")

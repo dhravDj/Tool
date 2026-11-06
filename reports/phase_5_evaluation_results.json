@@ -1,0 +1,174 @@
+{
+  "timestamp": "2026-11-06T06:11:32Z",
+  "formats_tested": [
+    "xlsx",
+    "xls",
+    "csv",
+    "ods"
+  ],
+  "ingestion_benchmarks": {
+    "sales.xlsx": {
+      "format": "xlsx",
+      "detected_format": "xlsx",
+      "detection_confidence": 0.98,
+      "file_size_bytes": 6544,
+      "latency_ms": 12.79,
+      "throughput_kb_per_sec": 499.56,
+      "total_worksheets": 3,
+      "total_rows": 12,
+      "total_cells": 53,
+      "cells_per_second": 4143.0
+    },
+    "legacy.xls": {
+      "format": "xls",
+      "detected_format": "xls",
+      "detection_confidence": 0.98,
+      "file_size_bytes": 5632,
+      "latency_ms": 1.03,
+      "throughput_kb_per_sec": 5314.92,
+      "total_worksheets": 1,
+      "total_rows": 4,
+      "total_cells": 16,
+      "cells_per_second": 15461.6
+    },
+    "metrics.csv": {
+      "format": "csv",
+      "detected_format": "csv",
+      "detection_confidence": 0.95,
+      "file_size_bytes": 335,
+      "latency_ms": 1.61,
+      "throughput_kb_per_sec": 203.28,
+      "total_worksheets": 1,
+      "total_rows": 6,
+      "total_cells": 38,
+      "cells_per_second": 23611.7
+    },
+    "report.ods": {
+      "format": "ods",
+      "detected_format": "ods",
+      "detection_confidence": 0.98,
+      "file_size_bytes": 620,
+      "latency_ms": 0.56,
+      "throughput_kb_per_sec": 1083.02,
+      "total_worksheets": 1,
+      "total_rows": 4,
+      "total_cells": 12,
+      "cells_per_second": 21464.7
+    },
+    "aggregate": {
+      "total_files": 4,
+      "total_bytes": 13131,
+      "total_cells": 119,
+      "total_time_ms": 16.0,
+      "overall_throughput_kb_s": 801.66,
+      "overall_cells_per_s": 7439.4
+    }
+  },
+  "formula_inspection": {
+    "total_formulas_detected": 9,
+    "categories_identified": [
+      "math_aggregation",
+      "general",
+      "conditional",
+      "arithmetic"
+    ],
+    "cross_sheet_references": 2,
+    "correctly_extracted": 0
+  },
+  "profiling_accuracy": {
+    "Q1 Regional Sales Performance Report": {
+      "inferred_type": "text",
+      "null_count": 0,
+      "unique_count": 8,
+      "is_candidate_key": true,
+      "mean": null,
+      "min_value": "Q1 Regional Sales Performance Report",
+      "max_value": "Transaction_ID"
+    },
+    "Col_2": {
+      "inferred_type": "text",
+      "null_count": 2,
+      "unique_count": 6,
+      "is_candidate_key": false,
+      "mean": null,
+      "min_value": "Cloud Gateway",
+      "max_value": "Storage Array"
+    },
+    "Col_3": {
+      "inferred_type": "number",
+      "null_count": 2,
+      "unique_count": 6,
+      "is_candidate_key": false,
+      "mean": 5.8,
+      "min_value": 2.0,
+      "max_value": 10.0
+    },
+    "Col_4": {
+      "inferred_type": "number",
+      "null_count": 2,
+      "unique_count": 6,
+      "is_candidate_key": false,
+      "mean": 1790.0,
+      "min_value": 350.0,
+      "max_value": 4500.0
+    },
+    "Col_5": {
+      "inferred_type": "text",
+      "null_count": 1,
+      "unique_count": 7,
+      "is_candidate_key": false,
+      "mean": null,
+      "min_value": "=C3*D3",
+      "max_value": "Revenue"
+    },
+    "Col_6": {
+      "inferred_type": "text",
+      "null_count": 2,
+      "unique_count": 5,
+      "is_candidate_key": false,
+      "mean": null,
+      "min_value": "East",
+      "max_value": "West"
+    }
+  },
+  "security_verification": {
+    "csv_formula_injection_escaped": true,
+    "zero_macro_execution_guaranteed": true,
+    "external_links_isolated": true,
+    "dangerous_prefixes_tested": [
+      "=",
+      "+",
+      "-",
+      "@",
+      "\\t",
+      "\\r"
+    ]
+  },
+  "export_benchmarks": {
+    "json": {
+      "size_bytes": 52609,
+      "latency_ms": 0.29
+    },
+    "markdown": {
+      "size_bytes": 4411,
+      "latency_ms": 0.11
+    },
+    "csv": {
+      "size_bytes": 344,
+      "latency_ms": 0.03
+    },
+    "xlsx": {
+      "size_bytes": 6421,
+      "latency_ms": 5.4
+    },
+    "parquet": {
+      "available": false,
+      "note": "pyarrow not installed"
+    }
+  },
+  "resource_footprint": {
+    "max_rss_mb": 534.95,
+    "user_cpu_time_s": 1.701,
+    "system_cpu_time_s": 0.058
+  }
+}

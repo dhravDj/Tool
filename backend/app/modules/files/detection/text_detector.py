@@ -174,7 +174,7 @@ class TextDetector:
         if len(lines) >= 2:
             # Check for TSV
             tab_counts = [line.count("\t") for line in lines]
-            if tab_counts[0] > 0 and len(set(tab_counts)) == 1:
+            if tab_counts[0] > 0 and (len(set(tab_counts)) == 1 or extension_hint == "tsv"):
                 return TextDetectionResult(
                     is_text=True,
                     encoding=encoding,
@@ -186,7 +186,9 @@ class TextDetector:
 
             # Check for CSV
             comma_counts = [line.count(",") for line in lines]
-            if comma_counts[0] > 0 and len(set(comma_counts)) == 1:
+            if (comma_counts[0] > 0 and len(set(comma_counts)) == 1) or (
+                extension_hint == "csv" and comma_counts[0] > 0
+            ):
                 return TextDetectionResult(
                     is_text=True,
                     encoding=encoding,

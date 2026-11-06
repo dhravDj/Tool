@@ -26,6 +26,7 @@ import { LoadingState } from "@/components/ui/LoadingState";
 import { PageContainer } from "@/components/ui/PageContainer";
 import { DocumentExtractionView } from "@/components/DocumentExtractionView";
 import { ImageIntelligenceView } from "@/components/ImageIntelligenceView";
+import { SpreadsheetIntelligenceView } from "@/components/SpreadsheetIntelligenceView";
 import { api } from "@/services/api";
 import { FileRecordSummary, FormatDetailData } from "@/types/api";
 
@@ -34,7 +35,9 @@ export const FileLibraryPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [inspectingFile, setInspectingFile] = useState<FileRecordSummary | null>(null);
-  const [modalTab, setModalTab] = useState<"extraction" | "image_intelligence" | "detection">("extraction");
+  const [modalTab, setModalTab] = useState<
+    "extraction" | "image_intelligence" | "spreadsheet_intelligence" | "detection"
+  >("extraction");
 
   // Queries
   const {
@@ -120,6 +123,29 @@ export const FileLibraryPage: React.FC = () => {
 
     return matchesSearch && matchesCat;
   });
+
+  const isSpreadsheet = (f: FileRecordSummary) =>
+    f.format_category === "spreadsheet" ||
+    ["xlsx", "xls", "csv", "tsv", "ods"].includes(
+      (f.detection_format_id || f.actual_extension || f.claimed_extension || "").toLowerCase()
+    );
+
+  const isImage = (f: FileRecordSummary) =>
+    f.format_category === "image" ||
+    ["png", "jpeg", "jpg", "webp", "tiff", "bmp", "gif"].includes(
+      (f.detection_format_id || f.actual_extension || f.claimed_extension || "").toLowerCase()
+    );
+
+  const handleInspect = (file: FileRecordSummary) => {
+    setInspectingFile(file);
+    if (isSpreadsheet(file)) {
+      setModalTab("spreadsheet_intelligence");
+    } else if (isImage(file)) {
+      setModalTab("image_intelligence");
+    } else {
+      setModalTab("extraction");
+    }
+  };
 
   return (
     <PageContainer
@@ -272,10 +298,7 @@ export const FileLibraryPage: React.FC = () => {
 
                   <div className="flex items-center gap-2 self-end md:self-center shrink-0">
                     <button
-                      onClick={() => {
-                        setInspectingFile(file);
-                        setModalTab(file.format_category === "image" ? "image_intelligence" : "extraction");
-                      }}
+                      onClick={() => handleInspect(file)}
                       className="rounded border border-border px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground transition flex items-center gap-1"
                     >
                       <Info className="h-3.5 w-3.5" />
@@ -352,7 +375,7 @@ export const FileLibraryPage: React.FC = () => {
       {/* File Record Inspection & Extraction Modal */}
       {inspectingFile && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="rounded-xl border border-border bg-card w-full max-w-4xl max-h-[90vh] overflow-y-auto p-6 shadow-2xl space-y-4">
+          <div className="rounded-xl border border-border bg-card w-full max-w-6xl max-h-[90vh] overflow-y-auto p-6 shadow-2xl space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-border">
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-2">
@@ -362,26 +385,42 @@ export const FileLibraryPage: React.FC = () => {
                   </h3>
                 </div>
                 <div className="flex items-center rounded-lg bg-muted p-0.5 text-xs">
-                  <button
-                    onClick={() => setModalTab("extraction")}
-                    className={`px-3 py-1 rounded-md font-medium transition ${
-                      modalTab === "extraction"
-                        ? "bg-card text-foreground shadow-sm"
-                        : "text-muted-foreground hover:text-foreground"
-                    }`}
-                  >
-                    Document Content
-                  </button>
-                  <button
-                    onClick={() => setModalTab("image_intelligence")}
-                    className={`px-3 py-1 rounded-md font-medium transition ${
-                      modalTab === "image_intelligence"
-                        ? "bg-card text-foreground shadow-sm"
-                        : "text-muted-foreground hover:text-foreground"
-                    }`}
-                  >
-                    Image Intelligence
-                  </button>
+                  {isSpreadsheet(inspectingFile) && (
+                    <button
+                      onClick={() => setModalTab("spreadsheet_intelligence")}
+                      className={`px-3 py-1 rounded-md font-medium transition ${
+                        modalTab === "spreadsheet_intelligence"
+                          ? "bg-card text-foreground shadow-sm"
+                          : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      Spreadsheet Intelligence
+                    </button>
+                  )}
+                  {isImage(inspectingFile) && (
+                    <button
+                      onClick={() => setModalTab("image_intelligence")}
+                      className={`px-3 py-1 rounded-md font-medium transition ${
+                        modalTab === "image_intelligence"
+                          ? "bg-card text-foreground shadow-sm"
+                          : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      Image Intelligence
+                    </button>
+                  )}
+                  {!isSpreadsheet(inspectingFile) && !isImage(inspectingFile) && (
+                    <button
+                      onClick={() => setModalTab("extraction")}
+                      className={`px-3 py-1 rounded-md font-medium transition ${
+                        modalTab === "extraction"
+                          ? "bg-card text-foreground shadow-sm"
+                          : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      Document Content
+                    </button>
+                  )}
                   <button
                     onClick={() => setModalTab("detection")}
                     className={`px-3 py-1 rounded-md font-medium transition ${
@@ -402,7 +441,13 @@ export const FileLibraryPage: React.FC = () => {
               </button>
             </div>
 
-            {modalTab === "extraction" ? (
+            {modalTab === "spreadsheet_intelligence" ? (
+              <SpreadsheetIntelligenceView
+                fileId={inspectingFile.id}
+                filename={inspectingFile.original_filename}
+                format={inspectingFile.detection_format_id || inspectingFile.actual_extension}
+              />
+            ) : modalTab === "extraction" ? (
               <DocumentExtractionView
                 fileId={inspectingFile.id}
                 filename={inspectingFile.original_filename}

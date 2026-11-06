@@ -106,4 +106,29 @@ class ContainerDetector:
                     warnings=[f"Failed reading ISO-BMFF container: {e}"],
                 )
 
+        # 4. OLE2 Compound File Containers (DOC, XLS, PPT, MSG)
+        if container_type == "ole2":
+            try:
+                with open(file_path, "rb") as f:
+                    chunk = f.read(65536)
+                res = ContainerInspector.inspect_ole2_container(chunk)
+                fmt = (
+                    format_registry.get_by_id(res.identified_format_id)
+                    if res.identified_format_id
+                    else None
+                )
+                return ContainerDetectionResult(
+                    is_container=True,
+                    container_type="ole2",
+                    detected_format=fmt,
+                    manifest_entries=res.manifest_entries,
+                    warnings=res.warnings,
+                )
+            except Exception as e:
+                return ContainerDetectionResult(
+                    is_container=True,
+                    container_type="ole2",
+                    warnings=[f"Failed reading OLE2 container: {e}"],
+                )
+
         return ContainerDetectionResult(is_container=False)

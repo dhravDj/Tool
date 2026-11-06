@@ -179,6 +179,168 @@ ground_truth["corrupted_sample.webp"] = {
     "is_suspicious": False,
 }
 
+# 9. sales.xlsx (Multi-sheet, formulas, styling, merged cells, hidden sheet)
+import openpyxl
+from openpyxl.styles import Font, PatternFill, Alignment
+
+wb_sales = openpyxl.Workbook()
+ws_q1 = wb_sales.active
+ws_q1.title = "Q1_Sales"
+
+# Merged title
+ws_q1.merge_cells("A1:F1")
+ws_q1["A1"] = "Q1 Regional Sales Performance Report"
+ws_q1["A1"].font = Font(name="Calibri", size=14, bold=True, color="1E3A8A")
+ws_q1["A1"].alignment = Alignment(horizontal="center", vertical="center")
+
+headers = ["Transaction_ID", "Product", "Units", "Unit_Price", "Revenue", "Region"]
+for col_idx, h in enumerate(headers, start=1):
+    c = ws_q1.cell(row=2, column=col_idx, value=h)
+    c.font = Font(bold=True)
+    c.fill = PatternFill(start_color="E2E8F0", end_color="E2E8F0", fill_type="solid")
+
+rows_data = [
+    ("TXN-101", "Enterprise Server", 5, 1200.0, "=C3*D3", "North"),
+    ("TXN-102", "Storage Array", 2, 4500.0, "=C4*D4", "South"),
+    ("TXN-103", "Network Switch", 10, 350.0, "=C5*D5", "East"),
+    ("TXN-104", "Security Appliance", 4, 2100.0, "=C6*D6", "West"),
+    ("TXN-105", "Cloud Gateway", 8, 800.0, "=C7*D7", "North"),
+]
+
+for r_offset, r_data in enumerate(rows_data, start=3):
+    for c_offset, val in enumerate(r_data, start=1):
+        ws_q1.cell(row=r_offset, column=c_offset, value=val)
+
+# Summary row
+ws_q1.cell(row=8, column=1, value="Total Revenue")
+ws_q1.cell(row=8, column=5, value="=SUM(E3:E7)")
+
+# Sheet 2: Targets
+ws_targets = wb_sales.create_sheet(title="Targets")
+ws_targets.append(["Quarter", "Revenue_Target", "Actual_Revenue", "Status"])
+ws_targets.append(["Q1", 40000.0, "=Q1_Sales!E8", "=IF(C2>=B2, \"MET\", \"PENDING\")"])
+
+# Sheet 3: Hidden Audit
+ws_audit = wb_sales.create_sheet(title="Audit_Notes")
+ws_audit.sheet_state = "hidden"
+ws_audit.append(["Audit_ID", "Reviewer", "Flagged_Transactions"])
+ws_audit.append(["AUD-001", "SecOps Team", "=COUNTIF(Q1_Sales!F3:F7, \"North\")"])
+
+sales_path = fixtures_dir / "sales.xlsx"
+wb_sales.save(str(sales_path))
+
+ground_truth["sales.xlsx"] = {
+    "format_id": "xlsx",
+    "category": "spreadsheet",
+    "mime_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "is_valid": True,
+    "sheet_count": 3,
+    "has_formulas": True,
+    "has_hidden_sheets": True,
+    "expected_formulas": ["=C3*D3", "=SUM(E3:E7)", "=Q1_Sales!E8", "=IF(C2>=B2, \"MET\", \"PENDING\")"],
+}
+
+# 10. legacy.xls (Legacy Excel 97-2003 BIFF8)
+import xlwt
+
+wb_legacy = xlwt.Workbook(encoding="utf-8")
+ws_legacy = wb_legacy.add_sheet("Inventory")
+ws_legacy.write(0, 0, "SKU")
+ws_legacy.write(0, 1, "Item_Name")
+ws_legacy.write(0, 2, "Stock_Qty")
+ws_legacy.write(0, 3, "Unit_Cost")
+
+items = [
+    ("SKU-9001", "Flash Drive 64GB", 120, 8.50),
+    ("SKU-9002", "External SSD 1TB", 45, 75.00),
+    ("SKU-9003", "USB-C Docking Hub", 30, 42.00),
+]
+for r_idx, item in enumerate(items, start=1):
+    for c_idx, val in enumerate(item):
+        ws_legacy.write(r_idx, c_idx, val)
+
+legacy_path = fixtures_dir / "legacy.xls"
+wb_legacy.save(str(legacy_path))
+
+ground_truth["legacy.xls"] = {
+    "format_id": "xls",
+    "category": "spreadsheet",
+    "mime_type": "application/vnd.ms-excel",
+    "is_valid": True,
+    "sheet_count": 1,
+}
+
+# 11. metrics.csv (Comma-delimited with formulas and injection attempt)
+csv_path = fixtures_dir / "metrics.csv"
+csv_content = """metric_id,component,latency_ms,error_rate,status,formula_note
+MET-001,detector,1.45,0.001,healthy,=1+2
+MET-002,ocr_engine,42.80,0.004,healthy,=SUM(10,20)
+MET-003,vision_align,18.10,0.000,healthy,@SUM(1,2)
+MET-004,storage_s3,5.20,0.002,warning,+CMD|'/C calc'!A0
+MET-005,task_queue,0.85,0.000,healthy,-HYPERLINK("http://malicious.test")
+"""
+csv_path.write_text(csv_content, encoding="utf-8")
+
+ground_truth["metrics.csv"] = {
+    "format_id": "csv",
+    "category": "spreadsheet",
+    "mime_type": "text/csv",
+    "is_valid": True,
+    "row_count": 5,
+    "delimiter": ",",
+    "has_injection_risk": True,
+}
+
+# 12. report.ods (OpenDocument Spreadsheet XML container)
+import io
+import zipfile
+
+ods_content_xml = """<?xml version="1.0" encoding="UTF-8"?>
+<office:document-content xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0"
+  xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0"
+  xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0"
+  office:version="1.3">
+  <office:body>
+    <office:spreadsheet>
+      <table:table table:name="Operational_Kpis">
+        <table:table-row>
+          <table:table-cell office:value-type="string"><text:p>Department</text:p></table:table-cell>
+          <table:table-cell office:value-type="string"><text:p>Uptime_Percent</text:p></table:table-cell>
+          <table:table-cell office:value-type="string"><text:p>Incidents</text:p></table:table-cell>
+        </table:table-row>
+        <table:table-row>
+          <table:table-cell office:value-type="string"><text:p>Infrastructure</text:p></table:table-cell>
+          <table:table-cell office:value-type="float" office:value="99.98"><text:p>99.98</text:p></table:table-cell>
+          <table:table-cell office:value-type="float" office:value="2"><text:p>2</text:p></table:table-cell>
+        </table:table-row>
+        <table:table-row>
+          <table:table-cell office:value-type="string"><text:p>Application</text:p></table:table-cell>
+          <table:table-cell office:value-type="float" office:value="99.95"><text:p>99.95</text:p></table:table-cell>
+          <table:table-cell office:value-type="float" office:value="4"><text:p>4</text:p></table:table-cell>
+        </table:table-row>
+        <table:table-row>
+          <table:table-cell office:value-type="string"><text:p>Security</text:p></table:table-cell>
+          <table:table-cell office:value-type="float" office:value="100.0"><text:p>100.0</text:p></table:table-cell>
+          <table:table-cell office:value-type="float" office:value="0"><text:p>0</text:p></table:table-cell>
+        </table:table-row>
+      </table:table>
+    </office:spreadsheet>
+  </office:body>
+</office:document-content>"""
+
+ods_path = fixtures_dir / "report.ods"
+with zipfile.ZipFile(ods_path, "w", compression=zipfile.ZIP_DEFLATED) as zf:
+    zf.writestr("mimetype", "application/vnd.oasis.opendocument.spreadsheet")
+    zf.writestr("content.xml", ods_content_xml)
+
+ground_truth["report.ods"] = {
+    "format_id": "ods",
+    "category": "spreadsheet",
+    "mime_type": "application/vnd.oasis.opendocument.spreadsheet",
+    "is_valid": True,
+    "sheet_count": 1,
+}
+
 # Save ground_truth.json
 gt_path = fixtures_dir / "ground_truth.json"
 gt_path.write_text(json.dumps(ground_truth, indent=2), encoding="utf-8")

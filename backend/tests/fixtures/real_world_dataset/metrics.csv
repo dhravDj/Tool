@@ -1,0 +1,6 @@
+metric_id,component,latency_ms,error_rate,status,formula_note
+MET-001,detector,1.45,0.001,healthy,=1+2
+MET-002,ocr_engine,42.80,0.004,healthy,=SUM(10,20)
+MET-003,vision_align,18.10,0.000,healthy,@SUM(1,2)
+MET-004,storage_s3,5.20,0.002,warning,+CMD|'/C calc'!A0
+MET-005,task_queue,0.85,0.000,healthy,-HYPERLINK("http://malicious.test")

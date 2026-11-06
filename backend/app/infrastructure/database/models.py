@@ -112,6 +112,9 @@ class FileRecord(Base):
     image_analyses: Mapped[list["ImageAnalysisRecord"]] = relationship(
         "ImageAnalysisRecord", back_populates="file", cascade="all, delete-orphan"
     )
+    spreadsheet_analyses: Mapped[list["SpreadsheetAnalysisRecord"]] = relationship(
+        "SpreadsheetAnalysisRecord", back_populates="file", cascade="all, delete-orphan"
+    )
 
     __table_args__ = (
         Index("ix_files_owner_status", "owner_id", "status"),
@@ -296,3 +299,46 @@ class ImageAnalysisRecord(Base):
 
     # Relationships
     file: Mapped["FileRecord"] = relationship("FileRecord", back_populates="image_analyses")
+
+
+class SpreadsheetAnalysisRecord(Base):
+    """Historical spreadsheet intelligence analysis record and workbook findings."""
+
+    __tablename__ = "spreadsheet_analysis_records"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+    file_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True),
+        ForeignKey("files.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    status: Mapped[str] = mapped_column(String(32), default="completed", index=True, nullable=False)
+    format: Mapped[str] = mapped_column(String(32), index=True, nullable=False)
+    sheet_count: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
+    total_rows: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    total_columns: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    total_cells: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    formula_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    has_charts: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    has_tables: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    has_merged_cells: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    has_hidden_sheets: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    artifacts: Mapped[dict[str, Any]] = mapped_column(JSON_TYPE, default=dict, nullable=False)
+    workbook_metadata: Mapped[dict[str, Any]] = mapped_column(JSON_TYPE, default=dict, nullable=False)
+    profiling_summary: Mapped[dict[str, Any]] = mapped_column(JSON_TYPE, default=dict, nullable=False)
+    warnings: Mapped[list[str]] = mapped_column(JSON_TYPE, default=list, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        default=lambda: datetime.now(UTC),
+        nullable=False,
+    )
+
+    # Relationships
+    file: Mapped["FileRecord"] = relationship("FileRecord", back_populates="spreadsheet_analyses")
+

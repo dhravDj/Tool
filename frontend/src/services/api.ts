@@ -20,8 +20,13 @@ import {
   ImageDocument,
   ImageManifest,
   PluginListResponse,
+  SpreadsheetCapabilities,
+  SpreadsheetDocument,
+  SpreadsheetManifest,
   SystemStatusData,
   VisionModelCapabilities,
+  WorksheetData,
+  WorksheetSummary,
 } from "@/types/api";
 
 const API_BASE = "/api/v1";
@@ -148,4 +153,47 @@ export const api = {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ question, focus_region_id: focusRegionId }),
     }),
+
+  // Phase 5: Spreadsheet Intelligence Endpoints
+  getSpreadsheetCapabilities: (): Promise<SpreadsheetCapabilities> =>
+    request<SpreadsheetCapabilities>("/spreadsheet-intelligence/capabilities"),
+
+  analyzeSpreadsheet: (fileId: string, options?: Record<string, unknown>): Promise<SpreadsheetManifest> =>
+    request<SpreadsheetManifest>(`/files/${encodeURIComponent(fileId)}/analyze-spreadsheet`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(options || {}),
+    }),
+
+  getSpreadsheetAnalysisStatus: (fileId: string): Promise<Record<string, unknown>> =>
+    request<Record<string, unknown>>(`/files/${encodeURIComponent(fileId)}/spreadsheet-analysis`),
+
+  getCanonicalSpreadsheetDocument: (fileId: string): Promise<SpreadsheetDocument> =>
+    request<SpreadsheetDocument>(`/files/${encodeURIComponent(fileId)}/spreadsheet-analysis/result`),
+
+  getWorksheets: (fileId: string): Promise<WorksheetSummary[]> =>
+    request<WorksheetSummary[]>(`/files/${encodeURIComponent(fileId)}/spreadsheet-analysis/worksheets`),
+
+  getWorksheetData: (
+    fileId: string,
+    sheetId: string,
+    page = 1,
+    pageSize = 50
+  ): Promise<WorksheetData & { page: number; total_pages: number }> =>
+    request<WorksheetData & { page: number; total_pages: number }>(
+      `/files/${encodeURIComponent(fileId)}/spreadsheet-analysis/worksheets/${encodeURIComponent(
+        sheetId
+      )}?page=${page}&page_size=${pageSize}`
+    ),
+
+  getSpreadsheetSummary: (fileId: string): Promise<Record<string, unknown>> =>
+    request<Record<string, unknown>>(`/files/${encodeURIComponent(fileId)}/spreadsheet-analysis/summary`),
+
+  getSpreadsheetManifest: (fileId: string): Promise<SpreadsheetManifest> =>
+    request<SpreadsheetManifest>(`/files/${encodeURIComponent(fileId)}/spreadsheet-analysis/manifest`),
+
+  getSpreadsheetDownloadUrl: (fileId: string, format = "json", sheetPosition = 1): string =>
+    `${API_BASE}/files/${encodeURIComponent(fileId)}/spreadsheet-analysis/download?format=${encodeURIComponent(
+      format
+    )}&sheet_position=${sheetPosition}`,
 };

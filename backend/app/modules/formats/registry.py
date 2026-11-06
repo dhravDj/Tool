@@ -240,7 +240,7 @@ class FormatRegistry:
                 is_container=True,
                 container_type="zip",
                 support_status=SupportStatus.DETECTED_AND_SUPPORTED,
-                extraction_plugin_id="openpyxl_extractor",
+                extraction_plugin_id="spreadsheet_intelligence_pipeline",
                 description="Modern Microsoft Excel spreadsheet container",
             )
         )
@@ -255,7 +255,8 @@ class FormatRegistry:
                 magic_signatures=[OLE2_SIGNATURE],
                 is_container=True,
                 container_type="ole2",
-                support_status=SupportStatus.DETECTED_BUT_NOT_IMPLEMENTED,
+                support_status=SupportStatus.DETECTED_AND_SUPPORTED,
+                extraction_plugin_id="spreadsheet_intelligence_pipeline",
                 description="Legacy binary Microsoft Excel format",
             )
         )
@@ -269,7 +270,8 @@ class FormatRegistry:
                 extensions=["ods"],
                 is_container=True,
                 container_type="zip",
-                support_status=SupportStatus.DETECTED_BUT_NOT_IMPLEMENTED,
+                support_status=SupportStatus.DETECTED_AND_SUPPORTED,
+                extraction_plugin_id="spreadsheet_intelligence_pipeline",
                 description="Open Document Format for spreadsheets",
             )
         )
@@ -282,6 +284,7 @@ class FormatRegistry:
                 mime_types=["text/csv", "application/csv"],
                 extensions=["csv"],
                 support_status=SupportStatus.DETECTED_AND_SUPPORTED,
+                extraction_plugin_id="spreadsheet_intelligence_pipeline",
                 description="Delimited plain text tabular data",
             )
         )
@@ -294,6 +297,7 @@ class FormatRegistry:
                 mime_types=["text/tab-separated-values"],
                 extensions=["tsv"],
                 support_status=SupportStatus.DETECTED_AND_SUPPORTED,
+                extraction_plugin_id="spreadsheet_intelligence_pipeline",
                 description="Tab-delimited text tabular data",
             )
         )

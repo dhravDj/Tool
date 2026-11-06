@@ -90,5 +90,43 @@
     "is_mismatch": false,
     "is_corrupted": true,
     "is_suspicious": false
+  },
+  "sales.xlsx": {
+    "format_id": "xlsx",
+    "category": "spreadsheet",
+    "mime_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "is_valid": true,
+    "sheet_count": 3,
+    "has_formulas": true,
+    "has_hidden_sheets": true,
+    "expected_formulas": [
+      "=C3*D3",
+      "=SUM(E3:E7)",
+      "=Q1_Sales!E8",
+      "=IF(C2>=B2, \"MET\", \"PENDING\")"
+    ]
+  },
+  "legacy.xls": {
+    "format_id": "xls",
+    "category": "spreadsheet",
+    "mime_type": "application/vnd.ms-excel",
+    "is_valid": true,
+    "sheet_count": 1
+  },
+  "metrics.csv": {
+    "format_id": "csv",
+    "category": "spreadsheet",
+    "mime_type": "text/csv",
+    "is_valid": true,
+    "row_count": 5,
+    "delimiter": ",",
+    "has_injection_risk": true
+  },
+  "report.ods": {
+    "format_id": "ods",
+    "category": "spreadsheet",
+    "mime_type": "application/vnd.oasis.opendocument.spreadsheet",
+    "is_valid": true,
+    "sheet_count": 1
   }
 }
