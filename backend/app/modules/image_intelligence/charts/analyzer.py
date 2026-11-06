@@ -19,8 +19,26 @@ class ChartAnalyzer:
     """Detects bar, line, and pie charts and reconstructs data series and axis annotations."""
 
     CHART_KEYWORDS = {
-        "chart", "graph", "plot", "sales", "revenue", "growth", "distribution", "share", "percentage",
-        "market", "annual", "quarterly", "trend", "q1", "q2", "q3", "q4", "jan", "feb", "mar"
+        "chart",
+        "graph",
+        "plot",
+        "sales",
+        "revenue",
+        "growth",
+        "distribution",
+        "share",
+        "percentage",
+        "market",
+        "annual",
+        "quarterly",
+        "trend",
+        "q1",
+        "q2",
+        "q3",
+        "q4",
+        "jan",
+        "feb",
+        "mar",
     }
 
     def analyze(
@@ -49,7 +67,10 @@ class ChartAnalyzer:
             is_chart = True
             chart_type = "pie"
             confidence = min(0.95, 0.72 + (len(percentages) * 0.06))
-        elif any(k in words for k in ("trend", "line", "timeline", "jan", "feb", "mar", "yoy")) and len(plain_numbers) >= 3:
+        elif (
+            any(k in words for k in ("trend", "line", "timeline", "jan", "feb", "mar", "yoy"))
+            and len(plain_numbers) >= 3
+        ):
             is_chart = True
             chart_type = "line"
             confidence = min(0.93, 0.70 + (chart_keyword_matches * 0.05))
@@ -99,7 +120,12 @@ class ChartAnalyzer:
                 region_id="chart_boundary_1",
                 region_type=RegionType.CHART,
                 bounding_box=[0.1, 0.1, 0.9, 0.9],
-                pixel_box=[int(width * 0.1), int(height * 0.1), int(width * 0.9), int(height * 0.9)],
+                pixel_box=[
+                    int(width * 0.1),
+                    int(height * 0.1),
+                    int(width * 0.9),
+                    int(height * 0.9),
+                ],
                 label=f"{chart_type}_chart:{title or 'unnamed'}",
                 confidence=confidence,
                 provenance="chart-parser",

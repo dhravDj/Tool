@@ -55,7 +55,9 @@ class ImageRegion(BaseModel):
     label: str
     text: str | None = None
     confidence: float = 1.0
-    provenance: str = "native"  # "ocr", "model-caption", "object-detector", "diagram-parser", "chart-parser"
+    provenance: str = (
+        "native"  # "ocr", "model-caption", "object-detector", "diagram-parser", "chart-parser"
+    )
     reading_order: int | None = None
     attributes: dict[str, Any] = Field(default_factory=dict)
 

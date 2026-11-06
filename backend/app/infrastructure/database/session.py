@@ -16,12 +16,15 @@ from app.core.logging import logger
 
 # Construct async SQLAlchemy engine
 # Use pool_pre_ping to automatically recover from dropped connections
+# Use pool_recycle and pool_timeout to prevent connection pool exhaustion and stale sockets
 engine: AsyncEngine = create_async_engine(
     settings.async_database_uri,
     echo=settings.DEBUG and False,  # Keep false by default to prevent leaking data to logs
     pool_pre_ping=True,
     pool_size=10,
     max_overflow=20,
+    pool_recycle=settings.DB_POOL_RECYCLE,
+    pool_timeout=settings.DB_POOL_TIMEOUT,
 )
 
 async_session_factory = async_sessionmaker(

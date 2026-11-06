@@ -71,7 +71,7 @@ class OCRRouter:
                 paragraphs = [p.strip() for p in text.split("\n\n") if p.strip()] or [text]
                 for idx, para in enumerate(paragraphs):
                     block = CanonicalBlock(
-                        block_id=f"p{page_number}_ocr_{idx+1}",
+                        block_id=f"p{page_number}_ocr_{idx + 1}",
                         block_type=BlockType.PARAGRAPH,
                         text=para,
                         reading_order=start_reading_order + idx,

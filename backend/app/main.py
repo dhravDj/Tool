@@ -69,6 +69,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
     # 4. Check OCR Subsystem readiness
     from app.modules.extraction.ocr.router import ocr_router
+
     ocr_status = ocr_router.get_diagnostics()
     logger.info(
         f"OCR Subsystem Status: ready={ocr_status['is_ready']}, "

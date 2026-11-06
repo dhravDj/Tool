@@ -81,12 +81,19 @@ class LegacyDocExtractor(BaseDocumentExtractor):
                     "last_saved_by": getattr(meta, "last_saved_by", None) or None,
                     "revision_number": getattr(meta, "revision_number", None) or None,
                     "total_edit_time": getattr(meta, "total_edit_time", None) or None,
-                    "created": meta.create_time.isoformat() if getattr(meta, "create_time", None) else None,
-                    "modified": meta.last_saved_time.isoformat() if getattr(meta, "last_saved_time", None) else None,
+                    "created": meta.create_time.isoformat()
+                    if getattr(meta, "create_time", None)
+                    else None,
+                    "modified": meta.last_saved_time.isoformat()
+                    if getattr(meta, "last_saved_time", None)
+                    else None,
                 }
 
                 # Check for macro streams (for audit/warning only - NEVER execute)
-                has_macros = any("vba" in "/".join(s).lower() or "macros" in "/".join(s).lower() for s in ole.listdir())
+                has_macros = any(
+                    "vba" in "/".join(s).lower() or "macros" in "/".join(s).lower()
+                    for s in ole.listdir()
+                )
                 if has_macros:
                     warnings.append(
                         "Document contains VBA/macro streams. Macro execution is disabled for security."
@@ -102,6 +109,7 @@ class LegacyDocExtractor(BaseDocumentExtractor):
         if antiword_bin:
             try:
                 import subprocess
+
                 res = subprocess.run(
                     [antiword_bin, str(file_path)],
                     capture_output=True,
@@ -161,7 +169,9 @@ class LegacyDocExtractor(BaseDocumentExtractor):
             metadata={"paragraph_count": len(blocks)},
         )
 
-        status = ExtractionStatus.COMPLETED_WITH_WARNINGS if warnings else ExtractionStatus.COMPLETED
+        status = (
+            ExtractionStatus.COMPLETED_WITH_WARNINGS if warnings else ExtractionStatus.COMPLETED
+        )
 
         return CanonicalDocument(
             document_id=doc_id,
@@ -218,13 +228,15 @@ class LegacyDocExtractor(BaseDocumentExtractor):
                     if txt_files and txt_files[0].stat().st_size > 0:
                         return txt_files[0].read_text(encoding="utf-8", errors="ignore").strip()
             except subprocess.TimeoutExpired:
-                warnings.append("LibreOffice conversion timed out after 15s; falling back to OLE stream parser.")
+                warnings.append(
+                    "LibreOffice conversion timed out after 15s; falling back to OLE stream parser."
+                )
             except Exception as exc:
                 warnings.append(f"LibreOffice conversion failed: {exc}")
         return ""
 
     def _extract_from_word_stream(self, file_path: Path, warnings: list[str]) -> str:
-        """Extract text chunks safely from the binary WordDocument stream."""
+        """Extract text chunks safely from the binary WordDocument stream using FIB and stream analysis."""
         try:
             with olefile.OleFileIO(str(file_path)) as ole:
                 if not ole.exists("WordDocument"):
@@ -232,23 +244,46 @@ class LegacyDocExtractor(BaseDocumentExtractor):
                     return ""
 
                 word_stream = ole.openstream("WordDocument").read()
-
-                # Search for UTF-16LE text runs and ASCII text runs
-                # Word 97-2003 stores text either compressed (CP1252) or uncompressed (UTF-16LE)
                 chunks: list[str] = []
 
-                # Strategy 1: Decode 16-bit unicode strings (min length 4 chars)
-                unicode_pattern = re.compile(b"(?:[\x20-\x7e\r\n\t]\x00){4,}")
-                matches_u16 = unicode_pattern.findall(word_stream)
-                for m in matches_u16:
-                    try:
-                        decoded = m.decode("utf-16le", errors="ignore").strip()
-                        if len(decoded) > 3:
-                            chunks.append(decoded)
-                    except Exception:
-                        pass
+                # Strategy 1: FIB (File Information Block) structural extraction
+                if len(word_stream) >= 80:
+                    import struct
 
-                # Strategy 2: If unicode matches were sparse, extract printable ASCII runs
+                    w_ident, _n_fib = struct.unpack_from("<HH", word_stream, 0)
+                    if w_ident in (0xA5EC, 0xA5DC):
+                        fc_min = struct.unpack_from("<I", word_stream, 0x18)[0]
+                        ccp_text = struct.unpack_from("<I", word_stream, 0x4C)[0]
+
+                        if 0 < fc_min < len(word_stream) and 0 < ccp_text < 5_000_000:
+                            # Try 16-bit unicode run at fc_min
+                            raw_slice = word_stream[
+                                fc_min : min(len(word_stream), fc_min + ccp_text * 2)
+                            ]
+                            try:
+                                decoded_fib = raw_slice.decode("utf-16le", errors="ignore").strip()
+                                # Clean control characters except newlines/tabs
+                                cleaned_fib = re.sub(
+                                    r"[\x00-\x08\x0b\x0c\x0e-\x1f]", "", decoded_fib
+                                )
+                                if len(cleaned_fib) > 10:
+                                    chunks.append(cleaned_fib)
+                            except Exception:
+                                pass
+
+                # Strategy 2: Decode 16-bit unicode strings (min length 4 chars) across stream
+                if not chunks or sum(len(c) for c in chunks) < 50:
+                    unicode_pattern = re.compile(b"(?:[\x20-\x7e\r\n\t]\x00){4,}")
+                    matches_u16 = unicode_pattern.findall(word_stream)
+                    for m in matches_u16:
+                        try:
+                            decoded = m.decode("utf-16le", errors="ignore").strip()
+                            if len(decoded) > 3:
+                                chunks.append(decoded)
+                        except Exception:
+                            pass
+
+                # Strategy 3: If unicode matches were sparse, extract printable ASCII runs
                 if not chunks or sum(len(c) for c in chunks) < 100:
                     ascii_pattern = re.compile(b"[\x20-\x7e\r\n\t]{6,}")
                     matches_ascii = ascii_pattern.findall(word_stream)
@@ -256,7 +291,9 @@ class LegacyDocExtractor(BaseDocumentExtractor):
                         try:
                             decoded = m.decode("latin1", errors="ignore").strip()
                             # Filter out binary junk like font names or internal tags if too repetitive
-                            if len(decoded) > 5 and not decoded.startswith(("Normal", "Default Paragraph", "Times New")):
+                            if len(decoded) > 5 and not decoded.startswith(
+                                ("Normal", "Default Paragraph", "Times New")
+                            ):
                                 chunks.append(decoded)
                         except Exception:
                             pass

@@ -246,6 +246,65 @@ class UniversalFileDetector(FileDetectorInterface):
                                 )
                 except Exception:
                     pass
+            elif sig_format.format_id == "webp":
+                try:
+                    with open(file_path, "rb") as f:
+                        if file_size < 16:
+                            is_corrupted = True
+                            warnings.append(
+                                "Truncated WEBP: file smaller than minimum RIFF header."
+                            )
+                        else:
+                            hdr = f.read(16)
+                            if not (hdr.startswith(b"RIFF") and hdr[8:12] == b"WEBP"):
+                                is_corrupted = True
+                                warnings.append(
+                                    "Corrupted WEBP: invalid RIFF/WEBP signature container."
+                                )
+                except Exception:
+                    pass
+            elif sig_format.format_id == "bmp":
+                try:
+                    with open(file_path, "rb") as f:
+                        if file_size < 14:
+                            is_corrupted = True
+                            warnings.append(
+                                "Truncated BMP: file smaller than 14-byte bitmap file header."
+                            )
+                        else:
+                            hdr = f.read(14)
+                            if not hdr.startswith(b"BM"):
+                                is_corrupted = True
+                                warnings.append("Corrupted BMP: missing BM signature header.")
+                except Exception:
+                    pass
+            elif sig_format.format_id == "tiff":
+                try:
+                    with open(file_path, "rb") as f:
+                        if file_size < 8:
+                            is_corrupted = True
+                            warnings.append("Truncated TIFF: file smaller than 8-byte TIFF header.")
+                        else:
+                            hdr = f.read(4)
+                            if hdr not in (b"II*\x00", b"MM\x00*"):
+                                is_corrupted = True
+                                warnings.append("Corrupted TIFF: invalid byte order indicator.")
+                except Exception:
+                    pass
+
+        # Check SVG / XML truncation
+        active_fmt = sig_format or text_format
+        if active_fmt and active_fmt.format_id == "svg":
+            try:
+                with open(file_path, encoding="utf-8", errors="ignore") as f:
+                    content = f.read(8192)
+                    if "</svg>" not in content.lower() and file_size < 2048:
+                        is_corrupted = True
+                        warnings.append(
+                            "Truncated or malformed SVG: missing closing </svg> element."
+                        )
+            except Exception:
+                pass
 
         # ----------------------------------------------------------------------
         # STEP 7: Cross-Validation, Confidence Arbitration & Metadata

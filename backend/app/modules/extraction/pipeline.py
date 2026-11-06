@@ -177,10 +177,12 @@ class ExtractionPipeline:
         processed_dir.mkdir(parents=True, exist_ok=True)
         assets_dir = processed_dir / "assets"
 
-        opts.update({
-            "document_id": str(file_id),
-            "assets_dir": str(assets_dir),
-        })
+        opts.update(
+            {
+                "document_id": str(file_id),
+                "assets_dir": str(assets_dir),
+            }
+        )
 
         # 5. Execute Extraction
         canonical_doc: CanonicalDocument
@@ -259,11 +261,13 @@ class ExtractionPipeline:
         if assets_dir.exists():
             for asset_file in assets_dir.iterdir():
                 if asset_file.is_file():
-                    assets_list.append({
-                        "name": asset_file.name,
-                        "size": asset_file.stat().st_size,
-                        "path": f"processed/{file_id}/assets/{asset_file.name}",
-                    })
+                    assets_list.append(
+                        {
+                            "name": asset_file.name,
+                            "size": asset_file.stat().st_size,
+                            "path": f"processed/{file_id}/assets/{asset_file.name}",
+                        }
+                    )
 
         manifest = ManifestGenerator.generate(
             document=canonical_doc,

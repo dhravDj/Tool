@@ -171,23 +171,22 @@ async def detect_batch_files(
     persist: bool = Query(False, description="Persist detected files to storage"),
     session: AsyncSession = Depends(get_session),
 ) -> APIResponse[BatchDetectionResponse]:
-    """Execute streaming detection on a controlled batch of files."""
+    """Execute concurrent detection on a controlled batch of files."""
+    import asyncio
+
     if len(files) > 50:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Batch upload limited to 50 files per request.",
         )
 
-    results: list[DetectionResultSchema] = []
-    mismatch_count = 0
-    suspicious_count = 0
-
     temp_dir = Path(tempfile.mkdtemp(prefix="documind_batch_"))
     try:
+        # 1. Save uploaded files to temp directory
+        file_tasks_input: list[tuple[Path, str | None]] = []
         for file in files:
             safe_filename = sanitize_filename(file.filename or "batch_file")
             temp_file_path = temp_dir / f"{uuid.uuid4()}_{safe_filename}"
-
             size = 0
             with open(temp_file_path, "wb") as f:
                 while chunk := await file.read(65536):
@@ -195,17 +194,32 @@ async def detect_batch_files(
                     if size > settings.MAX_UPLOAD_SIZE_BYTES:
                         break
                     f.write(chunk)
+            file_tasks_input.append((temp_file_path, file.filename))
 
-            det_res = universal_detector.detect_file(
-                file_path=temp_file_path,
-                original_filename=file.filename,
-            )
+        # 2. Concurrently detect files with bounded worker pool (Semaphore 8)
+        semaphore = asyncio.Semaphore(8)
 
+        async def _detect_single(path: Path, orig_name: str | None) -> Any:
+            async with semaphore:
+                return await asyncio.to_thread(
+                    universal_detector.detect_file,
+                    file_path=path,
+                    original_filename=orig_name,
+                )
+
+        detection_results = await asyncio.gather(
+            *(_detect_single(p, n) for p, n in file_tasks_input)
+        )
+
+        results: list[DetectionResultSchema] = []
+        mismatch_count = 0
+        suspicious_count = 0
+
+        for det_res in detection_results:
             if det_res.is_mismatch:
                 mismatch_count += 1
             if det_res.is_suspicious or det_res.is_corrupted:
                 suspicious_count += 1
-
             results.append(_convert_result_to_schema(det_res))
 
         summary = BatchDetectionResponse(

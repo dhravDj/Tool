@@ -36,15 +36,18 @@ def temp_dir(tmp_path: Path) -> Path:
 # 1. PDF Extractor Tests
 # ==============================================================================
 
+
 @pytest.mark.asyncio
 async def test_pdf_extractor_native_text_and_metadata(temp_dir: Path) -> None:
     pdf_path = temp_dir / "sample.pdf"
     doc = pymupdf.open()
-    doc.set_metadata({
-        "title": "Corporate Annual Strategy",
-        "author": "Jane Doe",
-        "subject": "Strategic Planning",
-    })
+    doc.set_metadata(
+        {
+            "title": "Corporate Annual Strategy",
+            "author": "Jane Doe",
+            "subject": "Strategic Planning",
+        }
+    )
     page = doc.new_page(width=595, height=842)
     page.insert_text((50, 60), "Executive Summary", fontsize=18)
     page.insert_text((50, 120), "DocuMind AI provides universal file intelligence.", fontsize=11)
@@ -84,7 +87,10 @@ async def test_pdf_extractor_table_extraction(temp_dir: Path) -> None:
 
     extractor = PDFExtractor()
     canonical_doc = await extractor.extract_document(pdf_path, "table_doc.pdf")
-    assert canonical_doc.extraction_status in (ExtractionStatus.COMPLETED, ExtractionStatus.COMPLETED_WITH_WARNINGS)
+    assert canonical_doc.extraction_status in (
+        ExtractionStatus.COMPLETED,
+        ExtractionStatus.COMPLETED_WITH_WARNINGS,
+    )
     assert len(canonical_doc.blocks) >= 1
 
 
@@ -133,6 +139,7 @@ async def test_pdf_extractor_page_limit_exceeded(temp_dir: Path) -> None:
 # ==============================================================================
 # 2. DOCX Extractor Tests
 # ==============================================================================
+
 
 @pytest.mark.asyncio
 async def test_docx_extractor(temp_dir: Path) -> None:
@@ -189,6 +196,7 @@ async def test_docx_extractor(temp_dir: Path) -> None:
 # 3. Legacy DOC Extractor Tests
 # ==============================================================================
 
+
 def create_synthetic_doc_bytes(text: str) -> bytes:
     """Generate a minimal valid OLE2 compound document containing a WordDocument stream."""
     import struct
@@ -212,7 +220,7 @@ def create_synthetic_doc_bytes(text: str) -> bytes:
     header[68:72] = struct.pack("<I", 0xFFFFFFFE)
     header[76:80] = struct.pack("<I", 0)
     for i in range(80, 512, 4):
-        header[i:i+4] = struct.pack("<I", 0xFFFFFFFF)
+        header[i : i + 4] = struct.pack("<I", 0xFFFFFFFF)
 
     fat = bytearray(512)
     fat[0:4] = struct.pack("<I", 0xFFFFFFFD)
@@ -220,13 +228,13 @@ def create_synthetic_doc_bytes(text: str) -> bytes:
     for s in range(num_sectors):
         sect_idx = 2 + s
         next_val = (sect_idx + 1) if s < num_sectors - 1 else 0xFFFFFFFE
-        fat[sect_idx*4:(sect_idx+1)*4] = struct.pack("<I", next_val)
-    for i in range((2 + num_sectors)*4, 512, 4):
-        fat[i:i+4] = struct.pack("<I", 0xFFFFFFFF)
+        fat[sect_idx * 4 : (sect_idx + 1) * 4] = struct.pack("<I", next_val)
+    for i in range((2 + num_sectors) * 4, 512, 4):
+        fat[i : i + 4] = struct.pack("<I", 0xFFFFFFFF)
 
     dir_sect = bytearray(512)
     root_name = "Root Entry\0".encode("utf-16le")
-    dir_sect[0:len(root_name)] = root_name
+    dir_sect[0 : len(root_name)] = root_name
     dir_sect[64:66] = struct.pack("<H", len(root_name))
     dir_sect[66] = 5
     dir_sect[67] = 1
@@ -237,15 +245,15 @@ def create_synthetic_doc_bytes(text: str) -> bytes:
 
     stream_name = "WordDocument\0".encode("utf-16le")
     e1 = 128
-    dir_sect[e1:e1+len(stream_name)] = stream_name
-    dir_sect[e1+64:e1+66] = struct.pack("<H", len(stream_name))
-    dir_sect[e1+66] = 2
-    dir_sect[e1+67] = 1
-    dir_sect[e1+68:e1+72] = struct.pack("<I", 0xFFFFFFFF)
-    dir_sect[e1+72:e1+76] = struct.pack("<I", 0xFFFFFFFF)
-    dir_sect[e1+76:e1+80] = struct.pack("<I", 0xFFFFFFFF)
-    dir_sect[e1+116:e1+120] = struct.pack("<I", 2)
-    dir_sect[e1+120:e1+124] = struct.pack("<I", len(content))
+    dir_sect[e1 : e1 + len(stream_name)] = stream_name
+    dir_sect[e1 + 64 : e1 + 66] = struct.pack("<H", len(stream_name))
+    dir_sect[e1 + 66] = 2
+    dir_sect[e1 + 67] = 1
+    dir_sect[e1 + 68 : e1 + 72] = struct.pack("<I", 0xFFFFFFFF)
+    dir_sect[e1 + 72 : e1 + 76] = struct.pack("<I", 0xFFFFFFFF)
+    dir_sect[e1 + 76 : e1 + 80] = struct.pack("<I", 0xFFFFFFFF)
+    dir_sect[e1 + 116 : e1 + 120] = struct.pack("<I", 2)
+    dir_sect[e1 + 120 : e1 + 124] = struct.pack("<I", len(content))
 
     return bytes(header + fat + dir_sect + content_padded)
 
@@ -260,7 +268,10 @@ async def test_legacy_doc_extractor(temp_dir: Path) -> None:
     canonical_doc = await extractor.extract_document(doc_path, "legacy.doc")
 
     assert canonical_doc.detected_format == "doc"
-    assert canonical_doc.extraction_status in (ExtractionStatus.COMPLETED, ExtractionStatus.COMPLETED_WITH_WARNINGS)
+    assert canonical_doc.extraction_status in (
+        ExtractionStatus.COMPLETED,
+        ExtractionStatus.COMPLETED_WITH_WARNINGS,
+    )
     assert len(canonical_doc.blocks) >= 1
     assert any("Extracted legacy Word document" in b.text for b in canonical_doc.blocks)
 
@@ -268,6 +279,7 @@ async def test_legacy_doc_extractor(temp_dir: Path) -> None:
 # ==============================================================================
 # 4. Plain Text Extractor Tests
 # ==============================================================================
+
 
 @pytest.mark.asyncio
 async def test_plain_text_extractor_utf8_and_bom(temp_dir: Path) -> None:
@@ -296,6 +308,7 @@ async def test_plain_text_extractor_utf8_and_bom(temp_dir: Path) -> None:
 # ==============================================================================
 # 5. Markdown Extractor Tests
 # ==============================================================================
+
 
 @pytest.mark.asyncio
 async def test_markdown_extractor(temp_dir: Path) -> None:
@@ -352,6 +365,7 @@ def extract_file(path: str) -> dict:
 # 6. RTF Extractor Tests
 # ==============================================================================
 
+
 @pytest.mark.asyncio
 async def test_rtf_extractor(temp_dir: Path) -> None:
     rtf_path = temp_dir / "sample.rtf"
@@ -375,6 +389,7 @@ async def test_rtf_extractor(temp_dir: Path) -> None:
 # ==============================================================================
 # 7. ODT Extractor Tests
 # ==============================================================================
+
 
 @pytest.mark.asyncio
 async def test_odt_extractor(temp_dir: Path) -> None:
@@ -441,6 +456,7 @@ async def test_odt_extractor(temp_dir: Path) -> None:
 # 8. EPUB Extractor Tests
 # ==============================================================================
 
+
 @pytest.mark.asyncio
 async def test_epub_extractor(temp_dir: Path) -> None:
     epub_path = temp_dir / "sample.epub"
@@ -492,6 +508,7 @@ async def test_epub_extractor(temp_dir: Path) -> None:
 # 9. Output Generators Tests
 # ==============================================================================
 
+
 @pytest.mark.asyncio
 async def test_generators(temp_dir: Path) -> None:
     md_path = temp_dir / "gen_test.md"
@@ -526,8 +543,50 @@ async def test_generators(temp_dir: Path) -> None:
 # 10. Pipeline Supported Formats Coverage
 # ==============================================================================
 
+
 def test_pipeline_covers_all_phase3_formats() -> None:
     supported = extraction_pipeline.list_supported_formats()
     required = ["pdf", "docx", "doc", "txt", "md", "rtf", "odt", "epub"]
     for req in required:
         assert req in supported, f"Format '{req}' missing from extraction pipeline"
+
+
+# ==============================================================================
+# 11. Multi-Column Reading Order Sorting Test
+# ==============================================================================
+
+
+def test_pdf_multi_column_reading_order_sorting() -> None:
+    extractor = PDFExtractor()
+    page_width = 600.0
+
+    # Blocks:
+    # 1. Spanning Title at top: y=20..50, x=50..550 (width=500 > 60% of 600)
+    # 2. Left column para 1: y=80..120, x=50..250
+    # 3. Left column para 2: y=130..180, x=50..250
+    # 4. Right column para 1: y=80..120, x=350..550
+    # 5. Right column para 2: y=130..180, x=350..550
+    # 6. Spanning footer at bottom: y=500..530, x=50..550
+
+    title = [50.0, 20.0, 550.0, 50.0, "Title Block", 0, 0]
+    left1 = [50.0, 80.0, 250.0, 120.0, "Left Column 1", 0, 0]
+    left2 = [50.0, 130.0, 250.0, 180.0, "Left Column 2", 0, 0]
+    right1 = [350.0, 80.0, 550.0, 120.0, "Right Column 1", 0, 0]
+    right2 = [350.0, 130.0, 550.0, 180.0, "Right Column 2", 0, 0]
+    footer = [50.0, 500.0, 550.0, 530.0, "Footer Block", 0, 0]
+
+    # Scrambled input order
+    input_blocks = [right1, left2, footer, title, right2, left1]
+    sorted_blocks = extractor._sort_blocks_reading_order(input_blocks, page_width=page_width)
+
+    # In multi-column reading order:
+    # Expected: Title -> Left 1 -> Left 2 -> Right 1 -> Right 2 -> Footer
+    sorted_texts = [b[4] for b in sorted_blocks]
+    assert sorted_texts == [
+        "Title Block",
+        "Left Column 1",
+        "Left Column 2",
+        "Right Column 1",
+        "Right Column 2",
+        "Footer Block",
+    ]

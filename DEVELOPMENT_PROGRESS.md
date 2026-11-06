@@ -1,8 +1,8 @@
 # DocuMind AI — Development Progress Tracker
 
-**Current Platform Version:** 0.4.0  
-**Active Phase:** Phase 4: Image & Visual Intelligence Engine + Foundation Improvements (Phase 1–3)  
-**Phase Status:** **COMPLETE (100%)**  
+**Current Platform Version:** 0.4.1 (Hardened & Optimized)  
+**Active Task:** Existing Phases 1–4 Improvement & Hardening Only (No Phase Renumbering, No Phase 5)  
+**Overall Status:** **STABLE & VERIFIED (100%)**  
 **Last Updated:** November 6, 2026  
 
 ---
@@ -11,11 +11,72 @@
 
 | Phase | Description | Status | Verification Summary |
 | :--- | :--- | :--- | :--- |
-| **Phase 1** | Foundation, Architecture & Engineering Setup | **COMPLETE (100%)** | Clean architecture, PostgreSQL 16 + Redis 7 Docker, Alembic, 23 backend tests, 6 frontend tests. |
-| **Phase 2** | Universal File Detection Engine | **COMPLETE (100%)** | 7-step multi-signal detection pipeline, 17 categories, 45+ formats, 67 backend tests, 7 frontend tests, 929 files/s benchmark. |
-| **Phase 3** | Document Extraction Engines | **COMPLETE (100%)** | 8 format extractors (PDF, DOCX, DOC, TXT, MD, RTF, ODT, EPUB), Canonical AST schema, GFM Markdown, Manifest, OCR routing, 85 backend tests, 8 frontend tests, 82% coverage. |
-| **Phase 4** | Image & Visual Intelligence Engine + Foundation Improvements | **COMPLETE (100%)** | Audit report, Redis TaskQueue, 7 image formats (PNG, JPG, WEBP, TIFF, BMP, SVG), non-destructive preprocessing, OCR subsystem, scene captioning, objects, diagrams, charts, grounded VQA, 106 backend tests, 9 frontend tests, 268 img/s benchmark. |
-| **Phase 5** | Structured & Tabular Extraction Engines | **PENDING** | Awaiting user instructions and Phase 5 kickoff (XLSX, XLS, CSV, TSV, Parquet). |
+| **Phase 1** | Foundation, Architecture & Engineering Setup | **HARDENED (100%)** | Clean architecture, PostgreSQL 16 connection pooling (`pool_recycle=1800`, `pool_timeout=15`), Redis 7 `TaskQueue` + `TaskWorker`, `HardwareGovernor` (bounded 4 CPU workers, GPU mutex 1), zero leaks. |
+| **Phase 2** | Universal File Detection Engine | **HARDENED (100%)** | 7-step detection pipeline, parallel batch detection (<2.1ms), corruption checks for WEBP/BMP/TIFF/SVG, high-risk executable disguise defense, 100% accuracy on real-world fixtures. |
+| **Phase 3** | Document Extraction Engines | **HARDENED (100%)** | 8 formats, multi-column PDF reading order clustering, Word FIB stream parser, defensive XML and table parsing, 100% text recall across test fixtures. |
+| **Phase 4** | Image & Visual Intelligence Engine | **HARDENED (100%)** | Transparent non-neural classification (`documind-heuristic-cv-v1`, `engine_type="heuristic"`), sub-8ms deskew (4.77ms), OCR CER/WER metrics, grounded VQA, 124 backend tests + 9 frontend tests (133 total passed). |
+| **Phase 5** | Structured & Tabular Extraction Engines | **PENDING** | Awaiting explicit future phase kickoff from user (strictly deferred). |
+
+---
+
+## 2. Completed Improvements Across Phases 1–4
+
+### 2.1 Phase 1 — Foundation, Infrastructure & Hardware Governor
+- [x] **Hardware Governor (`backend/app/core/hardware.py`)**:
+  - Calibrated for host architecture (AMD Ryzen 7 5800H + NVIDIA RTX 3050 4GB VRAM).
+  - CPU Concurrency Bounding: `MAX_PARALLEL_WORKERS = 4` enforced via `asyncio.Semaphore`.
+  - GPU Inference Mutex: `GPU_MAX_CONCURRENT_INFERENCE = 1` preventing CUDA Out-Of-Memory exceptions.
+  - Hardware detection for CPU logical cores, available RAM, and GPU devices with automatic CPU fallback.
+- [x] **Database Pool Resilience (`backend/app/infrastructure/database/session.py`)**:
+  - Added `pool_recycle = 1800` (30 minutes) and `pool_timeout = 15` seconds to `create_async_engine`.
+  - Prevents stale connection drops and connection pool exhaustion under high concurrency.
+- [x] **Background Task Worker Loop (`backend/app/workers/task_worker.py`)**:
+  - Created `TaskWorker` consuming queued asynchronous tasks with graceful shutdown, backoff, and dead-letter queue routing.
+
+### 2.2 Phase 2 — Universal File Detection Engine
+- [x] **Parallel Batch Detection API (`backend/app/api/v1/endpoints/detection.py`)**:
+  - Concurrently processes batch file uploads via `asyncio.gather` bounded by `asyncio.Semaphore(8)` and `asyncio.to_thread`.
+  - Average detection latency reduced to **2.04 ms per file**.
+- [x] **Corruption & Truncation Checks (`backend/app/modules/files/detection/detector.py`)**:
+  - WEBP: Truncated RIFF / missing `WEBP` form type header detection.
+  - BMP: Header size mismatch (< 14 bytes) and missing `BM` magic signature.
+  - TIFF: Invalid byte order indicator (`II*` or `MM*`) and header truncation.
+  - SVG: Truncated XML and missing closing `</svg>` elements.
+- [x] **Executable Disguise Protection (`backend/app/modules/files/detection/confidence.py`)**:
+  - Flags PE/DOS, ELF, Mach-O, and shell scripts masquerading as documents or images with `is_suspicious=True`, `is_mismatch=True`, and high-risk warning.
+
+### 2.3 Phase 3 — Document Content Extraction Engine
+- [x] **Multi-Column Reading Order (`backend/app/modules/extraction/adapters/pdf.py`)**:
+  - Enhanced `_sort_blocks_reading_order` to distinguish full-width spanning headers and footers from left/right column flows, eliminating column interleaving.
+- [x] **FIB Stream Parsing in Legacy DOC (`backend/app/modules/extraction/adapters/doc.py`)**:
+  - Added File Information Block (FIB) extraction reading `fcMin` and `ccpText` from the binary `WordDocument` stream.
+- [x] **Synchronous Thread OCR Safety**:
+  - Replaced ad-hoc event loop creation with clean synchronous execution via `asyncio.run()`.
+
+### 2.4 Phase 4 — Image & Visual Intelligence Engine
+- [x] **Honest Non-Neural Classification (`backend/app/modules/image_intelligence/vision/`)**:
+  - Formally classified default engine as `documind-heuristic-cv-v1` with `engine_type="heuristic"`.
+  - Zero neural claims made: transparently documents luminance distribution, Otsu binarization, palette quantization, and token topology heuristics.
+  - Implemented `VisionAdapterInterface` in `adapters.py` to decouple heuristic CV from future ONNX or cloud VLM backends.
+- [x] **Sub-8ms Deskew Preprocessing (`backend/app/modules/image_intelligence/preprocessing/pipeline.py`)**:
+  - Optimized horizontal projection profile analysis with 128x128 grid subsampling.
+  - Deskew angle estimation benchmarked at **4.77 ms** (well below the 8 ms target).
+- [x] **OCR CER and WER Metrics (`backend/app/modules/image_intelligence/ocr/metrics.py`)**:
+  - Added normalized Levenshtein Character Error Rate (`calculate_cer`) and Word Error Rate (`calculate_wer`).
+- [x] **VQA Grounding Precision**:
+  - Visual Question Answering outputs include explicit `grounding_region_ids` and transparent `reasoning`.
+
+### 2.5 Real-World Validation Dataset & Benchmarks
+- [x] Created `backend/tests/fixtures/real_world_dataset/` with 8 ground-truth annotated files (`invoice.pdf`, `memo.docx`, `notes.txt`, `documentation.md`, `chart.png`, `scan.jpeg`, `malicious_disguise.exe.pdf`, `corrupted_sample.webp`).
+- [x] Created automated benchmark script `scripts/evaluate_phases_1_to_4.py`.
+- [x] Added end-to-end regression tests in `backend/tests/integration/test_end_to_end_regression.py`.
+- [x] Published comprehensive reports:
+  - `reports/IMPROVEMENT_AUDIT.md`
+  - `reports/IMPROVEMENT_TEST_REPORT.md`
+  - `reports/IMPROVEMENT_ACCURACY_REPORT.md`
+  - `reports/IMPROVEMENT_PERFORMANCE_REPORT.md`
+  - `reports/IMPROVEMENT_SECURITY_REPORT.md`
+  - `docs/PRODUCTION_READINESS.md`
 
 ---
 

@@ -1,0 +1,94 @@
+{
+  "invoice.pdf": {
+    "format_id": "pdf",
+    "category": "pdf",
+    "mime_type": "application/pdf",
+    "is_valid": true,
+    "is_mismatch": false,
+    "is_corrupted": false,
+    "is_suspicious": false,
+    "expected_text": [
+      "ACME INVOICE",
+      "Globex Corporation",
+      "Server Rack",
+      "$6,200.00"
+    ]
+  },
+  "memo.docx": {
+    "format_id": "docx",
+    "category": "document",
+    "mime_type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "is_valid": true,
+    "is_mismatch": false,
+    "is_corrupted": false,
+    "is_suspicious": false,
+    "expected_text": [
+      "Internal Project Update",
+      "weekly engineering progress",
+      "database optimization"
+    ]
+  },
+  "notes.txt": {
+    "format_id": "txt",
+    "category": "document",
+    "mime_type": "text/plain",
+    "is_valid": true,
+    "is_mismatch": false,
+    "is_corrupted": false,
+    "is_suspicious": false,
+    "expected_text": [
+      "DocuMind AI Architecture Notes",
+      "Sovereign local processing"
+    ]
+  },
+  "documentation.md": {
+    "format_id": "md",
+    "category": "document",
+    "mime_type": "text/markdown",
+    "is_valid": true,
+    "is_mismatch": false,
+    "is_corrupted": false,
+    "is_suspicious": false,
+    "expected_text": [
+      "API Specification",
+      "POST /api/v1/files/detect"
+    ]
+  },
+  "chart.png": {
+    "format_id": "png",
+    "category": "image",
+    "mime_type": "image/png",
+    "is_valid": true,
+    "is_mismatch": false,
+    "is_corrupted": false,
+    "is_suspicious": false,
+    "expected_objects": [
+      "visual_graphic"
+    ]
+  },
+  "scan.jpeg": {
+    "format_id": "jpeg",
+    "category": "image",
+    "mime_type": "image/jpeg",
+    "is_valid": true,
+    "is_mismatch": false,
+    "is_corrupted": false,
+    "is_suspicious": false
+  },
+  "malicious_disguise.exe.pdf": {
+    "format_id": "elf",
+    "category": "executable",
+    "is_valid": true,
+    "is_mismatch": true,
+    "is_corrupted": false,
+    "is_suspicious": true
+  },
+  "corrupted_sample.webp": {
+    "format_id": "webp",
+    "category": "image",
+    "is_valid": true,
+    "is_mismatch": false,
+    "is_corrupted": true,
+    "is_suspicious": false
+  }
+}

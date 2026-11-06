@@ -193,9 +193,36 @@ class TestImageOCREngine:
         engine = ImageOCREngine()
         # Words on line 1: y ~ 20; Words on line 2: y ~ 60
         raw_words = [
-            {"text": "World", "conf": 0.9, "x0": 70, "y0": 20, "x1": 120, "y1": 35, "line_num": 1, "block_num": 1},
-            {"text": "Hello", "conf": 0.95, "x0": 10, "y0": 22, "x1": 60, "y1": 36, "line_num": 1, "block_num": 1},
-            {"text": "DocuMind", "conf": 0.88, "x0": 10, "y0": 60, "x1": 80, "y1": 75, "line_num": 2, "block_num": 1},
+            {
+                "text": "World",
+                "conf": 0.9,
+                "x0": 70,
+                "y0": 20,
+                "x1": 120,
+                "y1": 35,
+                "line_num": 1,
+                "block_num": 1,
+            },
+            {
+                "text": "Hello",
+                "conf": 0.95,
+                "x0": 10,
+                "y0": 22,
+                "x1": 60,
+                "y1": 36,
+                "line_num": 1,
+                "block_num": 1,
+            },
+            {
+                "text": "DocuMind",
+                "conf": 0.88,
+                "x0": 10,
+                "y0": 60,
+                "x1": 80,
+                "y1": 75,
+                "line_num": 2,
+                "block_num": 1,
+            },
         ]
         sorted_words = engine._sort_reading_order(raw_words)
         texts = [w["text"] for w in sorted_words]

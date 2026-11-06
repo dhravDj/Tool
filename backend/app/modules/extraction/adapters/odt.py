@@ -212,7 +212,9 @@ class ODTExtractor(BaseDocumentExtractor):
             metadata={"block_count": len(blocks)},
         )
 
-        status = ExtractionStatus.COMPLETED_WITH_WARNINGS if warnings else ExtractionStatus.COMPLETED
+        status = (
+            ExtractionStatus.COMPLETED_WITH_WARNINGS if warnings else ExtractionStatus.COMPLETED
+        )
 
         return CanonicalDocument(
             document_id=doc_id,

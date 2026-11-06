@@ -17,7 +17,9 @@ class ImageMarkdownGenerator:
         lines.append(f"# Visual Intelligence Report: `{doc.filename}`\n")
         lines.append(f"**Image ID:** `{doc.image_id}`  ")
         lines.append(f"**Analyzed At:** `{doc.created_at}`  ")
-        lines.append(f"**Format:** `{meta.format.upper()}` | **Dimensions:** `{meta.width} × {meta.height}` ({meta.aspect_ratio}:1) | **Color:** `{meta.color_mode}` ({meta.bit_depth}-bit)\n")
+        lines.append(
+            f"**Format:** `{meta.format.upper()}` | **Dimensions:** `{meta.width} × {meta.height}` ({meta.aspect_ratio}:1) | **Color:** `{meta.color_mode}` ({meta.bit_depth}-bit)\n"
+        )
 
         # Visual Scene Summary
         lines.append("## 1. Visual Scene Summary\n")
@@ -30,13 +32,19 @@ class ImageMarkdownGenerator:
 
         # Visual Objects & Regions
         lines.append("## 2. Detected Visual Regions\n")
-        object_regions = [r for r in doc.regions if r.region_type in (RegionType.OBJECT, RegionType.FACE)]
+        object_regions = [
+            r for r in doc.regions if r.region_type in (RegionType.OBJECT, RegionType.FACE)
+        ]
         if object_regions:
-            lines.append("| Region ID | Label | Bounding Box [ymin, xmin, ymax, xmax] | Confidence | Provenance |")
+            lines.append(
+                "| Region ID | Label | Bounding Box [ymin, xmin, ymax, xmax] | Confidence | Provenance |"
+            )
             lines.append("| :--- | :--- | :--- | :--- | :--- |")
             for r in object_regions[:15]:
                 bbox_str = f"[{r.bounding_box[0]:.2f}, {r.bounding_box[1]:.2f}, {r.bounding_box[2]:.2f}, {r.bounding_box[3]:.2f}]"
-                lines.append(f"| `{r.region_id}` | **{r.label}** | `{bbox_str}` | {r.confidence * 100:.1f}% | `{r.provenance}` |")
+                lines.append(
+                    f"| `{r.region_id}` | **{r.label}** | `{bbox_str}` | {r.confidence * 100:.1f}% | `{r.provenance}` |"
+                )
             lines.append("")
         else:
             lines.append("_No discrete foreground objects isolated._\n")
@@ -45,9 +53,13 @@ class ImageMarkdownGenerator:
         if analysis.diagram.is_diagram:
             lines.append("## 3. Technical Diagram & Flowchart Analysis\n")
             diag = analysis.diagram
-            lines.append(f"- **Diagram Type:** `{diag.diagram_type}` (Confidence: {diag.confidence * 100:.1f}%)")
+            lines.append(
+                f"- **Diagram Type:** `{diag.diagram_type}` (Confidence: {diag.confidence * 100:.1f}%)"
+            )
             lines.append(f"- **Flow Direction:** `{diag.flow_direction}`")
-            lines.append(f"- **Total Nodes:** {len(diag.nodes)} | **Connectors:** {diag.connectors_count}\n")
+            lines.append(
+                f"- **Total Nodes:** {len(diag.nodes)} | **Connectors:** {diag.connectors_count}\n"
+            )
             if diag.nodes:
                 lines.append("### Identified Nodes")
                 for n in diag.nodes[:10]:
@@ -58,7 +70,9 @@ class ImageMarkdownGenerator:
         if analysis.chart.is_chart:
             lines.append("## 4. Statistical Chart & Data Analysis\n")
             ch = analysis.chart
-            lines.append(f"- **Chart Type:** `{ch.chart_type}` (Confidence: {ch.confidence * 100:.1f}%)")
+            lines.append(
+                f"- **Chart Type:** `{ch.chart_type}` (Confidence: {ch.confidence * 100:.1f}%)"
+            )
             if ch.title:
                 lines.append(f"- **Chart Title:** **{ch.title}**")
             if ch.x_axis_label:
@@ -68,7 +82,9 @@ class ImageMarkdownGenerator:
                 lines.append("| Series / Item | Value | Unit |")
                 lines.append("| :--- | :--- | :--- |")
                 for s in ch.series_data[:12]:
-                    lines.append(f"| {s.get('label')} | **{s.get('value')}** | {s.get('unit', '-')} |")
+                    lines.append(
+                        f"| {s.get('label')} | **{s.get('value')}** | {s.get('unit', '-')} |"
+                    )
             lines.append("")
 
         # OCR Text Layer
@@ -87,8 +103,12 @@ class ImageMarkdownGenerator:
         lines.append(f"- **File Size:** {meta.file_size:,} bytes")
         lines.append(f"- **DPI:** {meta.dpi or 'Default (72x72)'}")
         lines.append(f"- **Transparency:** `{'Yes' if meta.has_transparency else 'No'}`")
-        lines.append(f"- **Animated:** `{'Yes (' + str(meta.frame_count) + ' frames)' if meta.is_animated else 'No'}`")
-        lines.append(f"- **GPS Privacy Scrubbing:** `{'ACTIVE (GPS data redacted)' if meta.gps_redacted else 'None'}`")
+        lines.append(
+            f"- **Animated:** `{'Yes (' + str(meta.frame_count) + ' frames)' if meta.is_animated else 'No'}`"
+        )
+        lines.append(
+            f"- **GPS Privacy Scrubbing:** `{'ACTIVE (GPS data redacted)' if meta.gps_redacted else 'None'}`"
+        )
 
         if meta.exif_scrubbed:
             lines.append("\n### Safe EXIF Tags")

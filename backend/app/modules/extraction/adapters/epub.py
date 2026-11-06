@@ -95,7 +95,9 @@ class EPUBExtractor(BaseDocumentExtractor):
                     img_name = Path(item.get_name()).name
                     out_path = assets_path / img_name
                     content = item.get_content()
-                    out_path.write_bytes(content if isinstance(content, bytes) else content.encode("utf-8"))
+                    out_path.write_bytes(
+                        content if isinstance(content, bytes) else content.encode("utf-8")
+                    )
                 except Exception as exc:
                     warnings.append(f"Failed to extract EPUB image {item.get_name()}: {exc}")
 
@@ -181,7 +183,10 @@ class EPUBExtractor(BaseDocumentExtractor):
                             confidence=1.0,
                             extraction_engine=self.engine_name,
                             provenance="native",
-                            metadata={"list_type": "number" if is_num else "bullet", "spine_id": item_id},
+                            metadata={
+                                "list_type": "number" if is_num else "bullet",
+                                "spine_id": item_id,
+                            },
                         )
                         page_blocks.append(block)
                         all_blocks.append(block)
@@ -205,7 +210,11 @@ class EPUBExtractor(BaseDocumentExtractor):
                             confidence=1.0,
                             extraction_engine=self.engine_name,
                             provenance="native_table",
-                            metadata={"table_grid": grid, "row_count": len(grid), "spine_id": item_id},
+                            metadata={
+                                "table_grid": grid,
+                                "row_count": len(grid),
+                                "spine_id": item_id,
+                            },
                         )
                         page_blocks.append(block)
                         all_blocks.append(block)
@@ -243,7 +252,9 @@ class EPUBExtractor(BaseDocumentExtractor):
         page_count = max(len(pages), 1)
         self._check_page_limit(page_count)
 
-        status = ExtractionStatus.COMPLETED_WITH_WARNINGS if warnings else ExtractionStatus.COMPLETED
+        status = (
+            ExtractionStatus.COMPLETED_WITH_WARNINGS if warnings else ExtractionStatus.COMPLETED
+        )
 
         return CanonicalDocument(
             document_id=doc_id,

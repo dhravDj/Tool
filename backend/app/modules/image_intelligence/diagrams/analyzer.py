@@ -19,13 +19,39 @@ class DiagramAnalyzer:
     """Identifies flowchart nodes, relational connectors, flow directions, and diagram types."""
 
     FLOWCHART_KEYWORDS = {
-        "start", "end", "stop", "decision", "process", "condition", "yes", "no", "if", "else", "step"
+        "start",
+        "end",
+        "stop",
+        "decision",
+        "process",
+        "condition",
+        "yes",
+        "no",
+        "if",
+        "else",
+        "step",
     }
     ARCHITECTURE_KEYWORDS = {
-        "client", "server", "database", "api", "microservice", "gateway", "backend", "frontend", "queue", "cache"
+        "client",
+        "server",
+        "database",
+        "api",
+        "microservice",
+        "gateway",
+        "backend",
+        "frontend",
+        "queue",
+        "cache",
     }
     SEQUENCE_KEYWORDS = {
-        "request", "response", "actor", "lifeline", "async", "sync", "call", "return"
+        "request",
+        "response",
+        "actor",
+        "lifeline",
+        "async",
+        "sync",
+        "call",
+        "return",
     }
 
     def analyze(
@@ -75,13 +101,15 @@ class DiagramAnalyzer:
         for idx, r in enumerate(text_regions[:20]):
             node_id = f"node_{idx + 1}"
             label = r.text.strip() if r.text else ""
-            nodes.append({
-                "node_id": node_id,
-                "label": label,
-                "shape": "rectangle",
-                "bounding_box": r.bounding_box,
-                "pixel_box": r.pixel_box,
-            })
+            nodes.append(
+                {
+                    "node_id": node_id,
+                    "label": label,
+                    "shape": "rectangle",
+                    "bounding_box": r.bounding_box,
+                    "pixel_box": r.pixel_box,
+                }
+            )
             diagram_regions.append(
                 ImageRegion(
                     region_id=f"diagram_node_{idx + 1}",

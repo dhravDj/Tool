@@ -478,3 +478,38 @@ def test_edge_case_20_compound_extension_tar_gz(tmp_path: Path):
     res = universal_detector.detect_file(f, "bundle.tar.gz")
     assert res.category == FormatCategory.ARCHIVE
     assert res.extension in ("tar.gz", "gz")
+
+
+def test_edge_case_21_truncated_webp(tmp_path: Path):
+    """Truncated or corrupted WEBP container detection."""
+    f = tmp_path / "truncated.webp"
+    f.write_bytes(b"RIFF\x20\x00\x00\x00BADF")
+
+    res = universal_detector.detect_file(f, "truncated.webp")
+    assert res.format_id == "webp"
+    assert res.is_corrupted is True
+    assert any("corrupted" in w.lower() or "truncated" in w.lower() for w in res.warnings)
+
+
+def test_edge_case_22_truncated_bmp(tmp_path: Path):
+    """Truncated BMP header smaller than 14 bytes."""
+    f = tmp_path / "truncated.bmp"
+    f.write_bytes(b"BM\x01\x00")
+
+    res = universal_detector.detect_file(f, "truncated.bmp")
+    assert res.format_id == "bmp"
+    assert res.is_corrupted is True
+    assert any("truncated" in w.lower() or "corrupted" in w.lower() for w in res.warnings)
+
+
+def test_edge_case_23_executable_disguised_as_pdf(tmp_path: Path):
+    """ELF executable binary disguised as a PDF invoice."""
+    elf_bytes = b"\x7fELF\x02\x01\x01\x00" + bytes(32)
+    f = tmp_path / "invoice.pdf"
+    f.write_bytes(elf_bytes)
+
+    res = universal_detector.detect_file(f, "invoice.pdf")
+    assert res.format_id == "elf"
+    assert res.is_mismatch is True
+    assert res.is_suspicious is True
+    assert any("executable disguise" in w.lower() for w in res.warnings)

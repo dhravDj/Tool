@@ -1,0 +1,116 @@
+{
+  "timestamp": "2026-11-06T03:47:16Z",
+  "hardware_profile": {
+    "cpu": {
+      "logical_cores": 16,
+      "recommended_workers": 4,
+      "active_workers_limit": 4
+    },
+    "memory": {
+      "total_ram_mb": 14803,
+      "free_ram_mb": 8022
+    },
+    "accelerator": {
+      "gpu_detected": false,
+      "device_name": "None",
+      "vram_mb": 0,
+      "gpu_concurrency_limit": 1,
+      "execution_target": "cpu"
+    }
+  },
+  "phase1_infrastructure": {
+    "database_connected": true,
+    "database_ping_ms": 10.47,
+    "redis_connected": true,
+    "redis_ping_ms": 2.7,
+    "governor_bounded_max_concurrency": 4,
+    "governor_stress_16tasks_ms": 20.82
+  },
+  "phase2_detection": {
+    "total_files_tested": 8,
+    "format_accuracy_pct": 100.0,
+    "mismatch_accuracy_pct": 100.0,
+    "corruption_accuracy_pct": 100.0,
+    "security_isolation_pct": 100.0,
+    "average_detection_ms": 2.04,
+    "min_detection_ms": 0.59,
+    "max_detection_ms": 6.64
+  },
+  "phase3_extraction": {
+    "evaluated_documents": [
+      {
+        "file": "invoice.pdf",
+        "format": "pdf",
+        "blocks": 8,
+        "pages": 1,
+        "duration_ms": 518.61,
+        "text_recall_pct": 100.0
+      },
+      {
+        "file": "memo.docx",
+        "format": "docx",
+        "blocks": 6,
+        "pages": 1,
+        "duration_ms": 17.23,
+        "text_recall_pct": 100.0
+      },
+      {
+        "file": "notes.txt",
+        "format": "txt",
+        "blocks": 2,
+        "pages": 1,
+        "duration_ms": 0.28,
+        "text_recall_pct": 100.0
+      },
+      {
+        "file": "documentation.md",
+        "format": "md",
+        "blocks": 4,
+        "pages": 1,
+        "duration_ms": 0.53,
+        "text_recall_pct": 100.0
+      }
+    ],
+    "overall_text_recall_pct": 100.0
+  },
+  "phase4_vision": {
+    "engine_name": "documind-heuristic-cv-v1",
+    "engine_type": "heuristic",
+    "hardware_target": "cpu",
+    "average_deskew_estimate_ms": 4.77,
+    "total_preprocessing_ms": 17.62,
+    "scene_analysis_duration_ms": 4.63,
+    "detected_scene_type": "statistical_chart",
+    "dominant_colors": [
+      "#FFFFFF",
+      "#9D6F86",
+      "#6DC196",
+      "#F2E9E2",
+      "#FFFFFE"
+    ],
+    "ocr_metrics": {
+      "cer": 0.0,
+      "wer": 0.0,
+      "char_accuracy_pct": 100.0,
+      "word_accuracy_pct": 100.0,
+      "reference_char_count": 99,
+      "hypothesis_char_count": 99,
+      "reference_word_count": 12,
+      "hypothesis_word_count": 12,
+      "word_substitutions": 0,
+      "word_deletions": 0,
+      "word_insertions": 0
+    },
+    "vqa_result": {
+      "question": "What is this chart showing?",
+      "answer": "This image features a bar chart titled 'Q4 Revenue Growth Chart' with 1 data series. Values observed: Q4: 100.",
+      "grounding_regions_count": 0,
+      "reasoning": "Derived from statistical chart axis detection and numeric pattern matching."
+    }
+  },
+  "resource_footprint": {
+    "peak_rss_mb": 515.6,
+    "platform": "linux",
+    "python_version": "3.13.15"
+  }
+}

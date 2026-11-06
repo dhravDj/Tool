@@ -83,6 +83,32 @@ class ConfidenceEvaluator:
                     f"Extension mismatch: filename claims '{claimed_extension}', but binary evidence indicates '{candidate.primary_extension}' ({candidate.canonical_name})."
                 )
 
+                # Check for high-risk executable / script disguise masquerading as document or image
+                executable_formats = {"exe", "dll", "elf", "macho", "sh", "bat", "ps1"}
+                benign_extensions = {
+                    "pdf",
+                    "docx",
+                    "doc",
+                    "txt",
+                    "png",
+                    "jpg",
+                    "jpeg",
+                    "webp",
+                    "gif",
+                    "svg",
+                    "csv",
+                    "xlsx",
+                    "pptx",
+                }
+                if (
+                    candidate.format_id in executable_formats
+                    or candidate.category == FormatCategory.EXECUTABLE
+                ) and normalized_claimed in benign_extensions:
+                    is_suspicious = True
+                    warnings.append(
+                        f"HIGH-RISK EXECUTABLE DISGUISE: Binary executable format '{candidate.format_id}' is disguised with extension '.{claimed_extension}'."
+                    )
+
         # 3. Detect conflicting signals (Polyglot or ambiguity)
         conflicting_signals = set()
         for ev in evidence_list:

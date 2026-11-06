@@ -121,7 +121,9 @@ class TaskQueue:
             self._memory_tasks[task_id] = {"status": "queued", "task": msg}
             return task_id
 
-    async def dequeue(self, queue_name: str = "default", timeout: float = 1.0) -> TaskMessage | None:
+    async def dequeue(
+        self, queue_name: str = "default", timeout: float = 1.0
+    ) -> TaskMessage | None:
         """Dequeue the next available task, blocking up to timeout seconds."""
         try:
             client = await self.manager.get_client()
@@ -183,7 +185,9 @@ class TaskQueue:
                     self._memory_tasks[task.task_id]["status"] = "retrying"
         else:
             # Route to dead-letter queue (DLQ)
-            logger.error(f"Task {task.task_id} ({task.task_name}) permanently failed. Routing to DLQ.")
+            logger.error(
+                f"Task {task.task_id} ({task.task_name}) permanently failed. Routing to DLQ."
+            )
             raw_msg = task.to_json()
             try:
                 client = await self.manager.get_client()

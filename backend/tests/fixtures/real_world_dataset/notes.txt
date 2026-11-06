@@ -1,0 +1,5 @@
+DocuMind AI Architecture Notes
+
+1. Microservice boundary definition
+2. Sovereign local processing
+3. Hardware governor with bounded workers

@@ -24,7 +24,11 @@ class MarkdownGenerator:
 
         for block in document.blocks:
             # Page transition marker
-            if include_page_markers and block.page_number != current_page and document.page_count > 1:
+            if (
+                include_page_markers
+                and block.page_number != current_page
+                and document.page_count > 1
+            ):
                 current_page = block.page_number
                 lines.append(f"\n<!-- Page {current_page} -->\n")
 

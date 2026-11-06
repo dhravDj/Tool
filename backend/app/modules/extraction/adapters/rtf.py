@@ -75,7 +75,9 @@ class RTFExtractor(BaseDocumentExtractor):
             raise CorruptedDocumentError(f"Failed to parse RTF structure: {exc}") from exc
 
         blocks: list[CanonicalBlock] = []
-        raw_paragraphs = [p.strip() for p in plain_text.replace("\r\n", "\n").split("\n\n") if p.strip()]
+        raw_paragraphs = [
+            p.strip() for p in plain_text.replace("\r\n", "\n").split("\n\n") if p.strip()
+        ]
 
         if not raw_paragraphs and "\n" in plain_text:
             raw_paragraphs = [p.strip() for p in plain_text.split("\n") if p.strip()]

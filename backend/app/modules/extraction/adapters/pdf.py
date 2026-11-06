@@ -157,7 +157,10 @@ class PDFExtractor(BaseDocumentExtractor):
                     block_rect = pymupdf.Rect(x0, y0, x1, y1)
 
                     # If block is inside an extracted table, skip duplicate text
-                    if any(block_rect in t_rect or t_rect.contains(block_rect) for t_rect in extracted_table_rects):
+                    if any(
+                        block_rect in t_rect or t_rect.contains(block_rect)
+                        for t_rect in extracted_table_rects
+                    ):
                         continue
 
                     cleaned_text = text.strip()
@@ -203,9 +206,8 @@ class PDFExtractor(BaseDocumentExtractor):
                             pixmap = page.get_pixmap(dpi=200)
                             img_bytes = pixmap.tobytes("png")
 
-                            # Execute OCR
-                            loop = asyncio.new_event_loop()
-                            ocr_blocks, ocr_warnings = loop.run_until_complete(
+                            # Execute OCR safely in synchronous thread
+                            ocr_blocks, ocr_warnings = asyncio.run(
                                 self.ocr_router.process_scanned_page(
                                     page_number=page_num,
                                     image_bytes=img_bytes,
@@ -213,7 +215,6 @@ class PDFExtractor(BaseDocumentExtractor):
                                     options=options,
                                 )
                             )
-                            loop.close()
 
                             warnings.extend(ocr_warnings)
                             if ocr_blocks:
@@ -265,7 +266,9 @@ class PDFExtractor(BaseDocumentExtractor):
                             all_blocks.append(img_block)
                             global_reading_order += 1
                         except Exception as exc:
-                            warnings.append(f"Page {page_num}: Failed to extract image {xref}: {exc}")
+                            warnings.append(
+                                f"Page {page_num}: Failed to extract image {xref}: {exc}"
+                            )
 
                 pages.append(
                     CanonicalPage(
@@ -285,9 +288,7 @@ class PDFExtractor(BaseDocumentExtractor):
                 )
 
             status = (
-                ExtractionStatus.COMPLETED_WITH_WARNINGS
-                if warnings
-                else ExtractionStatus.COMPLETED
+                ExtractionStatus.COMPLETED_WITH_WARNINGS if warnings else ExtractionStatus.COMPLETED
             )
 
             return CanonicalDocument(
@@ -309,32 +310,46 @@ class PDFExtractor(BaseDocumentExtractor):
             doc.close()
 
     def _sort_blocks_reading_order(self, blocks: list[Any], page_width: float) -> list[Any]:
-        """Sort blocks considering multi-column or single-column layout structure."""
+        """Sort blocks considering multi-column (2-column, 3-column) or single-column layout structure.
+
+        Separates full-width spanning blocks (titles, banners, footers) from localized column flows.
+        """
         if not blocks:
             return []
 
         midpoint = page_width / 2.0
-        left_col = []
-        right_col = []
-        spanning = []
+        left_col: list[Any] = []
+        right_col: list[Any] = []
+        spanning: list[Any] = []
 
         for b in blocks:
-            x0, _y0, x1, _y1 = b[:4]
-            if x1 <= midpoint + (page_width * 0.05):
+            x0, y0, x1, y1 = b[:4]
+            block_width = x1 - x0
+
+            # If block occupies more than 60% of page width, it's a spanning element
+            if block_width > page_width * 0.60:
+                spanning.append(b)
+            elif x1 <= midpoint + (page_width * 0.08):
                 left_col.append(b)
-            elif x0 >= midpoint - (page_width * 0.05):
+            elif x0 >= midpoint - (page_width * 0.08):
                 right_col.append(b)
             else:
                 spanning.append(b)
 
-        # If distinct two-column distribution with minimal spanning text
-        if len(left_col) >= 2 and len(right_col) >= 2 and len(spanning) <= len(blocks) * 0.3:
+        # Multi-column heuristic: both columns must have text elements
+        if len(left_col) >= 1 and len(right_col) >= 1:
             left_col.sort(key=lambda b: (round(b[1], -1), b[0]))
             right_col.sort(key=lambda b: (round(b[1], -1), b[0]))
 
-            header_spanning = [b for b in spanning if b[1] < min(left_col[0][1], right_col[0][1])]
-            footer_spanning = [b for b in spanning if b[1] >= max(left_col[-1][3], right_col[-1][3])]
-            mid_spanning = [b for b in spanning if b not in header_spanning and b not in footer_spanning]
+            # Top of columns and bottom of columns
+            col_top_y = min(left_col[0][1], right_col[0][1])
+            col_bottom_y = max(left_col[-1][3], right_col[-1][3])
+
+            header_spanning = [b for b in spanning if b[3] <= col_top_y + 10]
+            footer_spanning = [b for b in spanning if b[1] >= col_bottom_y - 10]
+            mid_spanning = [
+                b for b in spanning if b not in header_spanning and b not in footer_spanning
+            ]
 
             header_spanning.sort(key=lambda b: (round(b[1], -1), b[0]))
             mid_spanning.sort(key=lambda b: (round(b[1], -1), b[0]))

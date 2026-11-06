@@ -18,26 +18,31 @@ from app.plugins.interfaces.extractor import ExtractionEngineInterface, Extracti
 
 class ExtractionError(Exception):
     """Base exception for document extraction failures."""
+
     pass
 
 
 class PasswordRequiredError(ExtractionError):
     """Raised when a document is encrypted or requires a password."""
+
     pass
 
 
 class CorruptedDocumentError(ExtractionError):
     """Raised when a document file structure is corrupted or unreadable."""
+
     pass
 
 
 class UnsupportedFormatError(ExtractionError):
     """Raised when an extractor cannot handle the provided file format."""
+
     pass
 
 
 class PageLimitExceededError(ExtractionError):
     """Raised when a document exceeds the configured maximum page limit."""
+
     pass
 
 
@@ -102,7 +107,11 @@ class BaseDocumentExtractor(ExtractionEngineInterface):
 
     def _check_page_limit(self, page_count: int, max_limit: int | None = None) -> None:
         """Enforce maximum page count safety limit to prevent resource exhaustion."""
-        limit = max_limit if max_limit is not None else int(getattr(settings, "MAX_EXTRACTION_PAGE_LIMIT", 1000))
+        limit = (
+            max_limit
+            if max_limit is not None
+            else int(getattr(settings, "MAX_EXTRACTION_PAGE_LIMIT", 1000))
+        )
         if page_count > limit:
             raise PageLimitExceededError(
                 f"Document page count ({page_count}) exceeds maximum allowed limit ({limit})"

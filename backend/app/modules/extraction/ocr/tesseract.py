@@ -12,6 +12,7 @@ from app.modules.extraction.ocr.base import OCRAdapterInterface
 
 try:
     import pytesseract
+
     HAS_PYTESSERACT = True
 except ImportError:
     HAS_PYTESSERACT = False
@@ -69,7 +70,9 @@ class TesseractOCRAdapter(OCRAdapterInterface):
     def _sync_extract(self, image_bytes: bytes, options: dict[str, Any]) -> tuple[str, float]:
         try:
             raw_img = Image.open(io.BytesIO(image_bytes))
-            img: Image.Image = raw_img.convert("RGB") if raw_img.mode not in ("RGB", "L") else raw_img
+            img: Image.Image = (
+                raw_img.convert("RGB") if raw_img.mode not in ("RGB", "L") else raw_img
+            )
 
             # Extract detailed OCR data including word-level confidence
             data = pytesseract.image_to_data(

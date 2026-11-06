@@ -19,15 +19,21 @@ class CanonicalBlock(BaseModel):
     """Discrete semantic block within a document page."""
 
     block_id: str = Field(..., description="Unique deterministic or random block identifier")
-    block_type: BlockType = Field(default=BlockType.PARAGRAPH, description="Semantic classification")
-    text: str = Field(default="", description="Original extracted raw text without synthetic modifications")
+    block_type: BlockType = Field(
+        default=BlockType.PARAGRAPH, description="Semantic classification"
+    )
+    text: str = Field(
+        default="", description="Original extracted raw text without synthetic modifications"
+    )
     reading_order: int = Field(default=0, description="0-indexed natural reading order position")
     page_number: int = Field(default=1, description="1-indexed source document page number")
     bounding_box: list[float] | None = Field(
         default=None,
         description="Coordinates [x0, y0, x1, y1] in page points where available",
     )
-    confidence: float | None = Field(default=None, description="Extraction or OCR confidence score (0.0 to 1.0)")
+    confidence: float | None = Field(
+        default=None, description="Extraction or OCR confidence score (0.0 to 1.0)"
+    )
     extraction_engine: str = Field(default="native", description="Engine producing this block")
     provenance: str = Field(default="native", description="Source: native | ocr | layout_heuristic")
     warnings: list[str] = Field(default_factory=list, description="Parser or block-level warnings")
@@ -44,9 +50,13 @@ class CanonicalPage(BaseModel):
     width: float | None = Field(default=None, description="Page width in points (72 dpi)")
     height: float | None = Field(default=None, description="Page height in points (72 dpi)")
     rotation: int = Field(default=0, description="Clockwise rotation in degrees (0, 90, 180, 270)")
-    is_scanned: bool = Field(default=False, description="True if native digital text density is below threshold")
+    is_scanned: bool = Field(
+        default=False, description="True if native digital text density is below threshold"
+    )
     ocr_applied: bool = Field(default=False, description="True if OCR was executed for this page")
-    blocks: list[CanonicalBlock] = Field(default_factory=list, description="Blocks belonging to this page")
+    blocks: list[CanonicalBlock] = Field(
+        default_factory=list, description="Blocks belonging to this page"
+    )
     metadata: dict[str, Any] = Field(default_factory=dict, description="Page-specific attributes")
 
 
@@ -148,9 +158,15 @@ class ExtractionManifest(BaseModel):
 class ExtractionRequest(BaseModel):
     """Payload for triggering a document extraction run."""
 
-    password: str | None = Field(default=None, description="Optional password for encrypted documents (PDF)")
-    extract_images: bool = Field(default=False, description="Extract and save embedded image assets")
-    options: dict[str, Any] = Field(default_factory=dict, description="Additional extractor-specific options")
+    password: str | None = Field(
+        default=None, description="Optional password for encrypted documents (PDF)"
+    )
+    extract_images: bool = Field(
+        default=False, description="Extract and save embedded image assets"
+    )
+    options: dict[str, Any] = Field(
+        default_factory=dict, description="Additional extractor-specific options"
+    )
 
 
 class ExtractionStatusResponse(BaseModel):

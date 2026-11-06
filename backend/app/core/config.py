@@ -60,6 +60,8 @@ class Settings(BaseSettings):
     POSTGRES_DB: str = "documind_db"
     DATABASE_URL: str | None = None
     SYNC_DATABASE_URL: str | None = None
+    DB_POOL_RECYCLE: int = 1800  # Recycle idle pooled connections after 30 minutes
+    DB_POOL_TIMEOUT: int = 15  # Connection acquire timeout in seconds
 
     @property
     def async_database_uri(self) -> str:
@@ -133,6 +135,12 @@ class Settings(BaseSettings):
     LOCAL_MODEL_PROVIDER: str = "ollama"
     LOCAL_INFERENCE_DEVICE: str = "cpu"
     OLLAMA_BASE_URL: str = "http://localhost:11434"
+
+    # Hardware Governor & Concurrency (Ryzen 7 5800H + RTX 3050 4GB VRAM)
+    MAX_PARALLEL_WORKERS: int = 4
+    GPU_MAX_CONCURRENT_INFERENCE: int = 1
+    VISION_ENGINE_DEFAULT: str = "documind-heuristic-cv-v1"
+    VISION_DEVICE: str = "cpu"
 
     CLOUD_PROCESSING_ENABLED: bool = False
     CLOUD_MODEL_PROVIDER: str | None = None

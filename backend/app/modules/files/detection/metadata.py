@@ -141,14 +141,20 @@ class SafeMetadataExtractor:
                 # Keyframe header starts at offset 23
                 if len(header) >= 30 and header[20:23] == b"\x9d\x01\x2a":
                     w, h = struct.unpack("<HH", header[26:30])
-                    return {"dimensions": {"width": w & 0x3FFF, "height": h & 0x3FFF}, "format_variant": "lossy"}
+                    return {
+                        "dimensions": {"width": w & 0x3FFF, "height": h & 0x3FFF},
+                        "format_variant": "lossy",
+                    }
             elif subchunk == b"VP8L":
                 # Lossless 1-byte 0x2f signature, 4 bytes width/height bitstream
                 if len(header) >= 25 and header[20] == 0x2F:
                     b1, b2, b3, b4 = header[21:25]
                     width = 1 + (((b2 & 0x3F) << 8) | b1)
                     height = 1 + (((b4 & 0x0F) << 10) | (b3 << 2) | ((b2 & 0xC0) >> 6))
-                    return {"dimensions": {"width": width, "height": height}, "format_variant": "lossless"}
+                    return {
+                        "dimensions": {"width": width, "height": height},
+                        "format_variant": "lossless",
+                    }
             elif subchunk == b"VP8X":
                 if len(header) >= 30:
                     width = 1 + struct.unpack("<I", header[24:27] + b"\x00")[0]

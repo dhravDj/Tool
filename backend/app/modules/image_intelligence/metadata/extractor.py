@@ -159,7 +159,9 @@ class ImageMetadataExtractor:
                             exif_scrubbed[tag_name] = value
                         elif isinstance(value, bytes):
                             try:
-                                exif_scrubbed[tag_name] = value.decode("utf-8", errors="ignore").strip()
+                                exif_scrubbed[tag_name] = value.decode(
+                                    "utf-8", errors="ignore"
+                                ).strip()
                             except Exception:
                                 pass
             except Exception as e:

@@ -117,7 +117,9 @@ class DocxExtractor(BaseDocumentExtractor):
                     htext = hp.text.strip()
                     if htext:
                         block = CanonicalBlock(
-                            block_id=self._generate_block_id(current_page_number, len(current_page_blocks)),
+                            block_id=self._generate_block_id(
+                                current_page_number, len(current_page_blocks)
+                            ),
                             block_type=BlockType.HEADER,
                             text=htext,
                             reading_order=global_reading_order,
@@ -142,14 +144,16 @@ class DocxExtractor(BaseDocumentExtractor):
 
                 # Check if paragraph contains explicit page break
                 xml_str = child.xml
-                has_page_break = "w:type=\"page\"" in xml_str or "w:lastRenderedPageBreak" in xml_str
+                has_page_break = 'w:type="page"' in xml_str or "w:lastRenderedPageBreak" in xml_str
 
                 if text:
                     style_name = p.style.name.lower() if p.style and p.style.name else ""
                     b_type, meta = self._classify_paragraph(p, style_name, hyperlinks_map)
 
                     block = CanonicalBlock(
-                        block_id=self._generate_block_id(current_page_number, len(current_page_blocks)),
+                        block_id=self._generate_block_id(
+                            current_page_number, len(current_page_blocks)
+                        ),
                         block_type=b_type,
                         text=text,
                         reading_order=global_reading_order,
@@ -176,7 +180,9 @@ class DocxExtractor(BaseDocumentExtractor):
                 if grid:
                     table_text = self._format_table_text(grid)
                     block = CanonicalBlock(
-                        block_id=self._generate_block_id(current_page_number, len(current_page_blocks)),
+                        block_id=self._generate_block_id(
+                            current_page_number, len(current_page_blocks)
+                        ),
                         block_type=BlockType.TABLE,
                         text=table_text,
                         reading_order=global_reading_order,
@@ -202,7 +208,9 @@ class DocxExtractor(BaseDocumentExtractor):
                     ftext = fp.text.strip()
                     if ftext:
                         block = CanonicalBlock(
-                            block_id=self._generate_block_id(current_page_number, len(current_page_blocks)),
+                            block_id=self._generate_block_id(
+                                current_page_number, len(current_page_blocks)
+                            ),
                             block_type=BlockType.FOOTER,
                             text=ftext,
                             reading_order=global_reading_order,
@@ -250,7 +258,9 @@ class DocxExtractor(BaseDocumentExtractor):
         urls = []
         for element in p._element.iter():
             if element.tag.endswith("hyperlink"):
-                r_id = element.get("{http://schemas.openxmlformats.org/officeDocument/2006/relationships}id")
+                r_id = element.get(
+                    "{http://schemas.openxmlformats.org/officeDocument/2006/relationships}id"
+                )
                 if r_id and r_id in hyperlinks_map:
                     urls.append(hyperlinks_map[r_id])
         if urls:

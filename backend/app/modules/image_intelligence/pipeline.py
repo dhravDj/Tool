@@ -112,7 +112,9 @@ class ImageIntelligencePipeline(ProcessingPluginInterface):
 
         local_path = local_storage.get_local_path(record.storage_path)
         if not local_path or not local_path.exists():
-            raise ProcessingError(f"Underlying file not found at storage path: {record.storage_path}")
+            raise ProcessingError(
+                f"Underlying file not found at storage path: {record.storage_path}"
+            )
 
         format_id = record.detection_format_id or record.extension.lstrip(".")
         filename = record.original_filename
@@ -236,10 +238,12 @@ class ImageIntelligencePipeline(ProcessingPluginInterface):
         warnings.extend(ocr_warnings)
 
         # Stage 4: Vision Scene Understanding & Objects
-        caption, scene_type, objects, dominant_colors, object_regions = self.vision_engine.analyze_scene(
-            working_img,
-            ocr_text=ocr_text,
-            metadata_dict=meta.model_dump(),
+        caption, scene_type, objects, dominant_colors, object_regions = (
+            self.vision_engine.analyze_scene(
+                working_img,
+                ocr_text=ocr_text,
+                metadata_dict=meta.model_dump(),
+            )
         )
 
         # Stage 5: Diagram & Flowchart Analysis
@@ -324,7 +328,9 @@ class ImageIntelligencePipeline(ProcessingPluginInterface):
         record = res.scalar_one_or_none()
 
         if not record:
-            raise ProcessingError(f"No image analysis record found for file '{file_id}'. Run analyze-image first.")
+            raise ProcessingError(
+                f"No image analysis record found for file '{file_id}'. Run analyze-image first."
+            )
 
         # Read canonical document JSON from storage
         artifacts = record.artifacts or {}

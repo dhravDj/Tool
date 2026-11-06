@@ -139,7 +139,11 @@ class MarkdownExtractor(BaseDocumentExtractor):
             if stripped.startswith("|") and stripped.endswith("|"):
                 table_lines = [stripped]
                 idx += 1
-                while idx < n and lines[idx].strip().startswith("|") and lines[idx].strip().endswith("|"):
+                while (
+                    idx < n
+                    and lines[idx].strip().startswith("|")
+                    and lines[idx].strip().endswith("|")
+                ):
                     table_lines.append(lines[idx].strip())
                     idx += 1
 
@@ -226,11 +230,13 @@ class MarkdownExtractor(BaseDocumentExtractor):
             metadata={"block_count": len(blocks)},
         )
 
-        metadata.update({
-            "char_count": len(body),
-            "word_count": len(body.split()),
-            "line_count": len(lines),
-        })
+        metadata.update(
+            {
+                "char_count": len(body),
+                "word_count": len(body.split()),
+                "line_count": len(lines),
+            }
+        )
 
         return CanonicalDocument(
             document_id=doc_id,

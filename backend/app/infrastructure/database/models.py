@@ -296,4 +296,3 @@ class ImageAnalysisRecord(Base):
 
     # Relationships
     file: Mapped["FileRecord"] = relationship("FileRecord", back_populates="image_analyses")
-

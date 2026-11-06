@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 
 try:
     import pytesseract
+
     HAS_PYTESSERACT = True
 except ImportError:
     HAS_PYTESSERACT = False
@@ -31,6 +32,7 @@ class ImageOCREngine:
         if not (settings.OCR_ENABLED and HAS_PYTESSERACT and self.tesseract_cmd):
             return False
         import os
+
         return bool(shutil.which(self.tesseract_cmd) or os.path.exists(self.tesseract_cmd))
 
     def extract_regions(
@@ -51,7 +53,9 @@ class ImageOCREngine:
 
         try:
             config = options.get("tesseract_config", "--psm 1 --oem 3")
-            data = pytesseract.image_to_data(img, output_type=pytesseract.Output.DICT, config=config)
+            data = pytesseract.image_to_data(
+                img, output_type=pytesseract.Output.DICT, config=config
+            )
 
             n_boxes = len(data.get("text", []))
             raw_words: list[dict[str, Any]] = []
@@ -71,16 +75,18 @@ class ImageOCREngine:
                 w = int(data["width"][i])
                 h = int(data["height"][i])
 
-                raw_words.append({
-                    "text": text,
-                    "conf": conf,
-                    "x0": x,
-                    "y0": y,
-                    "x1": x + w,
-                    "y1": y + h,
-                    "line_num": data.get("line_num", [0])[i],
-                    "block_num": data.get("block_num", [0])[i],
-                })
+                raw_words.append(
+                    {
+                        "text": text,
+                        "conf": conf,
+                        "x0": x,
+                        "y0": y,
+                        "x1": x + w,
+                        "y1": y + h,
+                        "line_num": data.get("line_num", [0])[i],
+                        "block_num": data.get("block_num", [0])[i],
+                    }
+                )
 
             # Sort and assemble reading order
             sorted_words = self._sort_reading_order(raw_words)
@@ -119,9 +125,7 @@ class ImageOCREngine:
                 )
 
             full_text = " ".join(full_text_parts)
-            avg_conf = (
-                round(sum(confidences) / len(confidences), 3) if confidences else 0.0
-            )
+            avg_conf = round(sum(confidences) / len(confidences), 3) if confidences else 0.0
 
             return regions, full_text, avg_conf, warnings
 
