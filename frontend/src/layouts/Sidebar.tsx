@@ -9,6 +9,7 @@ import {
   LayoutDashboard,
   Server,
   Settings,
+  Sparkles,
   UploadCloud,
   X,
 } from "lucide-react";
@@ -28,6 +29,7 @@ export const Sidebar: React.FC = () => {
     { label: "Upload & Ingest", path: "/upload", icon: <UploadCloud className="h-5 w-5" /> },
     { label: "Processing Jobs", path: "/jobs", icon: <Activity className="h-5 w-5" /> },
     { label: "File Library", path: "/files", icon: <Files className="h-5 w-5" /> },
+    { label: "AI Intelligence", path: "/ai", icon: <Sparkles className="h-5 w-5 text-blue-500" /> },
     { label: "System Status", path: "/system", icon: <Server className="h-5 w-5" /> },
     { label: "Settings", path: "/settings", icon: <Settings className="h-5 w-5" /> },
   ];

@@ -51,6 +51,16 @@ import {
   StructuredDataAnalysisOverview,
   StructuredDataDocument,
   SystemStatusData,
+  AICapabilitiesResponse,
+  AISettingsPayload,
+  ChatRequest,
+  ChatResponse,
+  ComparisonRequest,
+  ComparisonResponse,
+  SearchQuery,
+  SearchResult,
+  SummaryRequest,
+  SummaryResponse,
   TimelineEvent,
   VideoCapabilities,
   VideoDetection,
@@ -523,4 +533,78 @@ export const api = {
 
   getArchiveExportUrl: (fileId: string, format = "json"): string =>
     `${API_BASE}/files/${encodeURIComponent(fileId)}/archive-analysis/export/${encodeURIComponent(format)}`,
+
+  // Phase 11 — Universal AI Intelligence Endpoints
+  getAICapabilities: (): Promise<AICapabilitiesResponse> =>
+    request<AICapabilitiesResponse>("/ai/capabilities"),
+
+  getAIProviders: (): Promise<Record<string, unknown>[]> =>
+    request<Record<string, unknown>[]>("/ai/providers"),
+
+  indexFileForAI: (fileId: string, force = false): Promise<Record<string, unknown>> =>
+    request<Record<string, unknown>>(`/ai/index/${encodeURIComponent(fileId)}?force=${force}`, {
+      method: "POST",
+    }),
+
+  getAIIndexStatus: (fileId: string): Promise<Record<string, unknown>> =>
+    request<Record<string, unknown>>(`/ai/index/${encodeURIComponent(fileId)}/status`),
+
+  searchAI: (query: SearchQuery): Promise<SearchResult> =>
+    request<SearchResult>("/ai/search", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(query),
+    }),
+
+  chatAI: (req: ChatRequest): Promise<ChatResponse> =>
+    request<ChatResponse>("/ai/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(req),
+    }),
+
+  listAIConversations: (limit = 20): Promise<Record<string, unknown>[]> =>
+    request<Record<string, unknown>[]>(`/ai/conversations?limit=${limit}`),
+
+  getAIConversation: (conversationId: string): Promise<Record<string, unknown>> =>
+    request<Record<string, unknown>>(`/ai/conversations/${encodeURIComponent(conversationId)}`),
+
+  deleteAIConversation: (conversationId: string): Promise<Record<string, unknown>> =>
+    request<Record<string, unknown>>(`/ai/conversations/${encodeURIComponent(conversationId)}`, {
+      method: "DELETE",
+    }),
+
+  summarizeFile: (req: SummaryRequest, refresh = false): Promise<SummaryResponse> =>
+    request<SummaryResponse>(`/ai/summarize?refresh=${refresh}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(req),
+    }),
+
+  compareFiles: (req: ComparisonRequest): Promise<ComparisonResponse> =>
+    request<ComparisonResponse>("/ai/compare", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(req),
+    }),
+
+  extractStructuredData: (fileId: string, fields?: string[]): Promise<Record<string, unknown>> =>
+    request<Record<string, unknown>>("/ai/extract-structured", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ file_id: fileId, fields }),
+    }),
+
+  getAISettings: (): Promise<Record<string, unknown>> =>
+    request<Record<string, unknown>>("/ai/settings"),
+
+  updateAISettings: (payload: AISettingsPayload): Promise<Record<string, unknown>> =>
+    request<Record<string, unknown>>("/ai/settings", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    }),
+
+  getAITelemetry: (): Promise<Record<string, unknown>> =>
+    request<Record<string, unknown>>("/ai/usage"),
 };

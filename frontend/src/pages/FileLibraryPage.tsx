@@ -17,6 +17,7 @@ import {
   Music,
   Package,
   Search,
+  Sparkles,
   Video,
   X,
 } from "lucide-react";
@@ -33,6 +34,7 @@ import { VideoIntelligenceView } from "@/components/VideoIntelligenceView";
 import { CodeIntelligenceView } from "@/components/CodeIntelligenceView";
 import { StructuredDataIntelligenceView } from "@/components/StructuredDataIntelligenceView";
 import { ArchiveIntelligenceView } from "@/components/ArchiveIntelligenceView";
+import { AIWorkspace } from "@/components/ai/AIWorkspace";
 import { api } from "@/services/api";
 import { FileRecordSummary, FormatDetailData } from "@/types/api";
 
@@ -42,7 +44,7 @@ export const FileLibraryPage: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [inspectingFile, setInspectingFile] = useState<FileRecordSummary | null>(null);
   const [modalTab, setModalTab] = useState<
-    "extraction" | "image_intelligence" | "spreadsheet_intelligence" | "presentation_intelligence" | "audio_intelligence" | "video_intelligence" | "code_intelligence" | "structured_data_intelligence" | "archive_intelligence" | "detection"
+    "extraction" | "image_intelligence" | "spreadsheet_intelligence" | "presentation_intelligence" | "audio_intelligence" | "video_intelligence" | "code_intelligence" | "structured_data_intelligence" | "archive_intelligence" | "detection" | "ai_intelligence"
   >("extraction");
 
   // Queries
@@ -560,6 +562,17 @@ export const FileLibraryPage: React.FC = () => {
                   >
                     Detection Provenance
                   </button>
+                  <button
+                    onClick={() => setModalTab("ai_intelligence")}
+                    className={`px-3 py-1 rounded-md font-medium transition flex items-center gap-1.5 ${
+                      modalTab === "ai_intelligence"
+                        ? "bg-blue-600 text-white shadow-sm"
+                        : "text-blue-600 dark:text-blue-400 hover:text-blue-700 bg-blue-50 dark:bg-blue-950/40"
+                    }`}
+                  >
+                    <Sparkles className="h-3.5 w-3.5" />
+                    AI Intelligence
+                  </button>
                 </div>
               </div>
               <button
@@ -570,7 +583,12 @@ export const FileLibraryPage: React.FC = () => {
               </button>
             </div>
 
-            {modalTab === "archive_intelligence" ? (
+            {modalTab === "ai_intelligence" ? (
+              <AIWorkspace
+                selectedFileId={inspectingFile.id}
+                selectedFilename={inspectingFile.original_filename}
+              />
+            ) : modalTab === "archive_intelligence" ? (
               <ArchiveIntelligenceView
                 fileId={inspectingFile.id}
                 filename={inspectingFile.original_filename}

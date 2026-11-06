@@ -1567,5 +1567,206 @@ export interface ArchiveCapabilities {
   features: string[];
 }
 
+// =============================================================================
+// Phase 11 — Universal AI Intelligence Types
+// =============================================================================
+
+export interface SourceReference {
+  source_file_id: string;
+  original_filename: string;
+  source_type: string;
+  formatted_citation: string;
+  page_number?: number | null;
+  paragraph_index?: number | null;
+  sheet_name?: string | null;
+  cell_range?: string | null;
+  slide_number?: number | null;
+  line_start?: number | null;
+  line_end?: number | null;
+  timestamp_start?: number | null;
+  timestamp_end?: number | null;
+  json_path?: string | null;
+  archive_path?: string | null;
+  metadata?: Record<string, any>;
+}
+
+export interface Citation {
+  citation_id: string;
+  file_id: string;
+  filename: string;
+  source_type: string;
+  formatted_citation: string;
+  snippet: string;
+  page_number?: number | null;
+  sheet_name?: string | null;
+  cell_range?: string | null;
+  slide_number?: number | null;
+  line_start?: number | null;
+  line_end?: number | null;
+  timestamp_start?: number | null;
+  timestamp_end?: number | null;
+  json_path?: string | null;
+  archive_path?: string | null;
+  relevance_score?: number;
+}
+
+export interface ChatMessage {
+  message_id: string;
+  conversation_id: string;
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+  citations: Citation[];
+  retrieved_chunk_ids: string[];
+  provider?: string | null;
+  model_name?: string | null;
+  prompt_tokens?: number | null;
+  completion_tokens?: number | null;
+  total_tokens?: number | null;
+  latency_ms?: number | null;
+  created_at: string;
+}
+
+export interface ChatRequest {
+  message: string;
+  conversation_id?: string | null;
+  scope_type?: string;
+  file_ids?: string[] | null;
+  collection_id?: string | null;
+  provider?: string | null;
+  model?: string | null;
+  temperature?: number;
+  max_tokens?: number;
+  allow_cloud?: boolean;
+}
+
+export interface ChatResponse {
+  conversation_id: string;
+  message: ChatMessage;
+  citations: Citation[];
+  retrieved_chunks_count: number;
+  provider_used: string;
+  model_used: string;
+  latency_ms: number;
+  warnings: string[];
+}
+
+export interface SearchFilter {
+  file_ids?: string[] | null;
+  source_types?: string[] | null;
+  collection_id?: string | null;
+  parent_archive_id?: string | null;
+  date_from?: string | null;
+  date_to?: string | null;
+}
+
+export interface SearchQuery {
+  query: string;
+  search_mode?: 'hybrid' | 'semantic' | 'keyword';
+  top_k?: number;
+  filter?: SearchFilter | null;
+}
+
+export interface SearchHit {
+  chunk_id: string;
+  file_id: string;
+  filename: string;
+  source_type: string;
+  content: string;
+  source_reference: SourceReference;
+  score: number;
+  search_method: string;
+  highlight_snippet?: string | null;
+}
+
+export interface SearchResult {
+  query: string;
+  search_mode: string;
+  total_hits: number;
+  hits: SearchHit[];
+  duration_ms: number;
+}
+
+export interface SummaryRequest {
+  file_id: string;
+  summary_type?: string;
+  provider?: string | null;
+  allow_cloud?: boolean;
+}
+
+export interface SummaryResponse {
+  summary_id: string;
+  file_id: string;
+  filename: string;
+  summary_type: string;
+  summary_text: string;
+  key_findings: string[];
+  citations: Citation[];
+  model_used: string;
+  duration_ms: number;
+}
+
+export interface ComparisonRequest {
+  file_ids: string[];
+  aspects?: string[] | null;
+  provider?: string | null;
+  allow_cloud?: boolean;
+}
+
+export interface ComparisonResponse {
+  comparison_id: string;
+  file_ids: string[];
+  filenames: string[];
+  comparison_matrix: Record<string, any>[];
+  common_themes: string[];
+  differences: string[];
+  contradictions: Record<string, any>[];
+  consolidated_summary: string;
+  citations: Citation[];
+  model_used: string;
+  duration_ms: number;
+}
+
+export interface ModelInfo {
+  model_id: string;
+  provider_name: string;
+  model_type: string;
+  display_name: string;
+  context_window: number;
+  max_output_tokens: number;
+  is_local: boolean;
+  requires_api_key: boolean;
+  capabilities: string[];
+}
+
+export interface ProviderInfo {
+  provider_name: string;
+  display_name: string;
+  is_available: boolean;
+  is_local: boolean;
+  requires_cloud_consent: boolean;
+  models: ModelInfo[];
+}
+
+export interface AICapabilitiesResponse {
+  engine_version: string;
+  supported_modalities: string[];
+  embedding_dimension: number;
+  available_providers: ProviderInfo[];
+  default_llm_model: string;
+  default_embedding_model: string;
+  features: string[];
+}
+
+export interface AISettingsPayload {
+  default_provider?: string | null;
+  default_llm_model?: string | null;
+  cloud_consent_given?: boolean | null;
+  ollama_base_url?: string | null;
+  gemini_api_key?: string | null;
+  chunk_size?: number | null;
+  chunk_overlap?: number | null;
+}
+
+
 
 

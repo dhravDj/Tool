@@ -133,6 +133,15 @@ class FileRecord(Base):
     archive_analyses: Mapped[list["ArchiveAnalysisRecord"]] = relationship(
         "ArchiveAnalysisRecord", back_populates="file", cascade="all, delete-orphan"
     )
+    knowledge_documents: Mapped[list["KnowledgeDocumentRecord"]] = relationship(
+        "KnowledgeDocumentRecord", back_populates="file", cascade="all, delete-orphan"
+    )
+    knowledge_chunks: Mapped[list["KnowledgeChunkRecord"]] = relationship(
+        "KnowledgeChunkRecord", back_populates="file", cascade="all, delete-orphan"
+    )
+    summaries: Mapped[list["SummaryRecord"]] = relationship(
+        "SummaryRecord", back_populates="file", cascade="all, delete-orphan"
+    )
 
     __table_args__ = (
         Index("ix_files_owner_status", "owner_id", "status"),
@@ -768,6 +777,333 @@ class ArchiveRelationshipRecord(Base):
     root_archive: Mapped["ArchiveAnalysisRecord"] = relationship(
         "ArchiveAnalysisRecord", foreign_keys=[root_archive_id]
     )
+
+
+# =============================================================================
+# Phase 11 — Universal AI Intelligence Engine Models
+# =============================================================================
+
+
+class KnowledgeDocumentRecord(Base, TimestampMixin):
+    """Universal normalized knowledge document extracted from any file modality."""
+
+    __tablename__ = "knowledge_documents"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+    file_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True),
+        ForeignKey("files.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    knowledge_document_id: Mapped[str] = mapped_column(
+        String(64), unique=True, index=True, nullable=False
+    )
+    source_type: Mapped[str] = mapped_column(String(32), index=True, nullable=False)
+    content_type: Mapped[str] = mapped_column(String(64), nullable=False)
+    title: Mapped[str] = mapped_column(String(255), nullable=False)
+    content_hash: Mapped[str] = mapped_column(String(64), index=True, nullable=False)
+    extraction_status: Mapped[str] = mapped_column(String(32), default="completed", nullable=False)
+    language: Mapped[str] = mapped_column(String(16), default="en", nullable=False)
+    total_blocks: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    total_tokens: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    raw_metadata: Mapped[dict[str, Any]] = mapped_column(JSON_TYPE, default=dict, nullable=False)
+
+    # Relationships
+    file: Mapped["FileRecord"] = relationship("FileRecord", back_populates="knowledge_documents")
+    chunks: Mapped[list["KnowledgeChunkRecord"]] = relationship(
+        "KnowledgeChunkRecord", back_populates="document", cascade="all, delete-orphan"
+    )
+
+
+class KnowledgeChunkRecord(Base):
+    """Searchable, chunked content unit with exact source references and embedding status."""
+
+    __tablename__ = "knowledge_chunks"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+    knowledge_document_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True),
+        ForeignKey("knowledge_documents.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    file_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True),
+        ForeignKey("files.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    chunk_id: Mapped[str] = mapped_column(String(64), unique=True, index=True, nullable=False)
+    chunk_index: Mapped[int] = mapped_column(Integer, nullable=False, index=True)
+    content: Mapped[str] = mapped_column(Text, nullable=False)
+    token_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    source_type: Mapped[str] = mapped_column(String(32), index=True, nullable=False)
+    source_reference: Mapped[dict[str, Any]] = mapped_column(JSON_TYPE, default=dict, nullable=False)
+    content_hash: Mapped[str] = mapped_column(String(64), index=True, nullable=False)
+    embedding_status: Mapped[str] = mapped_column(
+        String(32), default="pending", index=True, nullable=False
+    )
+    metadata_payload: Mapped[dict[str, Any]] = mapped_column(JSON_TYPE, default=dict, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        default=lambda: datetime.now(UTC),
+        nullable=False,
+    )
+
+    # Relationships
+    document: Mapped["KnowledgeDocumentRecord"] = relationship(
+        "KnowledgeDocumentRecord", back_populates="chunks"
+    )
+    file: Mapped["FileRecord"] = relationship("FileRecord", back_populates="knowledge_chunks")
+    embedding: Mapped[Optional["EmbeddingRecord"]] = relationship(
+        "EmbeddingRecord", back_populates="chunk", uselist=False, cascade="all, delete-orphan"
+    )
+
+    __table_args__ = (
+        Index("ix_chunks_file_index", "file_id", "chunk_index"),
+        Index("ix_chunks_doc_index", "knowledge_document_id", "chunk_index"),
+    )
+
+
+class EmbeddingRecord(Base):
+    """Vector embedding representation for a knowledge chunk."""
+
+    __tablename__ = "embedding_records"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+    chunk_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True),
+        ForeignKey("knowledge_chunks.id", ondelete="CASCADE"),
+        nullable=False,
+        unique=True,
+        index=True,
+    )
+    provider: Mapped[str] = mapped_column(String(32), index=True, nullable=False)
+    model_name: Mapped[str] = mapped_column(String(64), index=True, nullable=False)
+    dimension: Mapped[int] = mapped_column(Integer, nullable=False)
+    vector_data: Mapped[list[float]] = mapped_column(JSON_TYPE, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        default=lambda: datetime.now(UTC),
+        nullable=False,
+    )
+
+    # Relationships
+    chunk: Mapped["KnowledgeChunkRecord"] = relationship(
+        "KnowledgeChunkRecord", back_populates="embedding"
+    )
+
+
+class AIConversationRecord(Base, TimestampMixin):
+    """Multi-turn conversation session tied to files or global workspace."""
+
+    __tablename__ = "ai_conversations"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+    title: Mapped[str] = mapped_column(String(255), default="New Conversation", nullable=False)
+    provider: Mapped[str] = mapped_column(String(32), default="sovereign", nullable=False)
+    model_name: Mapped[str] = mapped_column(
+        String(64), default="documind-sovereign-llm-v1", nullable=False
+    )
+    file_id: Mapped[uuid.UUID | None] = mapped_column(
+        Uuid(as_uuid=True),
+        ForeignKey("files.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
+    context_mode: Mapped[str] = mapped_column(String(32), default="single_file", nullable=False)
+    system_prompt: Mapped[str | None] = mapped_column(Text, nullable=True)
+    metadata_payload: Mapped[dict[str, Any]] = mapped_column(JSON_TYPE, default=dict, nullable=False)
+
+    # Relationships
+    file: Mapped[Optional["FileRecord"]] = relationship("FileRecord")
+    messages: Mapped[list["AIMessageRecord"]] = relationship(
+        "AIMessageRecord",
+        back_populates="conversation",
+        cascade="all, delete-orphan",
+        order_by="AIMessageRecord.created_at",
+    )
+
+
+class AIMessageRecord(Base):
+    """Individual user or AI assistant turn within an AI conversation."""
+
+    __tablename__ = "ai_messages"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+    conversation_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True),
+        ForeignKey("ai_conversations.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    role: Mapped[str] = mapped_column(String(32), nullable=False)
+    content: Mapped[str] = mapped_column(Text, nullable=False)
+    thought_process: Mapped[str | None] = mapped_column(Text, nullable=True)
+    citations: Mapped[list[dict[str, Any]]] = mapped_column(
+        JSON_TYPE, default=list, nullable=False
+    )
+    retrieval_id: Mapped[uuid.UUID | None] = mapped_column(
+        Uuid(as_uuid=True),
+        ForeignKey("retrieval_records.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+    token_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    latency_ms: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        default=lambda: datetime.now(UTC),
+        nullable=False,
+    )
+
+    # Relationships
+    conversation: Mapped["AIConversationRecord"] = relationship(
+        "AIConversationRecord", back_populates="messages"
+    )
+    retrieval: Mapped[Optional["RetrievalRecord"]] = relationship("RetrievalRecord")
+
+
+class RetrievalRecord(Base):
+    """Audit log of RAG retrieval queries, scores, and retrieved chunk hits."""
+
+    __tablename__ = "retrieval_records"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+    query: Mapped[str] = mapped_column(Text, nullable=False)
+    search_mode: Mapped[str] = mapped_column(String(32), default="hybrid", nullable=False)
+    top_k: Mapped[int] = mapped_column(Integer, default=10, nullable=False)
+    filter_payload: Mapped[dict[str, Any]] = mapped_column(JSON_TYPE, default=dict, nullable=False)
+    hits_payload: Mapped[list[dict[str, Any]]] = mapped_column(
+        JSON_TYPE, default=list, nullable=False
+    )
+    duration_ms: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        default=lambda: datetime.now(UTC),
+        nullable=False,
+    )
+
+
+class AIProviderConfigRecord(Base):
+    """Configuration, credentials, and user consent status for AI providers."""
+
+    __tablename__ = "ai_provider_configs"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+    provider_name: Mapped[str] = mapped_column(String(32), unique=True, index=True, nullable=False)
+    is_enabled: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    api_key_encrypted: Mapped[str | None] = mapped_column(Text, nullable=True)
+    base_url: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    default_model: Mapped[str] = mapped_column(String(64), nullable=False)
+    user_consent_granted: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    settings_payload: Mapped[dict[str, Any]] = mapped_column(
+        JSON_TYPE, default=dict, nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        default=lambda: datetime.now(UTC),
+        onupdate=lambda: datetime.now(UTC),
+        nullable=False,
+    )
+
+
+class AIUsageRecord(Base):
+    """Usage tracking and token telemetry for AI and RAG operations."""
+
+    __tablename__ = "ai_usage_records"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+    provider: Mapped[str] = mapped_column(String(32), index=True, nullable=False)
+    model_name: Mapped[str] = mapped_column(String(64), nullable=False)
+    operation_type: Mapped[str] = mapped_column(String(32), index=True, nullable=False)
+    prompt_tokens: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    completion_tokens: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    total_tokens: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    duration_ms: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        default=lambda: datetime.now(UTC),
+        nullable=False,
+    )
+
+
+class SummaryRecord(Base):
+    """Pre-computed and cached multi-type file summaries."""
+
+    __tablename__ = "summary_records"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+    file_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True),
+        ForeignKey("files.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    summary_type: Mapped[str] = mapped_column(String(32), index=True, nullable=False)
+    provider: Mapped[str] = mapped_column(String(32), nullable=False)
+    model_name: Mapped[str] = mapped_column(String(64), nullable=False)
+    summary_text: Mapped[str] = mapped_column(Text, nullable=False)
+    key_findings: Mapped[list[str]] = mapped_column(JSON_TYPE, default=list, nullable=False)
+    citations: Mapped[list[dict[str, Any]]] = mapped_column(
+        JSON_TYPE, default=list, nullable=False
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        default=lambda: datetime.now(UTC),
+        nullable=False,
+    )
+
+    # Relationships
+    file: Mapped["FileRecord"] = relationship("FileRecord", back_populates="summaries")
+
+    __table_args__ = (
+        Index("ix_summaries_file_type", "file_id", "summary_type"),
+    )
+
 
 
 

@@ -2,6 +2,7 @@ import React from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MainLayout } from "@/layouts/MainLayout";
+import { AIIntelligencePage } from "@/pages/AIIntelligencePage";
 import { DashboardPage } from "@/pages/DashboardPage";
 import { FileLibraryPage } from "@/pages/FileLibraryPage";
 import { ProcessingJobsPage } from "@/pages/ProcessingJobsPage";
@@ -28,6 +29,7 @@ export const App: React.FC = () => {
             <Route path="/upload" element={<UploadPage />} />
             <Route path="/jobs" element={<ProcessingJobsPage />} />
             <Route path="/files" element={<FileLibraryPage />} />
+            <Route path="/ai" element={<AIIntelligencePage />} />
             <Route path="/system" element={<SystemStatusPage />} />
             <Route path="/settings" element={<SettingsPage />} />
           </Route>
