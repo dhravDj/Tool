@@ -155,6 +155,20 @@ MP4_FTYP_SIGNATURE = MagicSignature(
     description="ISO Base Media File Format (MP4/MOV/M4A/HEIC)",
 )
 
+QT_MOOV_SIGNATURE = MagicSignature(
+    signature_bytes=b"moov",
+    offset=4,
+    name="QT_MOOV",
+    description="Apple QuickTime Movie moov atom header",
+)
+
+QT_WIDE_SIGNATURE = MagicSignature(
+    signature_bytes=b"wide",
+    offset=4,
+    name="QT_WIDE",
+    description="Apple QuickTime Movie wide atom header",
+)
+
 EBML_SIGNATURE = MagicSignature(
     signature_bytes=b"\x1aE\xdf\xa3",
     offset=0,

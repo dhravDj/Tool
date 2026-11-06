@@ -167,15 +167,23 @@ class ContainerInspector:
 
     @classmethod
     def inspect_isobmff_container(cls, buffer: bytes) -> ContainerInspectionResult:
-        """Inspect ISO Base Media File Format ftyp major brand (MP4, M4A, MOV, HEIC)."""
+        """Inspect ISO Base Media File Format ftyp major brand or QuickTime atoms (MP4, M4A, MOV, HEIC)."""
         result = ContainerInspectionResult(is_container=True, container_type="isobmff")
+        if len(buffer) < 8:
+            return result
+
+        if buffer[4:8] in (b"moov", b"wide", b"mdat", b"skip", b"free"):
+            result.identified_format_id = "mov"
+            result.manifest_entries = [f"atom:{buffer[4:8].decode('ascii', errors='ignore')}"]
+            return result
+
         if len(buffer) < 12 or buffer[4:8] != b"ftyp":
             return result
 
         major_brand = buffer[8:12].decode("ascii", errors="ignore").lower()
         result.manifest_entries = [f"brand:{major_brand}"]
 
-        if major_brand in ("isom", "iso2", "mp41", "mp42", "avc1"):
+        if major_brand in ("isom", "iso2", "mp41", "mp42", "avc1", "dash"):
             result.identified_format_id = "mp4"
         elif major_brand in ("m4a ", "m4b ", "m4p "):
             result.identified_format_id = "m4a"
@@ -186,4 +194,22 @@ class ContainerInspector:
         else:
             result.identified_format_id = "mp4"  # Default generic ISO-BMFF
 
+        return result
+
+    @classmethod
+    def inspect_ebml_container(cls, buffer: bytes) -> ContainerInspectionResult:
+        """Inspect EBML container docType (Matroska MKV vs WebM)."""
+        result = ContainerInspectionResult(is_container=True, container_type="ebml")
+        if len(buffer) < 4 or buffer[:4] != b"\x1a\x45\xdf\xa3":
+            return result
+
+        header_sample = buffer[:512]
+        if b"webm" in header_sample:
+            result.identified_format_id = "webm"
+            result.manifest_entries = ["doctype:webm"]
+        elif b"matroska" in header_sample:
+            result.identified_format_id = "mkv"
+            result.manifest_entries = ["doctype:matroska"]
+        else:
+            result.identified_format_id = "mkv"  # Default generic EBML container
         return result

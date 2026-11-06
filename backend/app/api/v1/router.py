@@ -15,6 +15,7 @@ from app.api.v1.endpoints import (
     presentation_intelligence,
     spreadsheet_intelligence,
     system,
+    video_intelligence,
 )
 
 api_router = APIRouter()
@@ -31,3 +32,4 @@ api_router.include_router(image_intelligence.router)
 api_router.include_router(spreadsheet_intelligence.router)
 api_router.include_router(presentation_intelligence.router)
 api_router.include_router(audio_intelligence.router)
+api_router.include_router(video_intelligence.router)

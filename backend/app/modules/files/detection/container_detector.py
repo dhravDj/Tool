@@ -131,4 +131,31 @@ class ContainerDetector:
                     warnings=[f"Failed reading OLE2 container: {e}"],
                 )
 
+        # 5. EBML Containers (MKV, WEBM)
+        if container_type == "ebml" or (
+            raw_signature_format and raw_signature_format.format_id in ("mkv", "webm")
+        ):
+            try:
+                with open(file_path, "rb") as f:
+                    chunk = f.read(512)
+                res = ContainerInspector.inspect_ebml_container(chunk)
+                fmt = (
+                    format_registry.get_by_id(res.identified_format_id)
+                    if res.identified_format_id
+                    else None
+                )
+                return ContainerDetectionResult(
+                    is_container=True,
+                    container_type="ebml",
+                    detected_format=fmt,
+                    manifest_entries=res.manifest_entries,
+                    warnings=res.warnings,
+                )
+            except Exception as e:
+                return ContainerDetectionResult(
+                    is_container=True,
+                    container_type="ebml",
+                    warnings=[f"Failed reading EBML container: {e}"],
+                )
+
         return ContainerDetectionResult(is_container=False)

@@ -42,6 +42,7 @@ dependencies = [
     "python-pptx>=1.0.0",
     "mutagen>=1.47.0",
     "soundfile>=0.12.0",
+    "opencv-python-headless>=4.8.0",
 ]
 
 [project.optional-dependencies]
@@ -118,6 +119,7 @@ module = [
     "soundfile.*",
     "pyannote.*",
     "faster_whisper.*",
+    "cv2.*",
 ]
 ignore_missing_imports = true
 

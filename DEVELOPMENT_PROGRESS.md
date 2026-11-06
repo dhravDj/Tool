@@ -1,7 +1,7 @@
 # DocuMind AI — Development Progress Tracker
 
-**Current Platform Version:** 0.7.0 (Audio Intelligence)  
-**Active Task:** Phase 7 — Audio Intelligence Engine  
+**Current Platform Version:** 0.8.0 (Video Intelligence)  
+**Active Task:** Phase 8 — Video Intelligence Engine  
 **Overall Status:** **STABLE & VERIFIED (100%)**  
 **Last Updated:** November 6, 2026  
 
@@ -18,6 +18,7 @@
 | **Phase 5** | Spreadsheet Intelligence Engine | **HARDENED (100%)** | Complete 5-format support (XLSX, XLS, CSV, TSV, ODS), OLE2 compound container detection, non-executing AST formula inspector with cross-sheet tracking, automated data understanding & column profiling, DDE CSV formula injection sanitization (`'`), zero macro execution, 6 export generators, 9 REST API endpoints, full React spreadsheet viewer, 135 backend tests + 10 frontend tests (145 total passed). |
 | **Phase 6** | Presentation Intelligence Engine | **HARDENED (100%)** | Complete 3-format support (PPTX, PPT, ODP), slide hierarchy, bullet nesting levels, tables, native charts with series & categories, embedded picture assets, speaker notes isolation, diagram node-edge graphs, grouped shapes, hidden slide detection, sandboxed LibreOffice conversion + native OLE2 binary stream parser fallback, zero macro execution, 4 output generators (JSON, MD, TXT, Manifest), 9 REST API endpoints, full React presentation viewer, 155 backend tests + 11 frontend tests (166 total passed). |
 | **Phase 7** | Audio Intelligence Engine | **COMPLETED (100%)** | Complete 6-format support (MP3, WAV, M4A, AAC, FLAC, OGG), FFmpeg decoding & 16kHz mono normalization, amplitude dynamics, silence detection, VAD windowed chunking, sovereign baseline acoustic transcription (`documind-acoustic-v1`), faster-whisper & whisper.cpp adapters, cloud adapter with strict user consent verification, multilingual transcription (Hindi Unicode, Hinglish, English), acoustic timbre diarization, sound event classification (Music, Silence, Applause, Noise), 6 export formats (JSON, MD, TXT, SRT, VTT, Manifest), 11 REST API endpoints, interactive React waveform audio player & transcript viewer, 174 backend tests + 12 frontend tests (186 total passed), RTF 0.0176, peak RSS 89.77 MB. |
+| **Phase 8** | Video Intelligence Engine | **COMPLETED (100%)** | Complete 5-format support (MP4, MKV, MOV, AVI, WEBM), incremental stream decoding, PTS handling, HSV scene boundary detection, keyframe perceptual hash deduplication, Tesseract OCR on keyframes, IoU multi-frame object tracking, visual event detection, FFmpeg audio extraction with Phase 7 audio intelligence integration (Devanagari Unicode & English speech transcription), unified multimodal timeline, 7 export generators, 14 REST API endpoints, interactive React video player with scene navigator & synchronized transcript, 191 backend tests + 13 frontend tests (204 total passed), RTF 0.0482, peak RSS 134.22 MB. |
 
 ---
 
@@ -479,6 +480,58 @@
 
 ---
 
-## 6. Next Phase
+## 6. Completed Phase 8 Milestones
 
-- **Phase 8:** Video Intelligence Engine (strictly deferred pending explicit user instruction).
+### 6.1 Multi-Signal Container Detection
+- [x] Registered 5 video formats (**MP4, MKV, MOV, AVI, WEBM**) with `SupportStatus.DETECTED_AND_SUPPORTED` in `FormatRegistry`.
+- [x] Extended `ContainerDetector` with EBML header analysis for Matroska (`matroska`) vs WebM (`webm`) format discrimination.
+- [x] Validated ISO-BMFF `ftyp` brand signatures (`mp41`, `mp42`, `isom`, `avc1`) and Apple QuickTime atoms (`moov`, `wide`, `qt  `).
+
+### 6.2 Stream Probing & Incremental Decoding
+- [x] Built `VideoPreprocessor`: extracts video/audio codec, profile, dimensions, fps, bitrate, pixel format, and audio start offsets using FFprobe with OpenCV fallback.
+- [x] Implemented `VideoDecoder`: incremental frame generator yielding downscaled frames (`max_dimension=720px`) with high-precision presentation timestamps (PTS), bounded memory usage, and VFR accommodation.
+
+### 6.3 Scene Boundary Detection & Keyframes
+- [x] Implemented `SceneDetector`: evaluates normalized HSV color histograms and luminance deltas for hard cuts and gradual fade-to-black/fade-in transitions.
+- [x] Implemented `KeyframeExtractor`: selects representative scene midpoint frames, creates 256px thumbnails, eliminates duplicates via perceptual hashing, and persists assets via `LocalStorageService`.
+
+### 6.4 Visual Intelligence, OCR & Object Tracking
+- [x] Integrated Phase 4 `ImageOCREngine` (Tesseract) on keyframes for presentation slide text extraction.
+- [x] Implemented `ObjectTracker`: performs frame differencing, contour detection, and multi-frame IoU tracking with anonymous persistent IDs (`track_001`).
+- [x] Built `VisualEventDetector`: generates structured event flags for scene transitions, person motion, presentation slide changes, and camera motion.
+
+### 6.5 Audio Extraction & Multimodal Timeline
+- [x] FFmpeg 16kHz mono audio demuxing and dispatch to Phase 7 `AudioIntelligencePipeline`.
+- [x] High-fidelity multilingual speech-to-text preserving Hindi Devanagari Unicode and English transcripts (`WER = 0.00`, `CER = 0.00`).
+- [x] Built `MultimodalTimelineBuilder`: constructs a second-level master timeline synchronizing visual scenes, keyframes, OCR snippets, object tracks, speech utterances, and sound events.
+
+### 6.6 Multi-Format Output Generation
+- [x] `VideoJSONGenerator`: canonical `video_document.json`.
+- [x] `VideoMarkdownGenerator`: formatted `video_analysis.md`.
+- [x] `VideoPlainTextGenerator`: speech transcript `video_transcript.txt`.
+- [x] `VideoSubtitleGenerator`: SubRip (`subtitles.srt`) and WebVTT (`subtitles.vtt`).
+- [x] `VideoManifestGenerator` & `VideoKeyframesManifestGenerator`: audit and keyframe manifests.
+
+### 6.7 Database & Alembic Integration
+- [x] Created `VideoAnalysisRecord` model in `backend/app/infrastructure/database/models.py`.
+- [x] Created and verified reversible Alembic migration `007_video_analysis_records.py` on PostgreSQL 16.
+
+### 6.8 REST API & Interactive Frontend
+- [x] Implemented 14 REST API endpoints under `/api/v1/video-intelligence` and `/api/v1/files/{file_id}/video-analysis/...`.
+- [x] Created interactive React component `VideoIntelligenceView.tsx`: HTML5 player, scene navigator, multimodal timeline, transcript search and seek, object track cards, and export downloads. Integrated into `FileLibraryPage.tsx`.
+
+### 6.9 Verification & Performance Benchmarking
+- [x] **Backend Quality Suite:** **191 passed** in Pytest (15 unit tests, 2 integration tests, 174 regression tests from Phases 1–7).
+- [x] **Frontend Quality Suite:** **13 passed** across 9 Vitest suites (1 new `video_intelligence.test.tsx` suite).
+- [x] **Typecheck & Linting:** 0 Ruff errors, 0 Mypy errors across 214 source files, 0 TypeScript errors.
+- [x] **Production Build:** `npm run build` compiled cleanly in 1.97s.
+- [x] **Performance Benchmark (`evaluate_video_phase_8.py`)**:
+  - Processed 19.06 seconds of synthetic video across 7 fixtures in 0.920 seconds.
+  - Real-Time Factor (RTF): **0.0482** (~20.7x faster than real-time).
+  - Peak Resident Set Size (RSS): **134.22 MB** (well below 500MB constraint).
+
+---
+
+## 7. Next Phase
+
+- **Phase 9:** Code & Structured Data Intelligence Engine (strictly deferred pending explicit user instruction).

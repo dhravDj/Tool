@@ -35,6 +35,14 @@ import {
   SpreadsheetDocument,
   SpreadsheetManifest,
   SystemStatusData,
+  TimelineEvent,
+  VideoCapabilities,
+  VideoDetection,
+  VideoDocument,
+  VideoKeyframe,
+  VideoManifest,
+  VideoScene,
+  VideoTrack,
   VisionModelCapabilities,
   WorksheetData,
   WorksheetSummary,
@@ -293,4 +301,52 @@ export const api = {
 
   getAudioExportUrl: (fileId: string, format = "srt"): string =>
     `${API_BASE}/files/${encodeURIComponent(fileId)}/audio-analysis/export/${encodeURIComponent(format)}`,
+
+  // Phase 8: Video Intelligence Methods
+  getVideoCapabilities: (): Promise<VideoCapabilities> =>
+    request<VideoCapabilities>("/video-intelligence/capabilities"),
+
+  analyzeVideoFile: (
+    fileId: string,
+    payload?: Record<string, unknown>
+  ): Promise<VideoManifest> =>
+    request<VideoManifest>(`/files/${encodeURIComponent(fileId)}/analyze-video`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload || {}),
+    }),
+
+  getVideoAnalysis: (fileId: string): Promise<Record<string, unknown>> =>
+    request<Record<string, unknown>>(`/files/${encodeURIComponent(fileId)}/video-analysis`),
+
+  getVideoDocumentResult: (fileId: string): Promise<VideoDocument> =>
+    request<VideoDocument>(`/files/${encodeURIComponent(fileId)}/video-analysis/result`),
+
+  getVideoSummary: (fileId: string): Promise<Record<string, unknown>> =>
+    request<Record<string, unknown>>(`/files/${encodeURIComponent(fileId)}/video-analysis/summary`),
+
+  getVideoScenes: (fileId: string): Promise<VideoScene[]> =>
+    request<VideoScene[]>(`/files/${encodeURIComponent(fileId)}/video-analysis/scenes`),
+
+  getVideoKeyframes: (fileId: string): Promise<VideoKeyframe[]> =>
+    request<VideoKeyframe[]>(`/files/${encodeURIComponent(fileId)}/video-analysis/keyframes`),
+
+  getVideoTimeline: (fileId: string): Promise<TimelineEvent[]> =>
+    request<TimelineEvent[]>(`/files/${encodeURIComponent(fileId)}/video-analysis/timeline`),
+
+  getVideoTranscript: (
+    fileId: string
+  ): Promise<{ file_id: string; transcript: string; speakers: Speaker[]; segments: AudioSegment[]; word_count: number }> =>
+    request<{ file_id: string; transcript: string; speakers: Speaker[]; segments: AudioSegment[]; word_count: number }>(
+      `/files/${encodeURIComponent(fileId)}/video-analysis/transcript`
+    ),
+
+  getVideoDetections: (fileId: string): Promise<VideoDetection[]> =>
+    request<VideoDetection[]>(`/files/${encodeURIComponent(fileId)}/video-analysis/detections`),
+
+  getVideoTracks: (fileId: string): Promise<VideoTrack[]> =>
+    request<VideoTrack[]>(`/files/${encodeURIComponent(fileId)}/video-analysis/tracks`),
+
+  getVideoExportUrl: (fileId: string, format = "srt"): string =>
+    `${API_BASE}/files/${encodeURIComponent(fileId)}/video-analysis/export/${encodeURIComponent(format)}`,
 };

@@ -1,0 +1,1 @@
+Moving vehicle box traversal across frame

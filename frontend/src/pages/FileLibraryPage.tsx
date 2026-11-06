@@ -29,6 +29,7 @@ import { ImageIntelligenceView } from "@/components/ImageIntelligenceView";
 import { PresentationIntelligenceView } from "@/components/PresentationIntelligenceView";
 import { SpreadsheetIntelligenceView } from "@/components/SpreadsheetIntelligenceView";
 import { AudioIntelligenceView } from "@/components/AudioIntelligenceView";
+import { VideoIntelligenceView } from "@/components/VideoIntelligenceView";
 import { api } from "@/services/api";
 import { FileRecordSummary, FormatDetailData } from "@/types/api";
 
@@ -38,7 +39,7 @@ export const FileLibraryPage: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [inspectingFile, setInspectingFile] = useState<FileRecordSummary | null>(null);
   const [modalTab, setModalTab] = useState<
-    "extraction" | "image_intelligence" | "spreadsheet_intelligence" | "presentation_intelligence" | "audio_intelligence" | "detection"
+    "extraction" | "image_intelligence" | "spreadsheet_intelligence" | "presentation_intelligence" | "audio_intelligence" | "video_intelligence" | "detection"
   >("extraction");
 
   // Queries
@@ -150,9 +151,17 @@ export const FileLibraryPage: React.FC = () => {
       (f.detection_format_id || f.actual_extension || f.claimed_extension || "").toLowerCase()
     );
 
+  const isVideo = (f: FileRecordSummary) =>
+    f.format_category === "video" ||
+    ["mp4", "mkv", "mov", "avi", "webm", "m4v", "qt"].includes(
+      (f.detection_format_id || f.actual_extension || f.claimed_extension || "").toLowerCase()
+    );
+
   const handleInspect = (file: FileRecordSummary) => {
     setInspectingFile(file);
-    if (isAudio(file)) {
+    if (isVideo(file)) {
+      setModalTab("video_intelligence");
+    } else if (isAudio(file)) {
       setModalTab("audio_intelligence");
     } else if (isSpreadsheet(file)) {
       setModalTab("spreadsheet_intelligence");
@@ -439,6 +448,18 @@ export const FileLibraryPage: React.FC = () => {
                       Audio Intelligence
                     </button>
                   )}
+                  {isVideo(inspectingFile) && (
+                    <button
+                      onClick={() => setModalTab("video_intelligence")}
+                      className={`px-3 py-1 rounded-md font-medium transition ${
+                        modalTab === "video_intelligence"
+                          ? "bg-card text-foreground shadow-sm"
+                          : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      Video Intelligence
+                    </button>
+                  )}
                   {isPresentation(inspectingFile) && (
                     <button
                       onClick={() => setModalTab("presentation_intelligence")}
@@ -451,7 +472,7 @@ export const FileLibraryPage: React.FC = () => {
                       Presentation Intelligence
                     </button>
                   )}
-                  {!isSpreadsheet(inspectingFile) && !isImage(inspectingFile) && !isPresentation(inspectingFile) && !isAudio(inspectingFile) && (
+                  {!isSpreadsheet(inspectingFile) && !isImage(inspectingFile) && !isPresentation(inspectingFile) && !isAudio(inspectingFile) && !isVideo(inspectingFile) && (
                     <button
                       onClick={() => setModalTab("extraction")}
                       className={`px-3 py-1 rounded-md font-medium transition ${
@@ -504,6 +525,12 @@ export const FileLibraryPage: React.FC = () => {
               />
             ) : modalTab === "audio_intelligence" ? (
               <AudioIntelligenceView
+                fileId={inspectingFile.id}
+                filename={inspectingFile.original_filename}
+                format={inspectingFile.detection_format_id || inspectingFile.actual_extension}
+              />
+            ) : modalTab === "video_intelligence" ? (
+              <VideoIntelligenceView
                 fileId={inspectingFile.id}
                 filename={inspectingFile.original_filename}
                 format={inspectingFile.detection_format_id || inspectingFile.actual_extension}

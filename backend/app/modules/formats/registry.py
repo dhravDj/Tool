@@ -26,6 +26,8 @@ from app.modules.formats.signatures import (
     PDF_SIGNATURE,
     PE_MZ_SIGNATURE,
     PNG_SIGNATURE,
+    QT_MOOV_SIGNATURE,
+    QT_WIDE_SIGNATURE,
     RAR_V4_SIGNATURE,
     RAR_V5_SIGNATURE,
     RTF_SIGNATURE,
@@ -549,7 +551,7 @@ class FormatRegistry:
                 magic_signatures=[MP4_FTYP_SIGNATURE],
                 is_container=True,
                 container_type="isobmff",
-                support_status=SupportStatus.DETECTED_BUT_NOT_IMPLEMENTED,
+                support_status=SupportStatus.DETECTED_AND_SUPPORTED,
                 description="Standard ISO-BMFF digital multimedia container",
             )
         )
@@ -564,7 +566,7 @@ class FormatRegistry:
                 magic_signatures=[EBML_SIGNATURE],
                 is_container=True,
                 container_type="ebml",
-                support_status=SupportStatus.DETECTED_BUT_NOT_IMPLEMENTED,
+                support_status=SupportStatus.DETECTED_AND_SUPPORTED,
                 description="Extensible open multimedia container",
             )
         )
@@ -579,7 +581,7 @@ class FormatRegistry:
                 magic_signatures=[EBML_SIGNATURE],
                 is_container=True,
                 container_type="ebml",
-                support_status=SupportStatus.DETECTED_BUT_NOT_IMPLEMENTED,
+                support_status=SupportStatus.DETECTED_AND_SUPPORTED,
                 description="Open media file format designed for the web",
             )
         )
@@ -591,10 +593,10 @@ class FormatRegistry:
                 category=FormatCategory.VIDEO,
                 mime_types=["video/quicktime"],
                 extensions=["mov", "qt"],
-                magic_signatures=[MP4_FTYP_SIGNATURE],
+                magic_signatures=[MP4_FTYP_SIGNATURE, QT_MOOV_SIGNATURE, QT_WIDE_SIGNATURE],
                 is_container=True,
                 container_type="isobmff",
-                support_status=SupportStatus.DETECTED_BUT_NOT_IMPLEMENTED,
+                support_status=SupportStatus.DETECTED_AND_SUPPORTED,
                 description="Apple QuickTime multimedia container",
             )
         )
@@ -609,7 +611,7 @@ class FormatRegistry:
                 magic_signatures=[WEBP_RIFF],
                 is_container=True,
                 container_type="riff",
-                support_status=SupportStatus.DETECTED_BUT_NOT_IMPLEMENTED,
+                support_status=SupportStatus.DETECTED_AND_SUPPORTED,
                 description="Microsoft RIFF video container",
             )
         )

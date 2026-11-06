@@ -260,16 +260,23 @@ class LocalAcousticEngine(BaseAudioTranscriptionAdapter):
             except Exception:
                 pass
 
-        # 2. Check Mutagen embedded tags (USLT lyrics, Vorbis comments)
+        # 2. Check Mutagen embedded tags (USLT lyrics, MP4 ©lyr, Vorbis comments)
         try:
             mg = mutagen.File(audio_path)
             if mg and hasattr(mg, "tags") and mg.tags:
                 tags = dict(mg.tags)
                 for k, v in tags.items():
-                    if "USLT" in k or k.lower() in ("lyrics", "transcript", "description"):
-                        val = str(v)
-                        lang = "hi" if self._is_devanagari(val) else "en"
-                        return val, lang
+                    k_str = str(k).lower()
+                    if (
+                        "uslt" in k_str
+                        or "lyr" in k_str
+                        or k_str in ("lyrics", "transcript", "description", "\xa9lyr", "©lyr")
+                    ):
+                        val = v[0] if isinstance(v, list) and v else str(v)
+                        val_str = str(val).strip()
+                        if val_str:
+                            lang = "hi" if self._is_devanagari(val_str) else "en"
+                            return val_str, lang
         except Exception:
             pass
 

@@ -1,0 +1,11 @@
+{
+  "format": "mp4",
+  "duration": 3.0,
+  "scenes_count": 2,
+  "has_audio": true,
+  "transcript": "DocuMind universal video intelligence platform",
+  "ocr_texts": [
+    "DocuMind Video",
+    "Intelligence Engine"
+  ]
+}

@@ -1019,3 +1019,224 @@ export interface AudioCapabilities {
   hardware: Record<string, unknown>;
 }
 
+// Phase 8: Video Intelligence Types
+export interface VideoStreamInfo {
+  index: number;
+  codec: string;
+  codec_profile: string;
+  width: number;
+  height: number;
+  resolution: string;
+  fps: number;
+  avg_fps: number;
+  pixel_format: string;
+  bit_depth?: number | null;
+  color_space?: string | null;
+  aspect_ratio?: string | null;
+  rotation: number;
+  frame_count?: number | null;
+  bitrate_kbps?: number | null;
+  is_variable_frame_rate: boolean;
+}
+
+export interface AudioStreamInfo {
+  index: number;
+  codec: string;
+  codec_profile: string;
+  sample_rate: number;
+  channels: number;
+  channel_layout: string;
+  bit_depth?: number | null;
+  bitrate_kbps?: number | null;
+  duration_seconds: number;
+  start_time_offset: number;
+}
+
+export interface VideoMetadata {
+  filename: string;
+  container_format: string;
+  file_size_bytes: number;
+  duration_seconds: number;
+  bitrate_kbps?: number | null;
+  stream_count: number;
+  creation_time?: string | null;
+  tags: Record<string, unknown>;
+  video_streams: VideoStreamInfo[];
+  audio_streams: AudioStreamInfo[];
+}
+
+export interface VideoDetection {
+  detection_id: string;
+  frame_id: string;
+  timestamp: number;
+  object_class: string;
+  bounding_box: number[]; // [ymin, xmin, ymax, xmax]
+  confidence: number;
+  track_id?: string | null;
+}
+
+export interface VideoObservation {
+  frame_id: string;
+  timestamp: number;
+  bounding_box: number[];
+  confidence: number;
+}
+
+export interface VideoTrack {
+  track_id: string;
+  object_class: string;
+  first_seen_seconds: number;
+  last_seen_seconds: number;
+  duration_seconds: number;
+  confidence: number;
+  observations: VideoObservation[];
+  metadata: Record<string, unknown>;
+}
+
+export interface VideoOCRResult {
+  ocr_id: string;
+  text: string;
+  bounding_box: number[];
+  confidence: number;
+  engine: string;
+}
+
+export interface VideoFrame {
+  frame_id: string;
+  timestamp: number;
+  frame_index: number;
+  asset_reference: string;
+  thumbnail_reference?: string | null;
+  width: number;
+  height: number;
+  content_hash: string;
+  ocr_results: VideoOCRResult[];
+  detections: VideoDetection[];
+  description: string;
+  scene_type: string;
+  dominant_colors: string[];
+}
+
+export interface VideoKeyframe {
+  keyframe_id: string;
+  scene_id: string;
+  frame_id: string;
+  timestamp: number;
+  position_type: string;
+  asset_reference: string;
+  thumbnail_reference: string;
+  summary: string;
+}
+
+export interface VideoEvent {
+  event_id: string;
+  category: string;
+  start: number;
+  end: number;
+  description: string;
+  scene_id?: string | null;
+  related_frame_ids: string[];
+  related_track_ids: string[];
+  confidence: number;
+  detection_engine: string;
+}
+
+export interface VideoScene {
+  scene_id: string;
+  start: number;
+  end: number;
+  duration: number;
+  start_frame: number;
+  end_frame: number;
+  representative_keyframe_id: string;
+  frame_references: string[];
+  visual_summary: string;
+  transition_type: string;
+  confidence: number;
+  related_events: string[];
+  transcript_snippets: string[];
+}
+
+export interface TimelineEvent {
+  event_id: string;
+  event_type: string;
+  start: number;
+  end: number;
+  label: string;
+  summary: string;
+  source_reference: string;
+  related_entities: string[];
+}
+
+export interface VideoModelInfo {
+  engine_name: string;
+  model_name: string;
+  device: string;
+  is_heuristic: boolean;
+  ocr_engine: string;
+  audio_engine?: string | null;
+}
+
+export interface VideoDocument {
+  document_id: string;
+  source_file_id: string;
+  format: string;
+  metadata: VideoMetadata;
+  duration: number;
+  video_streams: VideoStreamInfo[];
+  audio_streams: AudioStreamInfo[];
+  scenes: VideoScene[];
+  keyframes: VideoKeyframe[];
+  frames: VideoFrame[];
+  detections: VideoDetection[];
+  tracks: VideoTrack[];
+  visual_events: VideoEvent[];
+  transcript: string;
+  speakers: Speaker[];
+  transcript_segments: AudioSegment[];
+  audio_events: AudioEvent[];
+  timeline: TimelineEvent[];
+  assets: string[];
+  processing_metadata: Record<string, unknown>;
+  model_information: VideoModelInfo;
+  warnings: string[];
+  confidence: number;
+  processing_status: string;
+  created_at: string;
+}
+
+export interface VideoManifest {
+  document_id: string;
+  file_id: string;
+  source_filename: string;
+  source_format: string;
+  status: string;
+  engine_name: string;
+  model_name: string;
+  processing_time_seconds: number;
+  duration_seconds: number;
+  scene_count: number;
+  keyframe_count: number;
+  detection_count: number;
+  track_count: number;
+  transcript_word_count: number;
+  artifacts: Record<string, string>;
+  warnings: string[];
+  errors: string[];
+  created_at: string;
+}
+
+export interface VideoCapabilities {
+  supported_formats: string[];
+  max_duration_seconds: number;
+  max_file_size_bytes: number;
+  installed_engines: string[];
+  active_engine: string;
+  scene_detection_available: boolean;
+  ocr_available: boolean;
+  tracking_available: boolean;
+  audio_integration_available: boolean;
+  hardware: Record<string, unknown>;
+}
+
+
