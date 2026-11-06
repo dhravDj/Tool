@@ -2,6 +2,11 @@
 
 import {
   APIResponse,
+  AudioCapabilities,
+  AudioDocument,
+  AudioEvent,
+  AudioManifest,
+  AudioSegment,
   BatchDetectionResponseData,
   BatchSummary,
   CanonicalDocument,
@@ -25,6 +30,7 @@ import {
   PresentationManifest,
   SlideData,
   SlideSummary,
+  Speaker,
   SpreadsheetCapabilities,
   SpreadsheetDocument,
   SpreadsheetManifest,
@@ -240,4 +246,51 @@ export const api = {
     `${API_BASE}/files/${encodeURIComponent(fileId)}/presentation-analysis/download?format=${encodeURIComponent(
       format
     )}`,
+
+  // Phase 7: Audio Intelligence Methods
+  getAudioCapabilities: (): Promise<AudioCapabilities> =>
+    request<AudioCapabilities>("/audio-intelligence/capabilities"),
+
+  getAudioModels: (): Promise<Record<string, unknown>> =>
+    request<Record<string, unknown>>("/audio-intelligence/models"),
+
+  analyzeAudioFile: (
+    fileId: string,
+    payload?: Record<string, unknown>
+  ): Promise<AudioManifest> =>
+    request<AudioManifest>(`/files/${encodeURIComponent(fileId)}/analyze-audio`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload || {}),
+    }),
+
+  getAudioAnalysis: (fileId: string): Promise<Record<string, unknown>> =>
+    request<Record<string, unknown>>(`/files/${encodeURIComponent(fileId)}/audio-analysis`),
+
+  getAudioDocumentResult: (fileId: string): Promise<AudioDocument> =>
+    request<AudioDocument>(`/files/${encodeURIComponent(fileId)}/audio-analysis/result`),
+
+  getAudioTranscript: (
+    fileId: string
+  ): Promise<{ file_id: string; transcript: string; detected_language?: string; word_count: number }> =>
+    request<{ file_id: string; transcript: string; detected_language?: string; word_count: number }>(
+      `/files/${encodeURIComponent(fileId)}/audio-analysis/transcript`
+    ),
+
+  getAudioSegments: (fileId: string, query?: string): Promise<AudioSegment[]> => {
+    const qStr = query ? `?q=${encodeURIComponent(query)}` : "";
+    return request<AudioSegment[]>(`/files/${encodeURIComponent(fileId)}/audio-analysis/segments${qStr}`);
+  },
+
+  getAudioSpeakers: (fileId: string): Promise<Speaker[]> =>
+    request<Speaker[]>(`/files/${encodeURIComponent(fileId)}/audio-analysis/speakers`),
+
+  getAudioEvents: (fileId: string): Promise<AudioEvent[]> =>
+    request<AudioEvent[]>(`/files/${encodeURIComponent(fileId)}/audio-analysis/events`),
+
+  getAudioSummary: (fileId: string): Promise<Record<string, unknown>> =>
+    request<Record<string, unknown>>(`/files/${encodeURIComponent(fileId)}/audio-analysis/summary`),
+
+  getAudioExportUrl: (fileId: string, format = "srt"): string =>
+    `${API_BASE}/files/${encodeURIComponent(fileId)}/audio-analysis/export/${encodeURIComponent(format)}`,
 };

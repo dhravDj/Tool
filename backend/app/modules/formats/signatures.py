@@ -110,6 +110,22 @@ MP3_ID3_SIGNATURE = MagicSignature(
     description="MPEG Audio with ID3v2 container header",
 )
 
+MP3_SYNC_SIGNATURE = MagicSignature(
+    signature_bytes=b"\xff\xe2",
+    offset=0,
+    mask=b"\xff\xe6",
+    name="MP3_SYNC",
+    description="MPEG Audio Layer III frame sync header (Layer 01)",
+)
+
+AAC_ADTS_SIGNATURE = MagicSignature(
+    signature_bytes=b"\xff\xf0",
+    offset=0,
+    mask=b"\xff\xf6",
+    name="AAC_ADTS",
+    description="Advanced Audio Coding ADTS frame header (Layer 00)",
+)
+
 WAV_TAG = MagicSignature(
     signature_bytes=b"WAVE",
     offset=8,

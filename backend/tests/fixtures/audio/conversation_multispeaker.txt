@@ -1,0 +1,3 @@
+Speaker 1: Hello everyone and welcome to the project meeting.
+Speaker 2: Good morning, we are ready to discuss the results.
+Speaker 1: Excellent, let us review the presentation.

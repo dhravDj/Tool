@@ -118,6 +118,9 @@ class FileRecord(Base):
     presentation_analyses: Mapped[list["PresentationAnalysisRecord"]] = relationship(
         "PresentationAnalysisRecord", back_populates="file", cascade="all, delete-orphan"
     )
+    audio_analyses: Mapped[list["AudioAnalysisRecord"]] = relationship(
+        "AudioAnalysisRecord", back_populates="file", cascade="all, delete-orphan"
+    )
 
     __table_args__ = (
         Index("ix_files_owner_status", "owner_id", "status"),
@@ -388,4 +391,55 @@ class PresentationAnalysisRecord(Base):
 
     # Relationships
     file: Mapped["FileRecord"] = relationship("FileRecord", back_populates="presentation_analyses")
+
+
+class AudioAnalysisRecord(Base):
+    """Historical audio intelligence analysis record and speech-to-text findings."""
+
+    __tablename__ = "audio_analysis_records"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+    file_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True),
+        ForeignKey("files.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    status: Mapped[str] = mapped_column(String(32), default="completed", index=True, nullable=False)
+    format: Mapped[str] = mapped_column(String(32), index=True, nullable=False)
+    duration_seconds: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
+    sample_rate: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    channels: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
+    codec: Mapped[str] = mapped_column(String(32), default="unknown", nullable=False)
+    detected_language: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    language_confidence: Mapped[float | None] = mapped_column(Float, nullable=True)
+    full_transcript: Mapped[str] = mapped_column(Text, default="", nullable=False)
+    speaker_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    segment_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    event_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    has_diarization: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    has_word_timestamps: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    has_events: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    model_name: Mapped[str] = mapped_column(String(64), default="documind-acoustic-v1", nullable=False)
+    engine_name: Mapped[str] = mapped_column(String(64), default="documind-acoustic", nullable=False)
+    confidence: Mapped[float] = mapped_column(Float, default=1.0, nullable=False)
+    processing_duration: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
+    artifacts: Mapped[dict[str, Any]] = mapped_column(JSON_TYPE, default=dict, nullable=False)
+    audio_metadata: Mapped[dict[str, Any]] = mapped_column(JSON_TYPE, default=dict, nullable=False)
+    warnings: Mapped[list[str]] = mapped_column(JSON_TYPE, default=list, nullable=False)
+    error_details: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        default=lambda: datetime.now(UTC),
+        nullable=False,
+    )
+
+    # Relationships
+    file: Mapped["FileRecord"] = relationship("FileRecord", back_populates="audio_analyses")
+
 

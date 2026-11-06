@@ -3,6 +3,7 @@
 from app.modules.formats.categories import FormatCategory
 from app.modules.formats.format_definitions import FileFormatDefinition
 from app.modules.formats.signatures import (
+    AAC_ADTS_SIGNATURE,
     BMP_SIGNATURE,
     BZIP2_SIGNATURE,
     EBML_SIGNATURE,
@@ -17,6 +18,7 @@ from app.modules.formats.signatures import (
     MACHO_64_BE,
     MACHO_64_LE,
     MP3_ID3_SIGNATURE,
+    MP3_SYNC_SIGNATURE,
     MP4_FTYP_SIGNATURE,
     OGG_SIGNATURE,
     OLE2_SIGNATURE,
@@ -458,8 +460,8 @@ class FormatRegistry:
                 category=FormatCategory.AUDIO,
                 mime_types=["audio/mpeg", "audio/mp3"],
                 extensions=["mp3"],
-                magic_signatures=[MP3_ID3_SIGNATURE],
-                support_status=SupportStatus.DETECTED_BUT_NOT_IMPLEMENTED,
+                magic_signatures=[MP3_ID3_SIGNATURE, MP3_SYNC_SIGNATURE],
+                support_status=SupportStatus.DETECTED_AND_SUPPORTED,
                 description="Standard lossy compressed digital audio",
             )
         )
@@ -474,7 +476,7 @@ class FormatRegistry:
                 magic_signatures=[WEBP_RIFF],
                 is_container=True,
                 container_type="riff",
-                support_status=SupportStatus.DETECTED_BUT_NOT_IMPLEMENTED,
+                support_status=SupportStatus.DETECTED_AND_SUPPORTED,
                 description="Uncompressed LPCM audio container",
             )
         )
@@ -487,7 +489,7 @@ class FormatRegistry:
                 mime_types=["audio/flac", "audio/x-flac"],
                 extensions=["flac"],
                 magic_signatures=[FLAC_SIGNATURE],
-                support_status=SupportStatus.DETECTED_BUT_NOT_IMPLEMENTED,
+                support_status=SupportStatus.DETECTED_AND_SUPPORTED,
                 description="Lossless bit-perfect compressed audio",
             )
         )
@@ -500,7 +502,7 @@ class FormatRegistry:
                 mime_types=["audio/ogg", "application/ogg"],
                 extensions=["ogg", "oga"],
                 magic_signatures=[OGG_SIGNATURE],
-                support_status=SupportStatus.DETECTED_BUT_NOT_IMPLEMENTED,
+                support_status=SupportStatus.DETECTED_AND_SUPPORTED,
                 description="Open source compressed audio stream",
             )
         )
@@ -508,15 +510,28 @@ class FormatRegistry:
             FileFormatDefinition(
                 format_id="m4a",
                 canonical_name="MPEG-4 Audio",
-                display_name="M4A / AAC Audio",
+                display_name="M4A Audio",
                 category=FormatCategory.AUDIO,
                 mime_types=["audio/mp4", "audio/x-m4a"],
-                extensions=["m4a", "aac"],
+                extensions=["m4a"],
                 magic_signatures=[MP4_FTYP_SIGNATURE],
                 is_container=True,
                 container_type="isobmff",
-                support_status=SupportStatus.DETECTED_BUT_NOT_IMPLEMENTED,
+                support_status=SupportStatus.DETECTED_AND_SUPPORTED,
                 description="MPEG-4 AAC compressed audio container",
+            )
+        )
+        self.register(
+            FileFormatDefinition(
+                format_id="aac",
+                canonical_name="Advanced Audio Coding",
+                display_name="AAC Audio",
+                category=FormatCategory.AUDIO,
+                mime_types=["audio/aac", "audio/x-aac"],
+                extensions=["aac"],
+                magic_signatures=[AAC_ADTS_SIGNATURE],
+                support_status=SupportStatus.DETECTED_AND_SUPPORTED,
+                description="Raw Advanced Audio Coding ADTS audio stream",
             )
         )
 

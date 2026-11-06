@@ -40,6 +40,8 @@ dependencies = [
     "xlrd>=2.0.1",
     "xlwt>=1.3.0",
     "python-pptx>=1.0.0",
+    "mutagen>=1.47.0",
+    "soundfile>=0.12.0",
 ]
 
 [project.optional-dependencies]
@@ -112,6 +114,10 @@ module = [
     "xlwt.*",
     "pyarrow.*",
     "pptx.*",
+    "mutagen.*",
+    "soundfile.*",
+    "pyannote.*",
+    "faster_whisper.*",
 ]
 ignore_missing_imports = true
 

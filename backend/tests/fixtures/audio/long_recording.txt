@@ -1,0 +1,1 @@
+Long recording chunk test with multiple sentences across windowed boundaries.

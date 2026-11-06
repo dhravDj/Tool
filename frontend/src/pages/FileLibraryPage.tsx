@@ -28,6 +28,7 @@ import { DocumentExtractionView } from "@/components/DocumentExtractionView";
 import { ImageIntelligenceView } from "@/components/ImageIntelligenceView";
 import { PresentationIntelligenceView } from "@/components/PresentationIntelligenceView";
 import { SpreadsheetIntelligenceView } from "@/components/SpreadsheetIntelligenceView";
+import { AudioIntelligenceView } from "@/components/AudioIntelligenceView";
 import { api } from "@/services/api";
 import { FileRecordSummary, FormatDetailData } from "@/types/api";
 
@@ -37,7 +38,7 @@ export const FileLibraryPage: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [inspectingFile, setInspectingFile] = useState<FileRecordSummary | null>(null);
   const [modalTab, setModalTab] = useState<
-    "extraction" | "image_intelligence" | "spreadsheet_intelligence" | "presentation_intelligence" | "detection"
+    "extraction" | "image_intelligence" | "spreadsheet_intelligence" | "presentation_intelligence" | "audio_intelligence" | "detection"
   >("extraction");
 
   // Queries
@@ -143,9 +144,17 @@ export const FileLibraryPage: React.FC = () => {
       (f.detection_format_id || f.actual_extension || f.claimed_extension || "").toLowerCase()
     );
 
+  const isAudio = (f: FileRecordSummary) =>
+    f.format_category === "audio" ||
+    ["mp3", "wav", "m4a", "aac", "flac", "ogg", "oga"].includes(
+      (f.detection_format_id || f.actual_extension || f.claimed_extension || "").toLowerCase()
+    );
+
   const handleInspect = (file: FileRecordSummary) => {
     setInspectingFile(file);
-    if (isSpreadsheet(file)) {
+    if (isAudio(file)) {
+      setModalTab("audio_intelligence");
+    } else if (isSpreadsheet(file)) {
       setModalTab("spreadsheet_intelligence");
     } else if (isImage(file)) {
       setModalTab("image_intelligence");
@@ -418,6 +427,18 @@ export const FileLibraryPage: React.FC = () => {
                       Image Intelligence
                     </button>
                   )}
+                  {isAudio(inspectingFile) && (
+                    <button
+                      onClick={() => setModalTab("audio_intelligence")}
+                      className={`px-3 py-1 rounded-md font-medium transition ${
+                        modalTab === "audio_intelligence"
+                          ? "bg-card text-foreground shadow-sm"
+                          : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      Audio Intelligence
+                    </button>
+                  )}
                   {isPresentation(inspectingFile) && (
                     <button
                       onClick={() => setModalTab("presentation_intelligence")}
@@ -430,7 +451,7 @@ export const FileLibraryPage: React.FC = () => {
                       Presentation Intelligence
                     </button>
                   )}
-                  {!isSpreadsheet(inspectingFile) && !isImage(inspectingFile) && !isPresentation(inspectingFile) && (
+                  {!isSpreadsheet(inspectingFile) && !isImage(inspectingFile) && !isPresentation(inspectingFile) && !isAudio(inspectingFile) && (
                     <button
                       onClick={() => setModalTab("extraction")}
                       className={`px-3 py-1 rounded-md font-medium transition ${
@@ -477,6 +498,12 @@ export const FileLibraryPage: React.FC = () => {
               />
             ) : modalTab === "presentation_intelligence" ? (
               <PresentationIntelligenceView
+                fileId={inspectingFile.id}
+                filename={inspectingFile.original_filename}
+                format={inspectingFile.detection_format_id || inspectingFile.actual_extension}
+              />
+            ) : modalTab === "audio_intelligence" ? (
+              <AudioIntelligenceView
                 fileId={inspectingFile.id}
                 filename={inspectingFile.original_filename}
                 format={inspectingFile.detection_format_id || inspectingFile.actual_extension}

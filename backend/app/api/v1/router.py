@@ -3,6 +3,7 @@
 from fastapi import APIRouter
 
 from app.api.v1.endpoints import (
+    audio_intelligence,
     batches,
     detection,
     extraction,
@@ -29,3 +30,4 @@ api_router.include_router(extraction.router)
 api_router.include_router(image_intelligence.router)
 api_router.include_router(spreadsheet_intelligence.router)
 api_router.include_router(presentation_intelligence.router)
+api_router.include_router(audio_intelligence.router)

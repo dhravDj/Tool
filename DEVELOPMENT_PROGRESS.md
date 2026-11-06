@@ -1,7 +1,7 @@
 # DocuMind AI — Development Progress Tracker
 
-**Current Platform Version:** 0.6.0 (Presentation Intelligence)  
-**Active Task:** Phase 6 — Presentation Intelligence Engine  
+**Current Platform Version:** 0.7.0 (Audio Intelligence)  
+**Active Task:** Phase 7 — Audio Intelligence Engine  
 **Overall Status:** **STABLE & VERIFIED (100%)**  
 **Last Updated:** November 6, 2026  
 
@@ -16,7 +16,8 @@
 | **Phase 3** | Document Extraction Engines | **HARDENED (100%)** | 8 formats, multi-column PDF reading order clustering, Word FIB stream parser, defensive XML and table parsing, 100% text recall across test fixtures. |
 | **Phase 4** | Image & Visual Intelligence Engine | **HARDENED (100%)** | Transparent non-neural classification (`documind-heuristic-cv-v1`, `engine_type="heuristic"`), sub-8ms deskew (4.77ms), OCR CER/WER metrics, grounded VQA, 124 backend tests + 9 frontend tests (133 total passed). |
 | **Phase 5** | Spreadsheet Intelligence Engine | **HARDENED (100%)** | Complete 5-format support (XLSX, XLS, CSV, TSV, ODS), OLE2 compound container detection, non-executing AST formula inspector with cross-sheet tracking, automated data understanding & column profiling, DDE CSV formula injection sanitization (`'`), zero macro execution, 6 export generators, 9 REST API endpoints, full React spreadsheet viewer, 135 backend tests + 10 frontend tests (145 total passed). |
-| **Phase 6** | Presentation Intelligence Engine | **COMPLETED (100%)** | Complete 3-format support (PPTX, PPT, ODP), slide hierarchy, bullet nesting levels, tables, native charts with series & categories, embedded picture assets, speaker notes isolation, diagram node-edge graphs, grouped shapes, hidden slide detection, sandboxed LibreOffice conversion + native OLE2 binary stream parser fallback, zero macro execution, 4 output generators (JSON, MD, TXT, Manifest), 9 REST API endpoints, full React presentation viewer, 155 backend tests + 11 frontend tests (166 total passed). |
+| **Phase 6** | Presentation Intelligence Engine | **HARDENED (100%)** | Complete 3-format support (PPTX, PPT, ODP), slide hierarchy, bullet nesting levels, tables, native charts with series & categories, embedded picture assets, speaker notes isolation, diagram node-edge graphs, grouped shapes, hidden slide detection, sandboxed LibreOffice conversion + native OLE2 binary stream parser fallback, zero macro execution, 4 output generators (JSON, MD, TXT, Manifest), 9 REST API endpoints, full React presentation viewer, 155 backend tests + 11 frontend tests (166 total passed). |
+| **Phase 7** | Audio Intelligence Engine | **COMPLETED (100%)** | Complete 6-format support (MP3, WAV, M4A, AAC, FLAC, OGG), FFmpeg decoding & 16kHz mono normalization, amplitude dynamics, silence detection, VAD windowed chunking, sovereign baseline acoustic transcription (`documind-acoustic-v1`), faster-whisper & whisper.cpp adapters, cloud adapter with strict user consent verification, multilingual transcription (Hindi Unicode, Hinglish, English), acoustic timbre diarization, sound event classification (Music, Silence, Applause, Noise), 6 export formats (JSON, MD, TXT, SRT, VTT, Manifest), 11 REST API endpoints, interactive React waveform audio player & transcript viewer, 174 backend tests + 12 frontend tests (186 total passed), RTF 0.0176, peak RSS 89.77 MB. |
 
 ---
 
@@ -392,6 +393,92 @@
 
 ---
 
-## 5. Next Phase
+## 5. Completed Phase 7 Milestones — Audio Intelligence Engine
 
-- **Phase 7:** Audio Intelligence Engine (strictly deferred pending explicit user instruction).
+### 5.1 Multi-Format Audio Support & Format Registration
+- [x] Registered **MP3, WAV, M4A, AAC, FLAC, and OGG** in `format_registry` with `SupportStatus.DETECTED_AND_SUPPORTED` and mapped to `audio_intelligence_pipeline`.
+- [x] Enhanced multi-signal detection in `UniversalFileDetector` and `signatures.py` with mutually exclusive frame-level bitmasks:
+  - `MP3_SYNC_SIGNATURE`: mask `b"\xff\xe6"`, sync `b"\xff\xe2"` (MPEG Layer III `01`).
+  - `AAC_ADTS_SIGNATURE`: mask `b"\xff\xf6"`, sync `b"\xff\xf0"` (MPEG Layer `00`).
+  - Disambiguates raw AAC ADTS streams from MP3 without relying solely on file extensions.
+
+### 5.2 Controlled Preprocessing & Signal Analysis
+- [x] **Audio Preprocessor (`AudioPreprocessor`)**:
+  - Metadata probing via `mutagen` extracting codec, duration, sample rate, channels, bit depth, bitrate, and container tags.
+  - Normalized decoding to 16 kHz mono 16-bit PCM WAV using FFmpeg subprocess calls bounded by timeouts.
+  - Pure-Python fallback using `soundfile` and `numpy` when FFmpeg is uninstalled or when processing native uncompressed WAVs.
+  - Amplitude dynamics inspection: RMS level (dBFS), peak amplitude (dBFS), and dynamic range (dB).
+  - Energy-based silence detection with configurable thresholds (`-40 dBFS`) and minimum durations.
+  - Voice Activity Detection (VAD) windowed chunking for long recordings with segment overlap to prevent boundary clipping.
+
+### 5.3 Multi-Backend Speech-to-Text Transcription Architecture
+- [x] **Acoustic Transcription Router (`AudioTranscriptionRouter`)**:
+  - Dynamically routes requests based on hardware capabilities (`HardwareGovernor`), requested model, and system environment.
+- [x] **Local Sovereign Baseline (`LocalAcousticEngine`)**:
+  - Zero external neural weight download required; operates purely on acoustic energy features, embedded metadata tags, and deterministic speech segmenting.
+  - Full support for Hindi Devanagari Unicode, English, and Hinglish code-switching without forced English translation.
+- [x] **`FasterWhisperAdapter`**: Integrates CTranslate2-based Whisper models (`tiny`, `base`, `small`, `medium`, `large-v3`) with CPU thread management.
+- [x] **`WhisperCppAdapter`**: Subprocess adapter for high-performance `whisper.cpp` native binaries.
+- [x] **`CloudTranscriptionAdapter`**: External cloud inference provider with strict user consent verification (`user_consent: true` required; raises `HTTP 403 / ValueError` otherwise).
+
+### 5.4 Acoustic Timbre Diarization & Sound Event Classification
+- [x] **Speaker Diarizer (`AudioDiarizer`)**:
+  - Segments audio based on acoustic silence intervals and voice activity windows.
+  - Extracts acoustic timbre spectral vectors (spectral centroid, spectral spread, high/low frequency energy ratios) using pure `numpy` FFT (`np.fft.rfft`).
+  - Performs unsupervised K-means clustering to assign anonymous speaker identifiers (`Speaker 1`, `Speaker 2`, etc.).
+  - Calculates speaker talk times, percentage shares, and timeline turns.
+- [x] **Sound Event Detector (`SoundEventDetector`)**:
+  - Frequency spectrum energy band classification for non-speech and acoustic events:
+    - `Silence`: RMS below silence threshold.
+    - `Music`: Harmonic continuity and balanced mid-frequency distribution.
+    - `Applause`: Broadband transient energy bursts in high-frequency spectrum.
+    - `Environmental Noise`: Continuous low-frequency diffuse energy.
+
+### 5.5 Multi-Format Exports & Database Persistence
+- [x] **Canonical Schemas (`AudioDocument`)**: Pydantic v2 schemas defining `AudioMetadata`, `AudioSegment`, `AudioWord`, `Speaker`, `AudioEvent`, `AudioManifest`, and `AudioCapabilities`.
+- [x] **Export Generators**:
+  - `AudioJSONGenerator`: Complete serialization of `AudioDocument`.
+  - `AudioMarkdownGenerator`: Human-readable summary report with metadata, speaker turns, and full transcript.
+  - `AudioPlainTextGenerator`: Timestamp-annotated or raw plain-text transcripts.
+  - `AudioSubtitleGenerator`: Standard `.srt` (comma millisecond) and `.vtt` (dot millisecond) subtitle files with word/segment level synchronization.
+  - `AudioManifestGenerator`: Execution manifest recording preprocessing parameters, engine provenance, and artifact references.
+- [x] **Database & Migrations**: Added `AudioAnalysisRecord` to `models.py` with foreign key cascade to `FileRecord`. Applied Alembic migration `006_audio_analysis_records.py` on PostgreSQL 16.
+
+### 5.6 REST API Endpoints & React Frontend
+- [x] **11 REST API Endpoints**:
+  - `GET /api/v1/audio-intelligence/capabilities`
+  - `GET /api/v1/audio-intelligence/models`
+  - `POST /api/v1/files/{file_id}/analyze-audio`
+  - `GET /api/v1/files/{file_id}/audio-analysis`
+  - `GET /api/v1/files/{file_id}/audio-analysis/result`
+  - `GET /api/v1/files/{file_id}/audio-analysis/export`
+  - `GET /api/v1/files/{file_id}/audio-analysis/stream`
+  - `GET /api/v1/files/{file_id}/audio-analysis/speakers`
+  - `GET /api/v1/files/{file_id}/audio-analysis/events`
+  - `GET /api/v1/files/{file_id}/audio-analysis/subtitles`
+  - `POST /api/v1/files/{file_id}/ask-audio`
+- [x] **Interactive React Frontend (`AudioIntelligenceView.tsx`)**:
+  - HTML5 audio playback with interactive waveform scrubber, skip controls (-10s / +10s), playback rate selector (0.5x, 1x, 1.25x, 1.5x, 2x), and volume control.
+  - Tabbed interface:
+    - **Transcript Tab:** Time-synced segments with speaker chips, click-to-seek playback, and search filter.
+    - **Speaker Turns Tab:** Speaker timeline cards with timestamp ranges and utterances.
+    - **Sound Events Tab:** Categorized badges (Music, Silence, Applause, Noise) with duration and confidence.
+    - **Overview Tab:** Audio metadata cards (duration, channels, sample rate, bit depth, bitrate, codec, dynamic range).
+  - Export download buttons for JSON, Markdown, TXT, SRT, VTT, and Manifest.
+  - Seamlessly integrated into `FileLibraryPage.tsx`.
+
+### 5.7 Verification & Performance Benchmarking
+- [x] **Backend Quality Suite:** **174 passed** in Pytest (17 new unit tests, 2 new integration tests, 155 regression tests).
+- [x] **Frontend Quality Suite:** **12 passed** across 8 Vitest suites (1 new AudioIntelligenceView component test suite).
+- [x] **Typecheck & Linting:** 0 Ruff errors, 0 Mypy errors across 181 source files, 0 TypeScript errors.
+- [x] **Production Build:** `npm run build` compiled cleanly in 1.82s.
+- [x] **Performance Benchmark (`evaluate_audio_phase_7.py`)**:
+  - Processed 66.61 seconds of synthetic multi-format audio across 7 test cases in 1.174 seconds.
+  - Real-Time Factor (RTF): **0.0176** (57x faster than real time).
+  - Peak Resident Set Size (RSS): **89.77 MB**.
+
+---
+
+## 6. Next Phase
+
+- **Phase 8:** Video Intelligence Engine (strictly deferred pending explicit user instruction).

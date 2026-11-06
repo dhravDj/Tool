@@ -899,3 +899,123 @@ export interface SlideSummary {
   hidden: boolean;
   reading_order: string[];
 }
+
+// Phase 7: Audio Intelligence Types
+export interface AudioMetadata {
+  format: string;
+  codec: string;
+  duration_seconds: number;
+  sample_rate: number;
+  channels: number;
+  channel_layout: string;
+  bit_depth?: number | null;
+  bitrate_kbps?: number | null;
+  file_size_bytes: number;
+  audio_stream_count: number;
+  title?: string | null;
+  artist?: string | null;
+  album?: string | null;
+  genre?: string | null;
+  date?: string | null;
+  raw_tags: Record<string, unknown>;
+}
+
+export interface AudioWord {
+  word_id: string;
+  text: string;
+  start: number;
+  end: number;
+  confidence?: number | null;
+}
+
+export interface AudioSegment {
+  segment_id: string;
+  start: number;
+  end: number;
+  text: string;
+  speaker_id?: string | null;
+  words: AudioWord[];
+  confidence: number;
+  source_chunk_id?: string | null;
+}
+
+export interface Speaker {
+  speaker_id: string;
+  label: string;
+  segment_ids: string[];
+  total_speaking_time_seconds: number;
+  metadata: Record<string, unknown>;
+}
+
+export interface AudioEvent {
+  event_id: string;
+  category: string;
+  start: number;
+  end: number;
+  confidence: number;
+  detection_model: string;
+}
+
+export interface AudioModelInfo {
+  engine_name: string;
+  model_name: string;
+  device: string;
+  quantization?: string | null;
+  is_heuristic: boolean;
+}
+
+export interface AudioDocument {
+  document_id: string;
+  source_file_id: string;
+  format: string;
+  metadata: AudioMetadata;
+  duration: number;
+  sample_rate: number;
+  channels: number;
+  codec: string;
+  language?: string | null;
+  language_confidence?: number | null;
+  transcript: string;
+  segments: AudioSegment[];
+  speakers: Speaker[];
+  events: AudioEvent[];
+  processing_metadata: Record<string, unknown>;
+  model_information: AudioModelInfo;
+  warnings: string[];
+  confidence: number;
+  processing_status: string;
+  created_at: string;
+}
+
+export interface AudioManifest {
+  document_id: string;
+  file_id: string;
+  source_filename: string;
+  source_format: string;
+  status: string;
+  engine_name: string;
+  model_name: string;
+  processing_time_seconds: number;
+  duration_seconds: number;
+  detected_language?: string | null;
+  segment_count: number;
+  word_count: number;
+  speaker_count: number;
+  event_count: number;
+  artifacts: Record<string, string>;
+  warnings: string[];
+  errors: string[];
+  created_at: string;
+}
+
+export interface AudioCapabilities {
+  supported_formats: string[];
+  max_duration_seconds: number;
+  max_file_size_bytes: number;
+  installed_engines: string[];
+  active_engine: string;
+  diarization_available: boolean;
+  sound_events_available: boolean;
+  hardware: Record<string, unknown>;
+}
+
