@@ -6,6 +6,7 @@ import {
   ChevronRight,
   Cpu,
   Files,
+  Layers,
   LayoutDashboard,
   Server,
   Settings,
@@ -27,6 +28,7 @@ export const Sidebar: React.FC = () => {
   const navItems = [
     { label: "Dashboard", path: "/", icon: <LayoutDashboard className="h-5 w-5" /> },
     { label: "Upload & Ingest", path: "/upload", icon: <UploadCloud className="h-5 w-5" /> },
+    { label: "Bulk Processing", path: "/bulk-processing", icon: <Layers className="h-5 w-5 text-indigo-500" /> },
     { label: "Processing Jobs", path: "/jobs", icon: <Activity className="h-5 w-5" /> },
     { label: "File Library", path: "/files", icon: <Files className="h-5 w-5" /> },
     { label: "AI Intelligence", path: "/ai", icon: <Sparkles className="h-5 w-5 text-blue-500" /> },

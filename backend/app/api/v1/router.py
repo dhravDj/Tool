@@ -7,6 +7,7 @@ from app.api.v1.endpoints import (
     archive_intelligence,
     audio_intelligence,
     batches,
+    bulk_processing,
     code_intelligence,
     detection,
     extraction,
@@ -41,3 +42,4 @@ api_router.include_router(code_intelligence.router)
 api_router.include_router(structured_data_intelligence.router)
 api_router.include_router(archive_intelligence.router)
 api_router.include_router(ai_intelligence.router)
+api_router.include_router(bulk_processing.router)

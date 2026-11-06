@@ -1770,3 +1770,219 @@ export interface AISettingsPayload {
 
 
 
+
+
+// ==========================================
+// Phase 12: Large-Scale Bulk Processing Types
+// ==========================================
+
+export interface ProcessingPolicy {
+  priority: number;
+  max_parallel_workers: number;
+  continue_on_failure: boolean;
+  ocr_enabled: boolean;
+  ai_indexing_enabled: boolean;
+  generate_thumbnails: boolean;
+  timeout_per_file_seconds: number;
+  dedup_strategy: "reuse_analysis" | "skip" | "force_reprocess";
+  preferred_ocr_engine?: string;
+  preferred_ai_provider?: string;
+}
+
+export interface ProcessingBatch {
+  id: string;
+  name: string;
+  status: "pending" | "processing" | "paused" | "completed" | "partially_completed" | "failed" | "cancelled";
+  total_files: number;
+  accepted_files: number;
+  rejected_files: number;
+  queued_files: number;
+  processing_files: number;
+  completed_files: number;
+  partially_completed_files: number;
+  failed_files: number;
+  cancelled_files: number;
+  total_size_bytes: number;
+  overall_progress: number;
+  processing_policy: ProcessingPolicy | Record<string, unknown>;
+  error_summary: Record<string, unknown>;
+  started_at?: string | null;
+  completed_at?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface BatchFileItem {
+  id: string;
+  file_id?: string | null;
+  filename: string;
+  file_size: number;
+  sha256?: string | null;
+  status: "accepted" | "rejected" | "queued" | "processing" | "completed" | "failed" | "cancelled" | "reused";
+  validation_error?: string | null;
+  dedup_decision?: string | null;
+  created_at: string;
+}
+
+export interface BatchProgress {
+  batch_id: string;
+  status: string;
+  overall_progress: number;
+  total_files: number;
+  completed_files: number;
+  failed_files: number;
+  processing_files: number;
+  queued_files: number;
+  elapsed_seconds?: number | null;
+  estimated_remaining_seconds?: number | null;
+  current_throughput_files_per_sec?: number | null;
+}
+
+export interface BatchReport {
+  batch_id: string;
+  name: string;
+  status: string;
+  summary_metrics: Record<string, unknown>;
+  policy: Record<string, unknown>;
+  files: BatchFileItem[];
+  errors: Array<{
+    job_id?: string;
+    file_id?: string;
+    error_code?: string;
+    error_message?: string;
+    retry_count?: number;
+  }>;
+  execution_timeline: {
+    created_at: string;
+    started_at?: string | null;
+    completed_at?: string | null;
+  };
+  exported_at: string;
+}
+
+export interface BulkUploadItemResult {
+  filename: string;
+  status: string;
+  file_id?: string | null;
+  batch_file_id?: string | null;
+  file_size: number;
+  sha256?: string | null;
+  format_id?: string | null;
+  error_message?: string | null;
+  dedup_decision: string;
+}
+
+export interface BulkUploadManifest {
+  batch_id: string;
+  batch_name: string;
+  total_submitted: number;
+  total_accepted: number;
+  total_rejected: number;
+  total_reused: number;
+  total_size_bytes: number;
+  files: BulkUploadItemResult[];
+  auto_started: boolean;
+  manifest_generated_at: string;
+}
+
+export interface ProcessingJob {
+  id: string;
+  batch_id?: string | null;
+  batch_file_id?: string | null;
+  file_id: string;
+  filename?: string | null;
+  job_type: string;
+  stage: string;
+  priority: number;
+  status: "queued" | "processing" | "completed" | "failed" | "dead_letter" | "cancelled" | "retrying";
+  current_worker_id?: string | null;
+  retry_count: number;
+  max_retries: number;
+  progress: number;
+  stage_progress: Record<string, unknown>;
+  idempotency_key: string;
+  error_code?: string | null;
+  error_message?: string | null;
+  created_at: string;
+  started_at?: string | null;
+  completed_at?: string | null;
+}
+
+export interface JobAttempt {
+  id: string;
+  attempt_number: number;
+  worker_id: string;
+  status: string;
+  started_at: string;
+  finished_at?: string | null;
+  error_message?: string | null;
+  duration_ms?: number | null;
+  memory_peak_mb?: number | null;
+}
+
+export interface QueueStatus {
+  queues: Record<string, number>;
+  total_queued: number;
+  total_processing: number;
+  total_dead_letter: number;
+  avg_latency_ms: number;
+  active_workers_count: number;
+  timestamp: string;
+}
+
+export interface WorkerStatus {
+  worker_id: string;
+  hostname: string;
+  pid: number;
+  worker_type: string;
+  current_job_id?: string | null;
+  jobs_completed: number;
+  jobs_failed: number;
+  cpu_percent: number;
+  memory_mb: number;
+  gpu_utilization?: number | null;
+  gpu_memory_used_mb?: number | null;
+  status: string;
+  last_heartbeat: string;
+  started_at: string;
+}
+
+export interface SystemCapacity {
+  host_info: Record<string, unknown>;
+  max_parallel_cpu_workers: number;
+  max_concurrent_gpu_slots: number;
+  active_cpu_slots_in_use: number;
+  active_gpu_slots_in_use: number;
+  submission_capacity_files_per_sec: number;
+  detection_capacity_files_per_sec: number;
+  extraction_capacity_files_per_sec: number;
+  ai_indexing_capacity_chunks_per_sec: number;
+  is_under_backpressure: boolean;
+  backpressure_reason?: string | null;
+  evaluated_at: string;
+}
+
+export interface ResourceUsage {
+  cpu: {
+    logical_cores: number;
+    recommended_workers: number;
+    active_workers_limit: number;
+  };
+  memory: {
+    total_ram_mb: number;
+    free_ram_mb: number;
+  };
+  gpu: {
+    available: boolean;
+    name?: string;
+    vram_mb?: number;
+    device_count?: number;
+  };
+  storage: {
+    total_gb: number;
+    used_gb: number;
+    free_gb: number;
+    percent_used: number;
+  };
+  timestamp: string;
+}

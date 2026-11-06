@@ -72,6 +72,18 @@ import {
   VisionModelCapabilities,
   WorksheetData,
   WorksheetSummary,
+  BatchFileItem,
+  BatchProgress,
+  BatchReport,
+  BulkUploadManifest,
+  JobAttempt,
+  ProcessingBatch,
+  ProcessingJob,
+  ProcessingPolicy,
+  QueueStatus,
+  ResourceUsage,
+  SystemCapacity,
+  WorkerStatus,
 } from "@/types/api";
 
 const API_BASE = "/api/v1";
@@ -607,4 +619,140 @@ export const api = {
 
   getAITelemetry: (): Promise<Record<string, unknown>> =>
     request<Record<string, unknown>>("/ai/usage"),
+
+  // Phase 12: Bulk Processing & Scalability Engine
+  uploadBulkFiles: async (
+    files: File[],
+    batchName?: string,
+    autoCreateBatch = true,
+    autoStartBatch = false,
+    ownerId?: string
+  ): Promise<BulkUploadManifest> => {
+    const formData = new FormData();
+    files.forEach((f) => formData.append("files", f));
+    if (batchName) formData.append("batch_name", batchName);
+    formData.append("auto_create_batch", String(autoCreateBatch));
+    formData.append("auto_start_batch", String(autoStartBatch));
+    if (ownerId) formData.append("owner_id", ownerId);
+
+    const response = await fetch(`${API_BASE}/bulk/upload`, {
+      method: "POST",
+      body: formData,
+    });
+    if (!response.ok) {
+      throw new Error(`Bulk upload failed with HTTP status ${response.status}`);
+    }
+    const resJson = await response.json();
+    return resJson.data;
+  },
+
+  createBatch: (req: { name: string; policy?: Partial<ProcessingPolicy> }): Promise<ProcessingBatch> =>
+    request<ProcessingBatch>("/bulk/batches", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(req),
+    }),
+
+  listBatches: (params?: { limit?: number; offset?: number; status?: string; owner_id?: string }): Promise<ProcessingBatch[]> => {
+    const q = new URLSearchParams();
+    if (params?.limit !== undefined) q.set("limit", String(params.limit));
+    if (params?.offset !== undefined) q.set("offset", String(params.offset));
+    if (params?.status) q.set("status", params.status);
+    if (params?.owner_id) q.set("owner_id", params.owner_id);
+    const qs = q.toString() ? `?${q.toString()}` : "";
+    return request<ProcessingBatch[]>(`/bulk/batches${qs}`);
+  },
+
+  getBatch: (batchId: string): Promise<ProcessingBatch> =>
+    request<ProcessingBatch>(`/bulk/batches/${encodeURIComponent(batchId)}`),
+
+  listBatchFiles: (
+    batchId: string,
+    params?: { limit?: number; offset?: number; status?: string }
+  ): Promise<BatchFileItem[]> => {
+    const q = new URLSearchParams();
+    if (params?.limit !== undefined) q.set("limit", String(params.limit));
+    if (params?.offset !== undefined) q.set("offset", String(params.offset));
+    if (params?.status) q.set("status", params.status);
+    const qs = q.toString() ? `?${q.toString()}` : "";
+    return request<BatchFileItem[]>(`/bulk/batches/${encodeURIComponent(batchId)}/files${qs}`);
+  },
+
+  startBatch: (batchId: string): Promise<ProcessingBatch> =>
+    request<ProcessingBatch>(`/bulk/batches/${encodeURIComponent(batchId)}/start`, {
+      method: "POST",
+    }),
+
+  pauseBatch: (batchId: string): Promise<ProcessingBatch> =>
+    request<ProcessingBatch>(`/bulk/batches/${encodeURIComponent(batchId)}/pause`, {
+      method: "POST",
+    }),
+
+  resumeBatch: (batchId: string): Promise<ProcessingBatch> =>
+    request<ProcessingBatch>(`/bulk/batches/${encodeURIComponent(batchId)}/resume`, {
+      method: "POST",
+    }),
+
+  cancelBatch: (batchId: string): Promise<ProcessingBatch> =>
+    request<ProcessingBatch>(`/bulk/batches/${encodeURIComponent(batchId)}/cancel`, {
+      method: "POST",
+    }),
+
+  retryFailedBatch: (batchId: string): Promise<ProcessingBatch> =>
+    request<ProcessingBatch>(`/bulk/batches/${encodeURIComponent(batchId)}/retry-failed`, {
+      method: "POST",
+    }),
+
+  getBatchProgress: (batchId: string): Promise<BatchProgress> =>
+    request<BatchProgress>(`/bulk/batches/${encodeURIComponent(batchId)}/progress`),
+
+  getBatchReport: (batchId: string): Promise<BatchReport> =>
+    request<BatchReport>(`/bulk/batches/${encodeURIComponent(batchId)}/report`),
+
+  listJobs: (params?: {
+    batch_id?: string;
+    status?: string;
+    stage?: string;
+    priority?: number;
+    limit?: number;
+    offset?: number;
+  }): Promise<ProcessingJob[]> => {
+    const q = new URLSearchParams();
+    if (params?.batch_id) q.set("batch_id", params.batch_id);
+    if (params?.status) q.set("status", params.status);
+    if (params?.stage) q.set("stage", params.stage);
+    if (params?.priority !== undefined) q.set("priority", String(params.priority));
+    if (params?.limit !== undefined) q.set("limit", String(params.limit));
+    if (params?.offset !== undefined) q.set("offset", String(params.offset));
+    const qs = q.toString() ? `?${q.toString()}` : "";
+    return request<ProcessingJob[]>(`/jobs${qs}`);
+  },
+
+  getJob: (jobId: string): Promise<ProcessingJob> =>
+    request<ProcessingJob>(`/jobs/${encodeURIComponent(jobId)}`),
+
+  cancelJob: (jobId: string): Promise<ProcessingJob> =>
+    request<ProcessingJob>(`/jobs/${encodeURIComponent(jobId)}/cancel`, {
+      method: "POST",
+    }),
+
+  retryJob: (jobId: string): Promise<ProcessingJob> =>
+    request<ProcessingJob>(`/jobs/${encodeURIComponent(jobId)}/retry`, {
+      method: "POST",
+    }),
+
+  getJobAttempts: (jobId: string): Promise<JobAttempt[]> =>
+    request<JobAttempt[]>(`/jobs/${encodeURIComponent(jobId)}/attempts`),
+
+  getQueueStatus: (): Promise<QueueStatus> =>
+    request<QueueStatus>("/jobs/queue/status"),
+
+  getSystemCapacity: (): Promise<SystemCapacity> =>
+    request<SystemCapacity>("/system/processing-capacity"),
+
+  getWorkerStatus: (): Promise<WorkerStatus[]> =>
+    request<WorkerStatus[]>("/system/worker-status"),
+
+  getResourceUsage: (): Promise<ResourceUsage> =>
+    request<ResourceUsage>("/system/resource-usage"),
 };

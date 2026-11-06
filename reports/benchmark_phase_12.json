@@ -1,0 +1,276 @@
+{
+  "benchmark_name": "Phase 12 Large-Scale Bulk Processing & Scalability Evaluation",
+  "timestamp": "2026-11-06T18:44:41.501290+00:00",
+  "hardware_environment": {
+    "cpu_cores": 16,
+    "max_parallel_workers": 4,
+    "max_gpu_slots": 1,
+    "total_ram_mb": 14803,
+    "free_ram_mb": 7568
+  },
+  "tiers": [
+    {
+      "file_count": 100,
+      "registration": {
+        "duration_seconds": 0.101,
+        "throughput_files_per_sec": 990.13,
+        "peak_rss_mb": 232.56
+      },
+      "queue_enqueue": {
+        "duration_seconds": 0.061,
+        "throughput_tasks_per_sec": 1639.44,
+        "latency_p50_ms": 0.5847,
+        "latency_p95_ms": 0.7428,
+        "latency_p99_ms": 0.9321
+      },
+      "queue_dequeue": {
+        "duration_seconds": 0.0923,
+        "throughput_tasks_per_sec": 1083.06,
+        "latency_p50_ms": 0.7852,
+        "latency_p95_ms": 1.0177,
+        "latency_p99_ms": 1.2423,
+        "priority_distribution": {
+          "interactive": 10,
+          "normal": 40,
+          "bulk": 45,
+          "maintenance": 5
+        }
+      },
+      "memory_rss": {
+        "initial_mb": 227.05,
+        "final_mb": 233.89,
+        "net_delta_mb": 6.84,
+        "is_bounded": true
+      },
+      "resilience": {
+        "backoff_samples": [
+          {
+            "attempt": 1,
+            "delay_seconds": 0.84
+          },
+          {
+            "attempt": 2,
+            "delay_seconds": 1.65
+          },
+          {
+            "attempt": 3,
+            "delay_seconds": 3.07
+          }
+        ],
+        "simulated_failures_recovered": 3
+      }
+    },
+    {
+      "file_count": 500,
+      "registration": {
+        "duration_seconds": 0.0563,
+        "throughput_files_per_sec": 8877.97,
+        "peak_rss_mb": 234.63
+      },
+      "queue_enqueue": {
+        "duration_seconds": 0.3104,
+        "throughput_tasks_per_sec": 1611.04,
+        "latency_p50_ms": 0.5964,
+        "latency_p95_ms": 0.7464,
+        "latency_p99_ms": 0.8212
+      },
+      "queue_dequeue": {
+        "duration_seconds": 0.4556,
+        "throughput_tasks_per_sec": 1097.5,
+        "latency_p50_ms": 0.76,
+        "latency_p95_ms": 1.0125,
+        "latency_p99_ms": 1.136,
+        "priority_distribution": {
+          "interactive": 50,
+          "normal": 200,
+          "bulk": 225,
+          "maintenance": 25
+        }
+      },
+      "memory_rss": {
+        "initial_mb": 233.89,
+        "final_mb": 234.64,
+        "net_delta_mb": 0.75,
+        "is_bounded": true
+      },
+      "resilience": {
+        "backoff_samples": [
+          {
+            "attempt": 1,
+            "delay_seconds": 0.62
+          },
+          {
+            "attempt": 2,
+            "delay_seconds": 1.44
+          },
+          {
+            "attempt": 3,
+            "delay_seconds": 3.84
+          }
+        ],
+        "simulated_failures_recovered": 3
+      }
+    },
+    {
+      "file_count": 1000,
+      "registration": {
+        "duration_seconds": 0.0917,
+        "throughput_files_per_sec": 10909.91,
+        "peak_rss_mb": 234.95
+      },
+      "queue_enqueue": {
+        "duration_seconds": 0.6312,
+        "throughput_tasks_per_sec": 1584.39,
+        "latency_p50_ms": 0.6096,
+        "latency_p95_ms": 0.7886,
+        "latency_p99_ms": 0.8667
+      },
+      "queue_dequeue": {
+        "duration_seconds": 0.8816,
+        "throughput_tasks_per_sec": 1134.33,
+        "latency_p50_ms": 0.7474,
+        "latency_p95_ms": 0.9822,
+        "latency_p99_ms": 1.1406,
+        "priority_distribution": {
+          "interactive": 100,
+          "normal": 400,
+          "bulk": 450,
+          "maintenance": 50
+        }
+      },
+      "memory_rss": {
+        "initial_mb": 234.64,
+        "final_mb": 234.95,
+        "net_delta_mb": 0.31,
+        "is_bounded": true
+      },
+      "resilience": {
+        "backoff_samples": [
+          {
+            "attempt": 1,
+            "delay_seconds": 0.94
+          },
+          {
+            "attempt": 2,
+            "delay_seconds": 1.28
+          },
+          {
+            "attempt": 3,
+            "delay_seconds": 3.33
+          }
+        ],
+        "simulated_failures_recovered": 3
+      }
+    },
+    {
+      "file_count": 5000,
+      "registration": {
+        "duration_seconds": 0.4212,
+        "throughput_files_per_sec": 11870.8,
+        "peak_rss_mb": 236.85
+      },
+      "queue_enqueue": {
+        "duration_seconds": 3.1449,
+        "throughput_tasks_per_sec": 1589.87,
+        "latency_p50_ms": 0.6046,
+        "latency_p95_ms": 0.7508,
+        "latency_p99_ms": 0.848
+      },
+      "queue_dequeue": {
+        "duration_seconds": 4.458,
+        "throughput_tasks_per_sec": 1121.58,
+        "latency_p50_ms": 0.7498,
+        "latency_p95_ms": 0.9552,
+        "latency_p99_ms": 1.0945,
+        "priority_distribution": {
+          "interactive": 500,
+          "normal": 2000,
+          "bulk": 2250,
+          "maintenance": 250
+        }
+      },
+      "memory_rss": {
+        "initial_mb": 234.95,
+        "final_mb": 236.91,
+        "net_delta_mb": 1.96,
+        "is_bounded": true
+      },
+      "resilience": {
+        "backoff_samples": [
+          {
+            "attempt": 1,
+            "delay_seconds": 0.86
+          },
+          {
+            "attempt": 2,
+            "delay_seconds": 1.15
+          },
+          {
+            "attempt": 3,
+            "delay_seconds": 2.68
+          }
+        ],
+        "simulated_failures_recovered": 3
+      }
+    },
+    {
+      "file_count": 10000,
+      "registration": {
+        "duration_seconds": 0.8846,
+        "throughput_files_per_sec": 11304.56,
+        "peak_rss_mb": 239.27
+      },
+      "queue_enqueue": {
+        "duration_seconds": 6.2584,
+        "throughput_tasks_per_sec": 1597.85,
+        "latency_p50_ms": 0.599,
+        "latency_p95_ms": 0.7634,
+        "latency_p99_ms": 0.8622
+      },
+      "queue_dequeue": {
+        "duration_seconds": 8.9811,
+        "throughput_tasks_per_sec": 1113.45,
+        "latency_p50_ms": 0.7566,
+        "latency_p95_ms": 0.9911,
+        "latency_p99_ms": 1.126,
+        "priority_distribution": {
+          "interactive": 1000,
+          "normal": 4000,
+          "bulk": 4500,
+          "maintenance": 500
+        }
+      },
+      "memory_rss": {
+        "initial_mb": 236.91,
+        "final_mb": 239.7,
+        "net_delta_mb": 2.79,
+        "is_bounded": true
+      },
+      "resilience": {
+        "backoff_samples": [
+          {
+            "attempt": 1,
+            "delay_seconds": 0.7
+          },
+          {
+            "attempt": 2,
+            "delay_seconds": 1.96
+          },
+          {
+            "attempt": 3,
+            "delay_seconds": 3.01
+          }
+        ],
+        "simulated_failures_recovered": 3
+      }
+    }
+  ],
+  "summary": {
+    "max_tested_batch_files": 10000,
+    "peak_registration_throughput": 11870.8,
+    "peak_queue_throughput": 1639.44,
+    "queue_latency_p95_ms": 0.7634,
+    "bounded_memory_verified": true,
+    "status": "PASSED"
+  }
+}

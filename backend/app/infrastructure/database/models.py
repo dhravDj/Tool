@@ -44,6 +44,9 @@ class User(Base, TimestampMixin):
     # Relationships
     files: Mapped[list["FileRecord"]] = relationship("FileRecord", back_populates="owner")
     batches: Mapped[list["Batch"]] = relationship("Batch", back_populates="owner")
+    processing_batches: Mapped[list["ProcessingBatchRecord"]] = relationship(
+        "ProcessingBatchRecord", back_populates="owner", cascade="all, delete-orphan"
+    )
 
 
 class FileRecord(Base):
@@ -141,6 +144,12 @@ class FileRecord(Base):
     )
     summaries: Mapped[list["SummaryRecord"]] = relationship(
         "SummaryRecord", back_populates="file", cascade="all, delete-orphan"
+    )
+    batch_files: Mapped[list["BatchFileRecord"]] = relationship(
+        "BatchFileRecord", back_populates="file", cascade="all, delete-orphan"
+    )
+    processing_jobs: Mapped[list["ProcessingJobRecord"]] = relationship(
+        "ProcessingJobRecord", back_populates="file", cascade="all, delete-orphan"
     )
 
     __table_args__ = (
@@ -758,7 +767,7 @@ class ArchiveRelationshipRecord(Base):
     nesting_depth: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
     original_path: Mapped[str] = mapped_column(Text, nullable=False)
     extracted_storage_reference: Mapped[str | None] = mapped_column(Text, nullable=True)
-    sha256: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
+    sha256: Mapped[str | None] = mapped_column(String(64), nullable=True)
     detection_result: Mapped[dict[str, Any]] = mapped_column(JSON_TYPE, default=dict, nullable=False)
     processing_status: Mapped[str] = mapped_column(String(32), default="extracted", nullable=False)
     created_at: Mapped[datetime] = mapped_column(
@@ -1103,6 +1112,292 @@ class SummaryRecord(Base):
     __table_args__ = (
         Index("ix_summaries_file_type", "file_id", "summary_type"),
     )
+
+
+class ProcessingBatchRecord(Base):
+    """Large-scale bulk processing batch record tracking thousands of files."""
+
+    __tablename__ = "processing_batches"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+    owner_id: Mapped[uuid.UUID | None] = mapped_column(
+        Uuid(as_uuid=True),
+        ForeignKey("users.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    total_files: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    accepted_files: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    rejected_files: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    queued_files: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    processing_files: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    completed_files: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    partially_completed_files: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    failed_files: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    cancelled_files: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    total_size_bytes: Mapped[int] = mapped_column(BigInteger, default=0, nullable=False)
+    status: Mapped[str] = mapped_column(
+        String(32),
+        default="pending",
+        index=True,
+        nullable=False,
+    )
+    overall_progress: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
+    processing_policy: Mapped[dict[str, Any]] = mapped_column(
+        JSON_TYPE, default=dict, nullable=False
+    )
+    error_summary: Mapped[dict[str, Any]] = mapped_column(
+        JSON_TYPE, default=dict, nullable=False
+    )
+    started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        default=lambda: datetime.now(UTC),
+        nullable=False,
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        default=lambda: datetime.now(UTC),
+        nullable=False,
+    )
+
+    # Relationships
+    owner: Mapped[Optional["User"]] = relationship("User", back_populates="processing_batches")
+    files: Mapped[list["BatchFileRecord"]] = relationship(
+        "BatchFileRecord", back_populates="batch", cascade="all, delete-orphan"
+    )
+    jobs: Mapped[list["ProcessingJobRecord"]] = relationship(
+        "ProcessingJobRecord", back_populates="batch", cascade="all, delete-orphan"
+    )
+
+    __table_args__ = (
+        Index("ix_processing_batches_owner_status", "owner_id", "status"),
+        Index("ix_processing_batches_created_at", "created_at"),
+    )
+
+
+class BatchFileRecord(Base):
+    """File item tracked within a large processing batch."""
+
+    __tablename__ = "batch_files"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+    batch_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True),
+        ForeignKey("processing_batches.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    file_id: Mapped[uuid.UUID | None] = mapped_column(
+        Uuid(as_uuid=True),
+        ForeignKey("files.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
+    filename: Mapped[str] = mapped_column(String(255), nullable=False)
+    file_size: Mapped[int] = mapped_column(BigInteger, default=0, nullable=False)
+    sha256: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    status: Mapped[str] = mapped_column(
+        String(32),
+        default="accepted",
+        index=True,
+        nullable=False,
+    )
+    validation_error: Mapped[str | None] = mapped_column(Text, nullable=True)
+    dedup_decision: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        default=lambda: datetime.now(UTC),
+        nullable=False,
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        default=lambda: datetime.now(UTC),
+        nullable=False,
+    )
+
+    # Relationships
+    batch: Mapped["ProcessingBatchRecord"] = relationship("ProcessingBatchRecord", back_populates="files")
+    file: Mapped[Optional["FileRecord"]] = relationship("FileRecord", back_populates="batch_files")
+    jobs: Mapped[list["ProcessingJobRecord"]] = relationship(
+        "ProcessingJobRecord", back_populates="batch_file", cascade="all, delete-orphan"
+    )
+
+    __table_args__ = (
+        Index("ix_batch_files_batch_status", "batch_id", "status"),
+        Index("ix_batch_files_sha256", "sha256"),
+    )
+
+
+class ProcessingJobRecord(Base):
+    """Job tracking pipeline execution across detection, extraction, and AI indexing."""
+
+    __tablename__ = "processing_jobs"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+    batch_id: Mapped[uuid.UUID | None] = mapped_column(
+        Uuid(as_uuid=True),
+        ForeignKey("processing_batches.id", ondelete="CASCADE"),
+        nullable=True,
+        index=True,
+    )
+    batch_file_id: Mapped[uuid.UUID | None] = mapped_column(
+        Uuid(as_uuid=True),
+        ForeignKey("batch_files.id", ondelete="CASCADE"),
+        nullable=True,
+        index=True,
+    )
+    file_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True),
+        ForeignKey("files.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    job_type: Mapped[str] = mapped_column(
+        String(64), default="pipeline_orchestration", index=True, nullable=False
+    )
+    stage: Mapped[str] = mapped_column(String(64), default="queued", nullable=False)
+    priority: Mapped[int] = mapped_column(Integer, default=50, index=True, nullable=False)
+    status: Mapped[str] = mapped_column(
+        String(32),
+        default="queued",
+        index=True,
+        nullable=False,
+    )
+    current_worker_id: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    retry_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    max_retries: Mapped[int] = mapped_column(Integer, default=3, nullable=False)
+    progress: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
+    stage_progress: Mapped[dict[str, Any]] = mapped_column(JSON_TYPE, default=dict, nullable=False)
+    idempotency_key: Mapped[str] = mapped_column(
+        String(128), unique=True, index=True, nullable=False
+    )
+    error_code: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
+    started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    heartbeat_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        default=lambda: datetime.now(UTC),
+        nullable=False,
+    )
+
+    # Relationships
+    batch: Mapped[Optional["ProcessingBatchRecord"]] = relationship(
+        "ProcessingBatchRecord", back_populates="jobs"
+    )
+    batch_file: Mapped[Optional["BatchFileRecord"]] = relationship(
+        "BatchFileRecord", back_populates="jobs"
+    )
+    file: Mapped["FileRecord"] = relationship("FileRecord", back_populates="processing_jobs")
+    attempts: Mapped[list["JobAttemptRecord"]] = relationship(
+        "JobAttemptRecord", back_populates="job", cascade="all, delete-orphan"
+    )
+
+    __table_args__ = (
+        Index("ix_processing_jobs_batch_status", "batch_id", "status"),
+        Index("ix_processing_jobs_priority_status", "priority", "status"),
+        Index("ix_processing_jobs_file_stage", "file_id", "stage"),
+    )
+
+
+class JobAttemptRecord(Base):
+    """Detailed audit attempt of a processing job execution."""
+
+    __tablename__ = "job_attempts"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+    job_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True),
+        ForeignKey("processing_jobs.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    attempt_number: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
+    worker_id: Mapped[str] = mapped_column(String(128), nullable=False)
+    started_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        default=lambda: datetime.now(UTC),
+        nullable=False,
+    )
+    finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    status: Mapped[str] = mapped_column(String(32), default="running", nullable=False)
+    error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
+    duration_ms: Mapped[float | None] = mapped_column(Float, nullable=True)
+    memory_peak_mb: Mapped[float | None] = mapped_column(Float, nullable=True)
+
+    # Relationships
+    job: Mapped["ProcessingJobRecord"] = relationship("ProcessingJobRecord", back_populates="attempts")
+
+    __table_args__ = (
+        Index("ix_job_attempts_job_attempt", "job_id", "attempt_number"),
+    )
+
+
+class WorkerHeartbeatRecord(Base):
+    """Active worker node heartbeat and resource telemetry."""
+
+    __tablename__ = "worker_heartbeats"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+    worker_id: Mapped[str] = mapped_column(String(128), unique=True, index=True, nullable=False)
+    hostname: Mapped[str] = mapped_column(String(255), nullable=False)
+    pid: Mapped[int] = mapped_column(Integer, nullable=False)
+    worker_type: Mapped[str] = mapped_column(String(64), default="generic", nullable=False)
+    current_job_id: Mapped[uuid.UUID | None] = mapped_column(Uuid(as_uuid=True), nullable=True)
+    jobs_completed: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    jobs_failed: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    cpu_percent: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
+    memory_mb: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
+    gpu_utilization: Mapped[float | None] = mapped_column(Float, nullable=True)
+    gpu_memory_used_mb: Mapped[float | None] = mapped_column(Float, nullable=True)
+    status: Mapped[str] = mapped_column(String(32), default="alive", index=True, nullable=False)
+    last_heartbeat: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        default=lambda: datetime.now(UTC),
+        index=True,
+        nullable=False,
+    )
+    started_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        default=lambda: datetime.now(UTC),
+        nullable=False,
+    )
+
 
 
 

@@ -4,11 +4,19 @@ import platform
 import shutil
 from typing import Any
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.api.dependencies.database import get_session
 from app.core.config import settings
 from app.domain.enums import FormatCategory
 from app.domain.schemas.api_response import APIResponse
+from app.modules.bulk_processing.capacity.system_monitor import system_monitor
+from app.modules.bulk_processing.schemas.job import (
+    ResourceUsageResponse,
+    SystemCapacityResponse,
+    WorkerStatusResponse,
+)
 from app.modules.files.detection.detector import UniversalFileDetector
 from app.modules.files.detection.mime_detector import HAS_MAGIC
 from app.modules.formats.registry import format_registry
@@ -131,3 +139,28 @@ async def get_detection_capabilities() -> APIResponse[dict[str, Any]]:
     return APIResponse.ok(
         data=capabilities, message="Detection capabilities retrieved successfully."
     )
+
+
+@router.get("/processing-capacity", response_model=APIResponse[SystemCapacityResponse])
+async def get_processing_capacity(
+    session: AsyncSession = Depends(get_session),
+) -> APIResponse[SystemCapacityResponse]:
+    """Retrieve live processing capacity, throughput limits, and backpressure signals."""
+    capacity = await system_monitor.get_system_capacity(session)
+    return APIResponse.ok(data=capacity, message="Processing capacity retrieved.")
+
+
+@router.get("/worker-status", response_model=APIResponse[list[WorkerStatusResponse]])
+async def get_worker_status(
+    session: AsyncSession = Depends(get_session),
+) -> APIResponse[list[WorkerStatusResponse]]:
+    """Retrieve active worker heartbeats and workload statuses."""
+    workers = await system_monitor.get_worker_statuses(session)
+    return APIResponse.ok(data=workers, message="Worker statuses retrieved.")
+
+
+@router.get("/resource-usage", response_model=APIResponse[ResourceUsageResponse])
+async def get_resource_usage() -> APIResponse[ResourceUsageResponse]:
+    """Retrieve current host CPU, RAM, disk, and GPU hardware metrics."""
+    usage = await system_monitor.get_resource_usage()
+    return APIResponse.ok(data=usage, message="Resource usage retrieved.")
