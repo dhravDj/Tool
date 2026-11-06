@@ -1,0 +1,4 @@
+DocuMind TXT fixture 2
+Expected token: ALPHA-TXT-002
+Unicode: नमस्ते दुनिया — café — 東京
+Second line with commas, semicolons; and tabs.

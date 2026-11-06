@@ -1,0 +1,5 @@
+id;name;score;city;note
+1;Ada;95.5;London;Expected token ALPHA-CSV-006
+2;Grace;98.0;New York;Contains, comma
+3;Linus;;Helsinki;"Contains ""quoted"" text"
+4;Unicode नमस्ते;88;Bhopal;semicolon delimiter

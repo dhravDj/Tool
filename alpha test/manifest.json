@@ -1,0 +1,1808 @@
+{
+  "dataset": "DocuMind Alpha Test Dataset",
+  "generated_on": "2026-11-06T05:47:47",
+  "file_count": 130,
+  "files": [
+    {
+      "file": "01_pdf/pdf_fixture_01.pdf",
+      "category": "PDF",
+      "size_bytes": 2234,
+      "sha256": "3939e042cbc9bbb1c184f1a6330f6f4a7b4c0fd51c792675f50b9912f7667374",
+      "expected": {
+        "format": "PDF",
+        "contains_token": "ALPHA-001-END",
+        "contains_table": true,
+        "expected_pages": 1
+      },
+      "notes": ""
+    },
+    {
+      "file": "01_pdf/pdf_fixture_02.pdf",
+      "category": "PDF",
+      "size_bytes": 2234,
+      "sha256": "4639ea053fa3793787e08e4bb7e0dff37ab8d7a288825638941038737ae10056",
+      "expected": {
+        "format": "PDF",
+        "contains_token": "ALPHA-002-END",
+        "contains_table": true,
+        "expected_pages": 1
+      },
+      "notes": ""
+    },
+    {
+      "file": "01_pdf/pdf_fixture_03.pdf",
+      "category": "PDF",
+      "size_bytes": 2236,
+      "sha256": "1367209f851ae3b407a8a5502257bc52bfcb33fecebb59819c0f1c2c45990d5c",
+      "expected": {
+        "format": "PDF",
+        "contains_token": "ALPHA-003-END",
+        "contains_table": true,
+        "expected_pages": 1
+      },
+      "notes": ""
+    },
+    {
+      "file": "01_pdf/pdf_fixture_04.pdf",
+      "category": "PDF",
+      "size_bytes": 2234,
+      "sha256": "2485412543ae3a1f020b5c57d090e36df7baab831afae02b0cce3b950abd6f94",
+      "expected": {
+        "format": "PDF",
+        "contains_token": "ALPHA-004-END",
+        "contains_table": true,
+        "expected_pages": 1
+      },
+      "notes": ""
+    },
+    {
+      "file": "01_pdf/pdf_fixture_05.pdf",
+      "category": "PDF",
+      "size_bytes": 2794,
+      "sha256": "8d372607095295784af939df5e14f219221f249692b5ee935bd00c944c0aaaca",
+      "expected": {
+        "format": "PDF",
+        "contains_token": "ALPHA-005-END",
+        "contains_table": true,
+        "expected_pages": 2
+      },
+      "notes": ""
+    },
+    {
+      "file": "01_pdf/pdf_fixture_06.pdf",
+      "category": "PDF",
+      "size_bytes": 2236,
+      "sha256": "563e672effdef88fba9ba1ce8d890ec03f29b536b7eda4aa9ab2ea2932937411",
+      "expected": {
+        "format": "PDF",
+        "contains_token": "ALPHA-006-END",
+        "contains_table": true,
+        "expected_pages": 1
+      },
+      "notes": ""
+    },
+    {
+      "file": "01_pdf/pdf_fixture_07.pdf",
+      "category": "PDF",
+      "size_bytes": 2234,
+      "sha256": "5dc94810ccdf53768eabbeb51cc34954c0503cbc6d6e8c2c1aa6a9f61041c382",
+      "expected": {
+        "format": "PDF",
+        "contains_token": "ALPHA-007-END",
+        "contains_table": true,
+        "expected_pages": 1
+      },
+      "notes": ""
+    },
+    {
+      "file": "01_pdf/pdf_fixture_08.pdf",
+      "category": "PDF",
+      "size_bytes": 2234,
+      "sha256": "9b5dc92be437c36b5e31d9fa8fa521073a13be0cff595ac2ba348f309c37c082",
+      "expected": {
+        "format": "PDF",
+        "contains_token": "ALPHA-008-END",
+        "contains_table": true,
+        "expected_pages": 1
+      },
+      "notes": ""
+    },
+    {
+      "file": "01_pdf/pdf_fixture_09.pdf",
+      "category": "PDF",
+      "size_bytes": 2236,
+      "sha256": "94ddfe871277d4bb33cbd64265ae506149c4dc39d8d02f2fc314fe258903745e",
+      "expected": {
+        "format": "PDF",
+        "contains_token": "ALPHA-009-END",
+        "contains_table": true,
+        "expected_pages": 1
+      },
+      "notes": ""
+    },
+    {
+      "file": "01_pdf/pdf_fixture_10.pdf",
+      "category": "PDF",
+      "size_bytes": 2807,
+      "sha256": "20a236d8919959f89616421b46a82bccf2c516735c825d74ab773bca6e561d29",
+      "expected": {
+        "format": "PDF",
+        "contains_token": "ALPHA-010-END",
+        "contains_table": true,
+        "expected_pages": 2
+      },
+      "notes": ""
+    },
+    {
+      "file": "01_pdf/pdf_fixture_11.pdf",
+      "category": "PDF",
+      "size_bytes": 2248,
+      "sha256": "547493c81210b574575232274f5740efb970a4b9d7ef2f2479f8915cfd43c5c9",
+      "expected": {
+        "format": "PDF",
+        "contains_token": "ALPHA-011-END",
+        "contains_table": true,
+        "expected_pages": 1
+      },
+      "notes": ""
+    },
+    {
+      "file": "01_pdf/pdf_fixture_12.pdf",
+      "category": "PDF",
+      "size_bytes": 2248,
+      "sha256": "b6203112e476e0cbfe629b28a443b43cb4a30eeae481745a65a090d80346442f",
+      "expected": {
+        "format": "PDF",
+        "contains_token": "ALPHA-012-END",
+        "contains_table": true,
+        "expected_pages": 1
+      },
+      "notes": ""
+    },
+    {
+      "file": "01_pdf/pdf_fixture_13.pdf",
+      "category": "PDF",
+      "size_bytes": 2248,
+      "sha256": "b706e9f9edd873b66f5773d1d654328aa88dad163c36aa6205df3e45eb9cb120",
+      "expected": {
+        "format": "PDF",
+        "contains_token": "ALPHA-013-END",
+        "contains_table": true,
+        "expected_pages": 1
+      },
+      "notes": ""
+    },
+    {
+      "file": "01_pdf/pdf_fixture_14.pdf",
+      "category": "PDF",
+      "size_bytes": 2248,
+      "sha256": "35137f42a57e12b4f575060ada3cdb01a1d8286ccba0de0760b6545cc40158ad",
+      "expected": {
+        "format": "PDF",
+        "contains_token": "ALPHA-014-END",
+        "contains_table": true,
+        "expected_pages": 1
+      },
+      "notes": ""
+    },
+    {
+      "file": "01_pdf/pdf_fixture_15.pdf",
+      "category": "PDF",
+      "size_bytes": 2808,
+      "sha256": "89e2a3d3eb3d5f75828c1a7c6cfb57fbbdeb4b4ac23b7b2e595633c59a0a9e2f",
+      "expected": {
+        "format": "PDF",
+        "contains_token": "ALPHA-015-END",
+        "contains_table": true,
+        "expected_pages": 2
+      },
+      "notes": ""
+    },
+    {
+      "file": "01_pdf/pdf_fixture_16.pdf",
+      "category": "PDF",
+      "size_bytes": 2248,
+      "sha256": "1e9cfb90a88675cf9e18a8a31f3db37a012e17031eee3ab5ac62745b1f98a018",
+      "expected": {
+        "format": "PDF",
+        "contains_token": "ALPHA-016-END",
+        "contains_table": true,
+        "expected_pages": 1
+      },
+      "notes": ""
+    },
+    {
+      "file": "01_pdf/pdf_fixture_17.pdf",
+      "category": "PDF",
+      "size_bytes": 2248,
+      "sha256": "bb0bc508d43e39ba5bf12d8fc777a818d6808375093ca371e6c7718307c67bd5",
+      "expected": {
+        "format": "PDF",
+        "contains_token": "ALPHA-017-END",
+        "contains_table": true,
+        "expected_pages": 1
+      },
+      "notes": ""
+    },
+    {
+      "file": "01_pdf/pdf_fixture_18.pdf",
+      "category": "PDF",
+      "size_bytes": 2247,
+      "sha256": "06974abe4e6f034b257f846a848b1e7c4fd67b2074436c0094927bf5e69f6c14",
+      "expected": {
+        "format": "PDF",
+        "contains_token": "ALPHA-018-END",
+        "contains_table": true,
+        "expected_pages": 1
+      },
+      "notes": ""
+    },
+    {
+      "file": "01_pdf/pdf_fixture_19.pdf",
+      "category": "PDF",
+      "size_bytes": 2248,
+      "sha256": "5fc3ab2d98d27cd2387e6d40f3deff7fcb0aba01e1dedee096d4b0340bf0dd6b",
+      "expected": {
+        "format": "PDF",
+        "contains_token": "ALPHA-019-END",
+        "contains_table": true,
+        "expected_pages": 1
+      },
+      "notes": ""
+    },
+    {
+      "file": "01_pdf/pdf_fixture_20.pdf",
+      "category": "PDF",
+      "size_bytes": 2806,
+      "sha256": "ecfa5d3e241a9080e4f859a2e97c0e2d30a6e027c1c2f49acc2716f7153eb4e2",
+      "expected": {
+        "format": "PDF",
+        "contains_token": "ALPHA-020-END",
+        "contains_table": true,
+        "expected_pages": 2
+      },
+      "notes": ""
+    },
+    {
+      "file": "01_pdf/pdf_fixture_21.pdf",
+      "category": "PDF",
+      "size_bytes": 2248,
+      "sha256": "29d3e2c0779d7c690dc16caa7b0775c9bc82f3cf85c2af087fd92a1a91b4936f",
+      "expected": {
+        "format": "PDF",
+        "contains_token": "ALPHA-021-END",
+        "contains_table": true,
+        "expected_pages": 1
+      },
+      "notes": ""
+    },
+    {
+      "file": "01_pdf/pdf_fixture_22.pdf",
+      "category": "PDF",
+      "size_bytes": 2247,
+      "sha256": "198c49b47a3af05baf3c75f931f92a3032bc61488cc53ca19f2bbd311e446e9e",
+      "expected": {
+        "format": "PDF",
+        "contains_token": "ALPHA-022-END",
+        "contains_table": true,
+        "expected_pages": 1
+      },
+      "notes": ""
+    },
+    {
+      "file": "01_pdf/pdf_fixture_23.pdf",
+      "category": "PDF",
+      "size_bytes": 2248,
+      "sha256": "23320d66a891b7db0bec8cc4d85be9885ba6e759f7d2a926e8730c08bab2083c",
+      "expected": {
+        "format": "PDF",
+        "contains_token": "ALPHA-023-END",
+        "contains_table": true,
+        "expected_pages": 1
+      },
+      "notes": ""
+    },
+    {
+      "file": "01_pdf/pdf_fixture_24.pdf",
+      "category": "PDF",
+      "size_bytes": 2248,
+      "sha256": "c3fdbca73f4eca8d0c9ce4b0309971c8b0c67144febcb34339a026c80713c1e0",
+      "expected": {
+        "format": "PDF",
+        "contains_token": "ALPHA-024-END",
+        "contains_table": true,
+        "expected_pages": 1
+      },
+      "notes": ""
+    },
+    {
+      "file": "01_pdf/pdf_fixture_25.pdf",
+      "category": "PDF",
+      "size_bytes": 2808,
+      "sha256": "32c3a33e6b8d02df674af40ce662cb8654a62f5e0ef5a166e2b1a1509bef37ad",
+      "expected": {
+        "format": "PDF",
+        "contains_token": "ALPHA-025-END",
+        "contains_table": true,
+        "expected_pages": 2
+      },
+      "notes": ""
+    },
+    {
+      "file": "01_pdf/pdf_fixture_26.pdf",
+      "category": "PDF",
+      "size_bytes": 2248,
+      "sha256": "cb1ecd0219d52dccc89b4929e9f1917f9bb49c6546cc9e5dd25125d67d9f0342",
+      "expected": {
+        "format": "PDF",
+        "contains_token": "ALPHA-026-END",
+        "contains_table": true,
+        "expected_pages": 1
+      },
+      "notes": ""
+    },
+    {
+      "file": "01_pdf/pdf_fixture_27.pdf",
+      "category": "PDF",
+      "size_bytes": 2248,
+      "sha256": "6483cc581bd765d95adc268f6b3c75023b9f6571bae42085c56383ac0376ad22",
+      "expected": {
+        "format": "PDF",
+        "contains_token": "ALPHA-027-END",
+        "contains_table": true,
+        "expected_pages": 1
+      },
+      "notes": ""
+    },
+    {
+      "file": "01_pdf/pdf_fixture_28.pdf",
+      "category": "PDF",
+      "size_bytes": 2248,
+      "sha256": "e21dea096ee1e64cf9d74378cddf4f59d4a4d314e7d78e0d0b9af62383d3cfe9",
+      "expected": {
+        "format": "PDF",
+        "contains_token": "ALPHA-028-END",
+        "contains_table": true,
+        "expected_pages": 1
+      },
+      "notes": ""
+    },
+    {
+      "file": "01_pdf/pdf_fixture_29.pdf",
+      "category": "PDF",
+      "size_bytes": 2248,
+      "sha256": "c66d5053e01bf2c98a0f26385c49bed65d89e7d79ae222a0c52558b732e25a73",
+      "expected": {
+        "format": "PDF",
+        "contains_token": "ALPHA-029-END",
+        "contains_table": true,
+        "expected_pages": 1
+      },
+      "notes": ""
+    },
+    {
+      "file": "01_pdf/pdf_fixture_30.pdf",
+      "category": "PDF",
+      "size_bytes": 2808,
+      "sha256": "be293023310be1285fdf17beedb79126c68fc5cc8a2423c52384026f301d0e47",
+      "expected": {
+        "format": "PDF",
+        "contains_token": "ALPHA-030-END",
+        "contains_table": true,
+        "expected_pages": 2
+      },
+      "notes": ""
+    },
+    {
+      "file": "02_doc_docx/docx_fixture_01.docx",
+      "category": "DOCX",
+      "size_bytes": 36990,
+      "sha256": "a5ef5e0987050760d8937a5f271ae2cf9edfa413c13126e287c5680b5e612bd3",
+      "expected": {
+        "format": "DOCX",
+        "contains_token": "ALPHA-DOCX-001-END",
+        "contains_table": true,
+        "expected_bullets": 2
+      },
+      "notes": ""
+    },
+    {
+      "file": "02_doc_docx/docx_fixture_02.docx",
+      "category": "DOCX",
+      "size_bytes": 36990,
+      "sha256": "4389c357d61299a03d0b5f83f73365e1f149acda9797aa4c0126e3d4b77d61b6",
+      "expected": {
+        "format": "DOCX",
+        "contains_token": "ALPHA-DOCX-002-END",
+        "contains_table": true,
+        "expected_bullets": 2
+      },
+      "notes": ""
+    },
+    {
+      "file": "02_doc_docx/docx_fixture_03.docx",
+      "category": "DOCX",
+      "size_bytes": 36990,
+      "sha256": "c5a1e0435eb586e49c79b34ef86dcc29d920a7112950e4fa3b798aed05c56b52",
+      "expected": {
+        "format": "DOCX",
+        "contains_token": "ALPHA-DOCX-003-END",
+        "contains_table": true,
+        "expected_bullets": 2
+      },
+      "notes": ""
+    },
+    {
+      "file": "02_doc_docx/docx_fixture_04.docx",
+      "category": "DOCX",
+      "size_bytes": 36988,
+      "sha256": "7d555932cd39dec60a91c5e34d14ea73299cee08e776d73576d60bc02ff7365c",
+      "expected": {
+        "format": "DOCX",
+        "contains_token": "ALPHA-DOCX-004-END",
+        "contains_table": true,
+        "expected_bullets": 2
+      },
+      "notes": ""
+    },
+    {
+      "file": "02_doc_docx/docx_fixture_05.docx",
+      "category": "DOCX",
+      "size_bytes": 36989,
+      "sha256": "8d97e159657f4f42bbed16d8f93661b71f03f21f40c8c1d7202daa9dd406b7f4",
+      "expected": {
+        "format": "DOCX",
+        "contains_token": "ALPHA-DOCX-005-END",
+        "contains_table": true,
+        "expected_bullets": 2
+      },
+      "notes": ""
+    },
+    {
+      "file": "02_doc_docx/docx_fixture_06.docx",
+      "category": "DOCX",
+      "size_bytes": 36988,
+      "sha256": "6d93bc663ffa3f3397af9b2588e2a6d077652170cda6184a09d4c0e5e65fbd08",
+      "expected": {
+        "format": "DOCX",
+        "contains_token": "ALPHA-DOCX-006-END",
+        "contains_table": true,
+        "expected_bullets": 2
+      },
+      "notes": ""
+    },
+    {
+      "file": "02_doc_docx/docx_fixture_07.docx",
+      "category": "DOCX",
+      "size_bytes": 36989,
+      "sha256": "aa26eb80f2975ce955a4f16dd63c5116f00647535d410cfca0e3f688e6f06fc4",
+      "expected": {
+        "format": "DOCX",
+        "contains_token": "ALPHA-DOCX-007-END",
+        "contains_table": true,
+        "expected_bullets": 2
+      },
+      "notes": ""
+    },
+    {
+      "file": "02_doc_docx/docx_fixture_08.docx",
+      "category": "DOCX",
+      "size_bytes": 36989,
+      "sha256": "d29baa2ba2668406e564e43914632c1d2c16ed1406aee8345b764e650fa53e1d",
+      "expected": {
+        "format": "DOCX",
+        "contains_token": "ALPHA-DOCX-008-END",
+        "contains_table": true,
+        "expected_bullets": 2
+      },
+      "notes": ""
+    },
+    {
+      "file": "02_doc_docx/docx_fixture_09.docx",
+      "category": "DOCX",
+      "size_bytes": 36989,
+      "sha256": "54cc57b4f37661fcbc0a686d12e8a41dc141256641c86190230b6094a8be28ba",
+      "expected": {
+        "format": "DOCX",
+        "contains_token": "ALPHA-DOCX-009-END",
+        "contains_table": true,
+        "expected_bullets": 2
+      },
+      "notes": ""
+    },
+    {
+      "file": "02_doc_docx/docx_fixture_10.docx",
+      "category": "DOCX",
+      "size_bytes": 36989,
+      "sha256": "dfa72f690b554479987c20bf21a3429ee8f6bd611f51c6c98f2b7a6ab6d3a4d6",
+      "expected": {
+        "format": "DOCX",
+        "contains_token": "ALPHA-DOCX-010-END",
+        "contains_table": true,
+        "expected_bullets": 2
+      },
+      "notes": ""
+    },
+    {
+      "file": "02_doc_docx/docx_fixture_11.docx",
+      "category": "DOCX",
+      "size_bytes": 36990,
+      "sha256": "18000942725e4b5d5ccb5dfb39dc024b535d2d8a22ddf931cf3b99587062bd4a",
+      "expected": {
+        "format": "DOCX",
+        "contains_token": "ALPHA-DOCX-011-END",
+        "contains_table": true,
+        "expected_bullets": 2
+      },
+      "notes": ""
+    },
+    {
+      "file": "02_doc_docx/docx_fixture_12.docx",
+      "category": "DOCX",
+      "size_bytes": 36990,
+      "sha256": "442b2d10947a0749d1b770ea1d7e64cf6a7db7436da479948d76ac763e326f72",
+      "expected": {
+        "format": "DOCX",
+        "contains_token": "ALPHA-DOCX-012-END",
+        "contains_table": true,
+        "expected_bullets": 2
+      },
+      "notes": ""
+    },
+    {
+      "file": "02_doc_docx/docx_fixture_13.docx",
+      "category": "DOCX",
+      "size_bytes": 36991,
+      "sha256": "44a4f4028536eaf8ebb9550d5f6f9f1af7695b6db766d2615b0e3ec5f76b394c",
+      "expected": {
+        "format": "DOCX",
+        "contains_token": "ALPHA-DOCX-013-END",
+        "contains_table": true,
+        "expected_bullets": 2
+      },
+      "notes": ""
+    },
+    {
+      "file": "02_doc_docx/docx_fixture_14.docx",
+      "category": "DOCX",
+      "size_bytes": 36989,
+      "sha256": "99ccd5d0454018b8206b59ed2cd12b8fe5f961dc7b8ae62c626126e289a3d822",
+      "expected": {
+        "format": "DOCX",
+        "contains_token": "ALPHA-DOCX-014-END",
+        "contains_table": true,
+        "expected_bullets": 2
+      },
+      "notes": ""
+    },
+    {
+      "file": "02_doc_docx/docx_fixture_15.docx",
+      "category": "DOCX",
+      "size_bytes": 36988,
+      "sha256": "787890cef78134c8a83174ea07f5895bd287350162a3fc42fc6c72757af7f196",
+      "expected": {
+        "format": "DOCX",
+        "contains_token": "ALPHA-DOCX-015-END",
+        "contains_table": true,
+        "expected_bullets": 2
+      },
+      "notes": ""
+    },
+    {
+      "file": "02_doc_docx/docx_fixture_16.docx",
+      "category": "DOCX",
+      "size_bytes": 36989,
+      "sha256": "e24a612a7b036112e2b5829d218e1dac73a475458b3131a83a39775e38c7de26",
+      "expected": {
+        "format": "DOCX",
+        "contains_token": "ALPHA-DOCX-016-END",
+        "contains_table": true,
+        "expected_bullets": 2
+      },
+      "notes": ""
+    },
+    {
+      "file": "02_doc_docx/docx_fixture_17.docx",
+      "category": "DOCX",
+      "size_bytes": 36988,
+      "sha256": "50a47a643aa255bb5699758ca1f4ebf63b19b7a845edd70f6a9d5d191889aa9a",
+      "expected": {
+        "format": "DOCX",
+        "contains_token": "ALPHA-DOCX-017-END",
+        "contains_table": true,
+        "expected_bullets": 2
+      },
+      "notes": ""
+    },
+    {
+      "file": "02_doc_docx/docx_fixture_18.docx",
+      "category": "DOCX",
+      "size_bytes": 36989,
+      "sha256": "b686839762af1a906c034fd293d5999ff19d7827d72dceffa83c6e64e6678e87",
+      "expected": {
+        "format": "DOCX",
+        "contains_token": "ALPHA-DOCX-018-END",
+        "contains_table": true,
+        "expected_bullets": 2
+      },
+      "notes": ""
+    },
+    {
+      "file": "02_doc_docx/mislabeled_legacy_doc_01.doc",
+      "category": "NEGATIVE_DOC",
+      "size_bytes": 74,
+      "sha256": "d1acca1232da300b3ad4ffe56bdeab91ba81d0b762298fb95cdcbf57d0aa7e7b",
+      "expected": {
+        "expected_status": "INVALID_FILE or DETECTED_BUT_UNSUPPORTED",
+        "actual_format": "TXT"
+      },
+      "notes": "Intentionally mislabeled .doc; must not be treated as valid legacy DOC."
+    },
+    {
+      "file": "02_doc_docx/mislabeled_legacy_doc_02.doc",
+      "category": "NEGATIVE_DOC",
+      "size_bytes": 74,
+      "sha256": "dc19a580e12769049b705c901eb27ee6375d688bf11ff9c86cc282c28cae6563",
+      "expected": {
+        "expected_status": "INVALID_FILE or DETECTED_BUT_UNSUPPORTED",
+        "actual_format": "TXT"
+      },
+      "notes": "Intentionally mislabeled .doc; must not be treated as valid legacy DOC."
+    },
+    {
+      "file": "03_other_documents/text_fixture_01.txt",
+      "category": "TXT",
+      "size_bytes": 168,
+      "sha256": "dd272f586c472deb05bc676510887fb8bc988d137e3a38045cf7a4b3926db710",
+      "expected": {
+        "format": "TXT",
+        "contains_token": "ALPHA-TXT-001",
+        "unicode": "नमस्ते दुनिया — café — 東京"
+      },
+      "notes": ""
+    },
+    {
+      "file": "03_other_documents/text_fixture_02.txt",
+      "category": "TXT",
+      "size_bytes": 168,
+      "sha256": "dba28f0b21057d91316dc591bbe26364cd62869f5efd332adbef4dfd42c4df4a",
+      "expected": {
+        "format": "TXT",
+        "contains_token": "ALPHA-TXT-002",
+        "unicode": "नमस्ते दुनिया — café — 東京"
+      },
+      "notes": ""
+    },
+    {
+      "file": "03_other_documents/text_fixture_03.txt",
+      "category": "TXT",
+      "size_bytes": 168,
+      "sha256": "bc3c13fbf55d646b4f039c1e8e20fc093c6b23b62cc95a41074deea36ce328d2",
+      "expected": {
+        "format": "TXT",
+        "contains_token": "ALPHA-TXT-003",
+        "unicode": "नमस्ते दुनिया — café — 東京"
+      },
+      "notes": ""
+    },
+    {
+      "file": "03_other_documents/markdown_fixture_01.md",
+      "category": "MD",
+      "size_bytes": 150,
+      "sha256": "238991513147a03bb97eafec639ae01bb88dcde29da6d58c8f29f5936cf620e4",
+      "expected": {
+        "format": "MD",
+        "contains_token": "ALPHA-MD-001",
+        "contains_table": true
+      },
+      "notes": ""
+    },
+    {
+      "file": "03_other_documents/markdown_fixture_02.md",
+      "category": "MD",
+      "size_bytes": 150,
+      "sha256": "54a477e5c3cdfee28fa750da13a29624fc95ccb8690cf52eaf4a74b79388f857",
+      "expected": {
+        "format": "MD",
+        "contains_token": "ALPHA-MD-002",
+        "contains_table": true
+      },
+      "notes": ""
+    },
+    {
+      "file": "03_other_documents/markdown_fixture_03.md",
+      "category": "MD",
+      "size_bytes": 150,
+      "sha256": "2d14a6757f486850517a62b6866bcac841f5aac78604fd948709f58495ff19aa",
+      "expected": {
+        "format": "MD",
+        "contains_token": "ALPHA-MD-003",
+        "contains_table": true
+      },
+      "notes": ""
+    },
+    {
+      "file": "03_other_documents/rtf_fixture_01.rtf",
+      "category": "RTF",
+      "size_bytes": 141,
+      "sha256": "70949aa2f33f4868364dc72e6e64777bb23416288b64b262ba45e64fa62eba26",
+      "expected": {
+        "format": "RTF",
+        "contains_token": "ALPHA-RTF-001"
+      },
+      "notes": ""
+    },
+    {
+      "file": "03_other_documents/rtf_fixture_02.rtf",
+      "category": "RTF",
+      "size_bytes": 141,
+      "sha256": "1d31f9fd003c03f8db67a4f6ac6886d2e479e3c93f426a5c80d7d48029f4d02d",
+      "expected": {
+        "format": "RTF",
+        "contains_token": "ALPHA-RTF-002"
+      },
+      "notes": ""
+    },
+    {
+      "file": "03_other_documents/odt_fixture_01.odt",
+      "category": "ODT",
+      "size_bytes": 1048,
+      "sha256": "9cd24a21bb0a0bc57e177261660ba65833d8237e11614ca67b990551136fb07c",
+      "expected": {
+        "format": "ODT",
+        "contains_token": "ALPHA-ODT-001"
+      },
+      "notes": ""
+    },
+    {
+      "file": "03_other_documents/odt_fixture_02.odt",
+      "category": "ODT",
+      "size_bytes": 1048,
+      "sha256": "6cad8d2140b4b9439afb83bf6c6ad069be0fe97a85a4958700e29f2fa8636c04",
+      "expected": {
+        "format": "ODT",
+        "contains_token": "ALPHA-ODT-002"
+      },
+      "notes": ""
+    },
+    {
+      "file": "03_other_documents/epub_fixture_01.epub",
+      "category": "EPUB",
+      "size_bytes": 1341,
+      "sha256": "325aa71ffea48b7ec6be77f7f515f913bf6b4c88cb88050de8f63f6346d3cd46",
+      "expected": {
+        "format": "EPUB",
+        "contains_token": "ALPHA-EPUB-001"
+      },
+      "notes": ""
+    },
+    {
+      "file": "03_other_documents/epub_fixture_02.epub",
+      "category": "EPUB",
+      "size_bytes": 1341,
+      "sha256": "2d366a5a0cac3e113428a9684536f189de873d3082d072dde32ca99fbee2d2a4",
+      "expected": {
+        "format": "EPUB",
+        "contains_token": "ALPHA-EPUB-002"
+      },
+      "notes": ""
+    },
+    {
+      "file": "03_other_documents/epub_fixture_03.epub",
+      "category": "EPUB",
+      "size_bytes": 1341,
+      "sha256": "111594862e97a8200c319d196b641922fe9905d09201a2a9e948e6983ce9618a",
+      "expected": {
+        "format": "EPUB",
+        "contains_token": "ALPHA-EPUB-003"
+      },
+      "notes": ""
+    },
+    {
+      "file": "04_images/image_fixture_01.png",
+      "category": "PNG",
+      "size_bytes": 11607,
+      "sha256": "42bf9b8268f3552ecf380879b9470ddd04998407cbf63d346d949a708b2222ce",
+      "expected": {
+        "format": "PNG",
+        "dimensions": [
+          900,
+          600
+        ],
+        "contains_token": "ALPHA-IMG-001"
+      },
+      "notes": "Synthetic high-contrast OCR fixture; OCR ground truth is printed in image."
+    },
+    {
+      "file": "04_images/image_fixture_02.jpg",
+      "category": "JPEG",
+      "size_bytes": 29963,
+      "sha256": "b0b7ebad7d0deff1e34d9905fe719772c23ef472f2ae9851fa89658d21695e62",
+      "expected": {
+        "format": "JPEG",
+        "dimensions": [
+          900,
+          600
+        ],
+        "contains_token": "ALPHA-IMG-002"
+      },
+      "notes": "Synthetic high-contrast OCR fixture; OCR ground truth is printed in image."
+    },
+    {
+      "file": "04_images/image_fixture_03.webp",
+      "category": "WEBP",
+      "size_bytes": 6276,
+      "sha256": "43ad4e9949ac3f87f088eca5e2d34ee59f964066cb7b93f735c8365625f54e33",
+      "expected": {
+        "format": "WEBP",
+        "dimensions": [
+          900,
+          600
+        ],
+        "contains_token": "ALPHA-IMG-003"
+      },
+      "notes": "Synthetic high-contrast OCR fixture; OCR ground truth is printed in image."
+    },
+    {
+      "file": "04_images/image_fixture_04.tiff",
+      "category": "TIFF",
+      "size_bytes": 1620140,
+      "sha256": "16e6220683fac8bed2ccbecbc48a9bc5c16abe9728b21e6098101b24da752b31",
+      "expected": {
+        "format": "TIFF",
+        "dimensions": [
+          900,
+          600
+        ],
+        "contains_token": "ALPHA-IMG-004"
+      },
+      "notes": "Synthetic high-contrast OCR fixture; OCR ground truth is printed in image."
+    },
+    {
+      "file": "04_images/image_fixture_05.bmp",
+      "category": "BMP",
+      "size_bytes": 1620054,
+      "sha256": "5930384b35fbb5ca38001cfbc69416e5ae389866035489d79692553e37ee19aa",
+      "expected": {
+        "format": "BMP",
+        "dimensions": [
+          900,
+          600
+        ],
+        "contains_token": "ALPHA-IMG-005"
+      },
+      "notes": "Synthetic high-contrast OCR fixture; OCR ground truth is printed in image."
+    },
+    {
+      "file": "04_images/image_fixture_06.png",
+      "category": "PNG",
+      "size_bytes": 11753,
+      "sha256": "1205b1034ee102fb48725be69aa9c9dedbaa5180028a6d34de4f7febb673db23",
+      "expected": {
+        "format": "PNG",
+        "dimensions": [
+          900,
+          600
+        ],
+        "contains_token": "ALPHA-IMG-006"
+      },
+      "notes": "Synthetic high-contrast OCR fixture; OCR ground truth is printed in image."
+    },
+    {
+      "file": "04_images/image_fixture_07.jpg",
+      "category": "JPEG",
+      "size_bytes": 29945,
+      "sha256": "6b4f14804445ab94062bf58cdb2b81a9c7a45b4c76f83f497cd48f4753bdcd72",
+      "expected": {
+        "format": "JPEG",
+        "dimensions": [
+          900,
+          600
+        ],
+        "contains_token": "ALPHA-IMG-007"
+      },
+      "notes": "Synthetic high-contrast OCR fixture; OCR ground truth is printed in image."
+    },
+    {
+      "file": "04_images/image_fixture_08.webp",
+      "category": "WEBP",
+      "size_bytes": 6288,
+      "sha256": "59abd2060251ecaa3f65723b85256f9285325c52abbefef48a69018ed86744fd",
+      "expected": {
+        "format": "WEBP",
+        "dimensions": [
+          900,
+          600
+        ],
+        "contains_token": "ALPHA-IMG-008"
+      },
+      "notes": "Synthetic high-contrast OCR fixture; OCR ground truth is printed in image."
+    },
+    {
+      "file": "04_images/image_fixture_09.tiff",
+      "category": "TIFF",
+      "size_bytes": 1620140,
+      "sha256": "6aebe9276cffd10e1f32b221694579860fdad6109b0c577a6d44050fa636664b",
+      "expected": {
+        "format": "TIFF",
+        "dimensions": [
+          900,
+          600
+        ],
+        "contains_token": "ALPHA-IMG-009"
+      },
+      "notes": "Synthetic high-contrast OCR fixture; OCR ground truth is printed in image."
+    },
+    {
+      "file": "04_images/image_fixture_10.bmp",
+      "category": "BMP",
+      "size_bytes": 1620054,
+      "sha256": "45aae07352bcad3b12f4483b19913e161c1c7a0fdb53783755abec4781b72916",
+      "expected": {
+        "format": "BMP",
+        "dimensions": [
+          900,
+          600
+        ],
+        "contains_token": "ALPHA-IMG-010"
+      },
+      "notes": "Synthetic high-contrast OCR fixture; OCR ground truth is printed in image."
+    },
+    {
+      "file": "04_images/image_fixture_11.png",
+      "category": "PNG",
+      "size_bytes": 11435,
+      "sha256": "04a0c7ffba91443eb9b7af040966b4cc86cafda9efb681a035ffcd5cd2b3d8b2",
+      "expected": {
+        "format": "PNG",
+        "dimensions": [
+          900,
+          600
+        ],
+        "contains_token": "ALPHA-IMG-011"
+      },
+      "notes": "Synthetic high-contrast OCR fixture; OCR ground truth is printed in image."
+    },
+    {
+      "file": "04_images/image_fixture_12.jpg",
+      "category": "JPEG",
+      "size_bytes": 29965,
+      "sha256": "ef90d92f817eb264d57c85bc40452f7035523a15b2266c5511965414d3cd5013",
+      "expected": {
+        "format": "JPEG",
+        "dimensions": [
+          900,
+          600
+        ],
+        "contains_token": "ALPHA-IMG-012"
+      },
+      "notes": "Synthetic high-contrast OCR fixture; OCR ground truth is printed in image."
+    },
+    {
+      "file": "04_images/image_fixture_13.webp",
+      "category": "WEBP",
+      "size_bytes": 6254,
+      "sha256": "36c821ab52b7ef66c4b3038381613b780ee3bda0fedadb0da73e8b7ecac7e66c",
+      "expected": {
+        "format": "WEBP",
+        "dimensions": [
+          900,
+          600
+        ],
+        "contains_token": "ALPHA-IMG-013"
+      },
+      "notes": "Synthetic high-contrast OCR fixture; OCR ground truth is printed in image."
+    },
+    {
+      "file": "04_images/image_fixture_14.tiff",
+      "category": "TIFF",
+      "size_bytes": 1620140,
+      "sha256": "f3ca9eaa7c103a48044d53d7feb38bc533a59ddd1e6dd9ef7da781ce2a1d6025",
+      "expected": {
+        "format": "TIFF",
+        "dimensions": [
+          900,
+          600
+        ],
+        "contains_token": "ALPHA-IMG-014"
+      },
+      "notes": "Synthetic high-contrast OCR fixture; OCR ground truth is printed in image."
+    },
+    {
+      "file": "04_images/image_fixture_15.bmp",
+      "category": "BMP",
+      "size_bytes": 1620054,
+      "sha256": "c79a62b28cdf6ce62fe8ffd24974a1a12e3c3d4d21a1864a2beb239381361023",
+      "expected": {
+        "format": "BMP",
+        "dimensions": [
+          900,
+          600
+        ],
+        "contains_token": "ALPHA-IMG-015"
+      },
+      "notes": "Synthetic high-contrast OCR fixture; OCR ground truth is printed in image."
+    },
+    {
+      "file": "04_images/image_fixture_16.png",
+      "category": "PNG",
+      "size_bytes": 11680,
+      "sha256": "091dfd11401bacab28d1f5d6d33de258ead9f735432b0fd541d2a7becef48e37",
+      "expected": {
+        "format": "PNG",
+        "dimensions": [
+          900,
+          600
+        ],
+        "contains_token": "ALPHA-IMG-016"
+      },
+      "notes": "Synthetic high-contrast OCR fixture; OCR ground truth is printed in image."
+    },
+    {
+      "file": "04_images/image_fixture_17.jpg",
+      "category": "JPEG",
+      "size_bytes": 29950,
+      "sha256": "950b4c1375386c5f3f61d9c2d5853639176df25d577818e56f84037fbf9bc449",
+      "expected": {
+        "format": "JPEG",
+        "dimensions": [
+          900,
+          600
+        ],
+        "contains_token": "ALPHA-IMG-017"
+      },
+      "notes": "Synthetic high-contrast OCR fixture; OCR ground truth is printed in image."
+    },
+    {
+      "file": "04_images/image_fixture_18.webp",
+      "category": "WEBP",
+      "size_bytes": 6254,
+      "sha256": "75b67127b0b4b0253e1b8404f41e5475c384e0f01a0c6a8f00a475579a986181",
+      "expected": {
+        "format": "WEBP",
+        "dimensions": [
+          900,
+          600
+        ],
+        "contains_token": "ALPHA-IMG-018"
+      },
+      "notes": "Synthetic high-contrast OCR fixture; OCR ground truth is printed in image."
+    },
+    {
+      "file": "04_images/image_fixture_19.tiff",
+      "category": "TIFF",
+      "size_bytes": 1620140,
+      "sha256": "de3cd3bd8224bed42834b1c573e2d6f22a252b9bd7ce01ba4f7c371a12e2b96e",
+      "expected": {
+        "format": "TIFF",
+        "dimensions": [
+          900,
+          600
+        ],
+        "contains_token": "ALPHA-IMG-019"
+      },
+      "notes": "Synthetic high-contrast OCR fixture; OCR ground truth is printed in image."
+    },
+    {
+      "file": "04_images/image_fixture_20.bmp",
+      "category": "BMP",
+      "size_bytes": 1620054,
+      "sha256": "70a4533fbfe92c6750898925f85d587e19604e3163f2bef395a9bfdf536f1bd7",
+      "expected": {
+        "format": "BMP",
+        "dimensions": [
+          900,
+          600
+        ],
+        "contains_token": "ALPHA-IMG-020"
+      },
+      "notes": "Synthetic high-contrast OCR fixture; OCR ground truth is printed in image."
+    },
+    {
+      "file": "04_images/image_fixture_21.png",
+      "category": "PNG",
+      "size_bytes": 11704,
+      "sha256": "ff5ee08f0b0180bbb388d9fe901d19f34604d9837ba4721bddb118d0e410baeb",
+      "expected": {
+        "format": "PNG",
+        "dimensions": [
+          900,
+          600
+        ],
+        "contains_token": "ALPHA-IMG-021"
+      },
+      "notes": "Synthetic high-contrast OCR fixture; OCR ground truth is printed in image."
+    },
+    {
+      "file": "04_images/image_fixture_22.jpg",
+      "category": "JPEG",
+      "size_bytes": 29988,
+      "sha256": "49799c9a4340ba8fc6e748c93175fcec9c8aad22a30f35ff7b12ca6097e72f01",
+      "expected": {
+        "format": "JPEG",
+        "dimensions": [
+          900,
+          600
+        ],
+        "contains_token": "ALPHA-IMG-022"
+      },
+      "notes": "Synthetic high-contrast OCR fixture; OCR ground truth is printed in image."
+    },
+    {
+      "file": "04_images/image_fixture_23.webp",
+      "category": "WEBP",
+      "size_bytes": 6282,
+      "sha256": "0063f6d65f3a08755d8ea8bca1bb87996471cf5b439abd31ec3e7153649c0b5c",
+      "expected": {
+        "format": "WEBP",
+        "dimensions": [
+          900,
+          600
+        ],
+        "contains_token": "ALPHA-IMG-023"
+      },
+      "notes": "Synthetic high-contrast OCR fixture; OCR ground truth is printed in image."
+    },
+    {
+      "file": "04_images/image_fixture_24.tiff",
+      "category": "TIFF",
+      "size_bytes": 1620140,
+      "sha256": "b703a03640c0d17546f01406916f60a41fdde99d666348c46fdb54d7de005130",
+      "expected": {
+        "format": "TIFF",
+        "dimensions": [
+          900,
+          600
+        ],
+        "contains_token": "ALPHA-IMG-024"
+      },
+      "notes": "Synthetic high-contrast OCR fixture; OCR ground truth is printed in image."
+    },
+    {
+      "file": "04_images/image_fixture_25.bmp",
+      "category": "BMP",
+      "size_bytes": 1620054,
+      "sha256": "f43af3f577dcece181088160aa9b4de80f44e1895e9fb8466be7e66b5848078b",
+      "expected": {
+        "format": "BMP",
+        "dimensions": [
+          900,
+          600
+        ],
+        "contains_token": "ALPHA-IMG-025"
+      },
+      "notes": "Synthetic high-contrast OCR fixture; OCR ground truth is printed in image."
+    },
+    {
+      "file": "04_images/image_fixture_26.png",
+      "category": "PNG",
+      "size_bytes": 11721,
+      "sha256": "e9030588290a11619a694dd2ac910973accbd0376d995dd9464b68ef98120fcf",
+      "expected": {
+        "format": "PNG",
+        "dimensions": [
+          900,
+          600
+        ],
+        "contains_token": "ALPHA-IMG-026"
+      },
+      "notes": "Synthetic high-contrast OCR fixture; OCR ground truth is printed in image."
+    },
+    {
+      "file": "04_images/image_fixture_27.jpg",
+      "category": "JPEG",
+      "size_bytes": 29952,
+      "sha256": "0a4240d6657b28a4e00fa4f5ee2973469f1416b4a10c51d191c97d11af563bd0",
+      "expected": {
+        "format": "JPEG",
+        "dimensions": [
+          900,
+          600
+        ],
+        "contains_token": "ALPHA-IMG-027"
+      },
+      "notes": "Synthetic high-contrast OCR fixture; OCR ground truth is printed in image."
+    },
+    {
+      "file": "04_images/image_fixture_28.webp",
+      "category": "WEBP",
+      "size_bytes": 6288,
+      "sha256": "3ee6d71008f6ed17bfb032fe302134126caa4e2016780d2c57ea84ce8d593d26",
+      "expected": {
+        "format": "WEBP",
+        "dimensions": [
+          900,
+          600
+        ],
+        "contains_token": "ALPHA-IMG-028"
+      },
+      "notes": "Synthetic high-contrast OCR fixture; OCR ground truth is printed in image."
+    },
+    {
+      "file": "04_images/image_fixture_29.svg",
+      "category": "SVG",
+      "size_bytes": 272,
+      "sha256": "a42e4753ed56e8b8ab7ceb76efec02d71275ab8b792236769db8800046f1edb4",
+      "expected": {
+        "format": "SVG",
+        "dimensions": [
+          900,
+          600
+        ],
+        "contains_token": "ALPHA-IMG-029"
+      },
+      "notes": "Vector image fixture."
+    },
+    {
+      "file": "04_images/image_fixture_30.svg",
+      "category": "SVG",
+      "size_bytes": 272,
+      "sha256": "478cbf165aeb62f0f9ed720ad1ae00074fa37356a73e546df8a753d7a9587289",
+      "expected": {
+        "format": "SVG",
+        "dimensions": [
+          900,
+          600
+        ],
+        "contains_token": "ALPHA-IMG-030"
+      },
+      "notes": "Vector image fixture."
+    },
+    {
+      "file": "05_spreadsheets/workbook_fixture_01.xlsx",
+      "category": "XLSX",
+      "size_bytes": 8213,
+      "sha256": "9732e85beffb1242278406b29d7b382d04706b5637828867a4eca833a964981a",
+      "expected": {
+        "format": "XLSX",
+        "sheets": [
+          "Sales",
+          "Summary",
+          "HiddenData"
+        ],
+        "formula_cells": [
+          "E2",
+          "E3",
+          "E4",
+          "E5",
+          "B2"
+        ],
+        "contains_token": "ALPHA-XLSX-001",
+        "has_chart": true
+      },
+      "notes": ""
+    },
+    {
+      "file": "05_spreadsheets/workbook_fixture_02.xlsx",
+      "category": "XLSX",
+      "size_bytes": 8217,
+      "sha256": "55c1d2fd2857e0ecab6fc859c7e176a8644a23a08241f2aadcaa87cdb2ac7a14",
+      "expected": {
+        "format": "XLSX",
+        "sheets": [
+          "Sales",
+          "Summary",
+          "HiddenData"
+        ],
+        "formula_cells": [
+          "E2",
+          "E3",
+          "E4",
+          "E5",
+          "B2"
+        ],
+        "contains_token": "ALPHA-XLSX-002",
+        "has_chart": true
+      },
+      "notes": ""
+    },
+    {
+      "file": "05_spreadsheets/workbook_fixture_03.xlsx",
+      "category": "XLSX",
+      "size_bytes": 8214,
+      "sha256": "c51b4c14912160e0875dd1e7918bd3e8a341ac9beec945c4e573bdb0e727e14d",
+      "expected": {
+        "format": "XLSX",
+        "sheets": [
+          "Sales",
+          "Summary",
+          "HiddenData"
+        ],
+        "formula_cells": [
+          "E2",
+          "E3",
+          "E4",
+          "E5",
+          "B2"
+        ],
+        "contains_token": "ALPHA-XLSX-003",
+        "has_chart": true
+      },
+      "notes": ""
+    },
+    {
+      "file": "05_spreadsheets/workbook_fixture_04.xlsx",
+      "category": "XLSX",
+      "size_bytes": 8218,
+      "sha256": "57142067e110cbbaa561384fa961f7f142f74baebdc0396a28fa60fd72904572",
+      "expected": {
+        "format": "XLSX",
+        "sheets": [
+          "Sales",
+          "Summary",
+          "HiddenData"
+        ],
+        "formula_cells": [
+          "E2",
+          "E3",
+          "E4",
+          "E5",
+          "B2"
+        ],
+        "contains_token": "ALPHA-XLSX-004",
+        "has_chart": true
+      },
+      "notes": ""
+    },
+    {
+      "file": "05_spreadsheets/workbook_fixture_05.xlsx",
+      "category": "XLSX",
+      "size_bytes": 8213,
+      "sha256": "533c96d803db0382cb8f6e994f6dcd0a63e6a369e52b536ea07636b4fa8be16f",
+      "expected": {
+        "format": "XLSX",
+        "sheets": [
+          "Sales",
+          "Summary",
+          "HiddenData"
+        ],
+        "formula_cells": [
+          "E2",
+          "E3",
+          "E4",
+          "E5",
+          "B2"
+        ],
+        "contains_token": "ALPHA-XLSX-005",
+        "has_chart": true
+      },
+      "notes": ""
+    },
+    {
+      "file": "05_spreadsheets/workbook_fixture_06.xlsx",
+      "category": "XLSX",
+      "size_bytes": 8218,
+      "sha256": "116a796c4e4cbc5174193f933fcae699c84baa9641fa677b0d110f62a7df11f2",
+      "expected": {
+        "format": "XLSX",
+        "sheets": [
+          "Sales",
+          "Summary",
+          "HiddenData"
+        ],
+        "formula_cells": [
+          "E2",
+          "E3",
+          "E4",
+          "E5",
+          "B2"
+        ],
+        "contains_token": "ALPHA-XLSX-006",
+        "has_chart": true
+      },
+      "notes": ""
+    },
+    {
+      "file": "05_spreadsheets/workbook_fixture_07.xlsx",
+      "category": "XLSX",
+      "size_bytes": 8213,
+      "sha256": "5ba97c345d931208e0f85ffc1034122ed53ecd529cefc37541aab99ff9fd13c7",
+      "expected": {
+        "format": "XLSX",
+        "sheets": [
+          "Sales",
+          "Summary",
+          "HiddenData"
+        ],
+        "formula_cells": [
+          "E2",
+          "E3",
+          "E4",
+          "E5",
+          "B2"
+        ],
+        "contains_token": "ALPHA-XLSX-007",
+        "has_chart": true
+      },
+      "notes": ""
+    },
+    {
+      "file": "05_spreadsheets/workbook_fixture_08.xlsx",
+      "category": "XLSX",
+      "size_bytes": 8217,
+      "sha256": "f3579c2ad4a50356aa2fe31b72a39dd9157b7fde0f5fab9377460a536d3baef5",
+      "expected": {
+        "format": "XLSX",
+        "sheets": [
+          "Sales",
+          "Summary",
+          "HiddenData"
+        ],
+        "formula_cells": [
+          "E2",
+          "E3",
+          "E4",
+          "E5",
+          "B2"
+        ],
+        "contains_token": "ALPHA-XLSX-008",
+        "has_chart": true
+      },
+      "notes": ""
+    },
+    {
+      "file": "05_spreadsheets/workbook_fixture_09.xlsx",
+      "category": "XLSX",
+      "size_bytes": 8212,
+      "sha256": "8181e6a9457f0351937b51a24b942ca709091566ddb669be6312139575f909b2",
+      "expected": {
+        "format": "XLSX",
+        "sheets": [
+          "Sales",
+          "Summary",
+          "HiddenData"
+        ],
+        "formula_cells": [
+          "E2",
+          "E3",
+          "E4",
+          "E5",
+          "B2"
+        ],
+        "contains_token": "ALPHA-XLSX-009",
+        "has_chart": true
+      },
+      "notes": ""
+    },
+    {
+      "file": "05_spreadsheets/workbook_fixture_10.xlsx",
+      "category": "XLSX",
+      "size_bytes": 8217,
+      "sha256": "cb36d3f7f514c28c94229157aca23896c56a71719faa072f3f0dfa71e9f2728f",
+      "expected": {
+        "format": "XLSX",
+        "sheets": [
+          "Sales",
+          "Summary",
+          "HiddenData"
+        ],
+        "formula_cells": [
+          "E2",
+          "E3",
+          "E4",
+          "E5",
+          "B2"
+        ],
+        "contains_token": "ALPHA-XLSX-010",
+        "has_chart": true
+      },
+      "notes": ""
+    },
+    {
+      "file": "05_spreadsheets/workbook_fixture_11.xlsx",
+      "category": "XLSX",
+      "size_bytes": 8215,
+      "sha256": "7ee0d678c61ffbc7ecc67a20c111c348b50c504252b596b66e87aac5ecf52a94",
+      "expected": {
+        "format": "XLSX",
+        "sheets": [
+          "Sales",
+          "Summary",
+          "HiddenData"
+        ],
+        "formula_cells": [
+          "E2",
+          "E3",
+          "E4",
+          "E5",
+          "B2"
+        ],
+        "contains_token": "ALPHA-XLSX-011",
+        "has_chart": true
+      },
+      "notes": ""
+    },
+    {
+      "file": "05_spreadsheets/workbook_fixture_12.xlsx",
+      "category": "XLSX",
+      "size_bytes": 8218,
+      "sha256": "3a656aebf9bc05b72cfe5b80622b32b18a7f95f598be58e4b3e75fa62b9e0165",
+      "expected": {
+        "format": "XLSX",
+        "sheets": [
+          "Sales",
+          "Summary",
+          "HiddenData"
+        ],
+        "formula_cells": [
+          "E2",
+          "E3",
+          "E4",
+          "E5",
+          "B2"
+        ],
+        "contains_token": "ALPHA-XLSX-012",
+        "has_chart": true
+      },
+      "notes": ""
+    },
+    {
+      "file": "05_spreadsheets/table_fixture_01.csv",
+      "category": "CSV",
+      "size_bytes": 163,
+      "sha256": "3dca19f80d4f383fa4009407d034623585f56617a462c1af6bfd18092a7197b3",
+      "expected": {
+        "format": "CSV",
+        "delimiter": ",",
+        "contains_token": "ALPHA-CSV-001"
+      },
+      "notes": "CSV edge cases include BOM, missing values, quoted commas and semicolon delimiter."
+    },
+    {
+      "file": "05_spreadsheets/table_fixture_02.csv",
+      "category": "CSV",
+      "size_bytes": 160,
+      "sha256": "659b3a5362fb92dd9a298c14ab1b058491f6bb7256a17f72b4b6e99a246da176",
+      "expected": {
+        "format": "CSV",
+        "delimiter": ",",
+        "contains_token": "ALPHA-CSV-002"
+      },
+      "notes": "CSV edge cases include BOM, missing values, quoted commas and semicolon delimiter."
+    },
+    {
+      "file": "05_spreadsheets/table_fixture_03.csv",
+      "category": "CSV",
+      "size_bytes": 160,
+      "sha256": "e3e55a31e509e56f55cd0f29d9ee4550fb68562ebbd3956dbc7120cb97f582ea",
+      "expected": {
+        "format": "CSV",
+        "delimiter": ",",
+        "contains_token": "ALPHA-CSV-003"
+      },
+      "notes": "CSV edge cases include BOM, missing values, quoted commas and semicolon delimiter."
+    },
+    {
+      "file": "05_spreadsheets/table_fixture_04.csv",
+      "category": "CSV",
+      "size_bytes": 160,
+      "sha256": "db93b15be88ce3d65b0523198584482a3ea2026acefb2e9fef83143b4fe65c41",
+      "expected": {
+        "format": "CSV",
+        "delimiter": ",",
+        "contains_token": "ALPHA-CSV-004"
+      },
+      "notes": "CSV edge cases include BOM, missing values, quoted commas and semicolon delimiter."
+    },
+    {
+      "file": "05_spreadsheets/table_fixture_05.csv",
+      "category": "CSV",
+      "size_bytes": 160,
+      "sha256": "038496ad4fcdec9582c99e12a470f15ebe37d1462eb2e6bca2b4a80f6fef0a8c",
+      "expected": {
+        "format": "CSV",
+        "delimiter": ",",
+        "contains_token": "ALPHA-CSV-005"
+      },
+      "notes": "CSV edge cases include BOM, missing values, quoted commas and semicolon delimiter."
+    },
+    {
+      "file": "05_spreadsheets/table_fixture_06.csv",
+      "category": "CSV",
+      "size_bytes": 218,
+      "sha256": "9e45a88563fdb77be280565d3784cc3f6d355bdffa852d2f5d8abe871387babe",
+      "expected": {
+        "format": "CSV",
+        "delimiter": ";",
+        "contains_token": "ALPHA-CSV-006"
+      },
+      "notes": "CSV edge cases include BOM, missing values, quoted commas and semicolon delimiter."
+    },
+    {
+      "file": "05_spreadsheets/table_fixture_01.tsv",
+      "category": "TSV",
+      "size_bytes": 72,
+      "sha256": "95e0b7a88751b49e086530c9dd8788820e61c416615f493dbe4bd0b870889092",
+      "expected": {
+        "format": "TSV",
+        "encoding": "utf-8"
+      },
+      "notes": ""
+    },
+    {
+      "file": "05_spreadsheets/table_fixture_02.tsv",
+      "category": "TSV",
+      "size_bytes": 146,
+      "sha256": "42194e2a116146c30a02a81a082d9b5c4db4b52c4fc370e75a3dfa6af43dcd31",
+      "expected": {
+        "format": "TSV",
+        "encoding": "utf-16"
+      },
+      "notes": ""
+    },
+    {
+      "file": "06_corrupted_unsupported/truncated.pdf",
+      "category": "CORRUPTED_OR_UNSUPPORTED",
+      "size_bytes": 38,
+      "sha256": "b4aee21cdfe2335a690f70b5cc192964f492a2b736f8d6cc838a1f8007fa3c46",
+      "expected": {
+        "expected_classification": "CORRUPTED_PDF"
+      },
+      "notes": "Negative fixture; expected to fail safely or be identified as unsupported."
+    },
+    {
+      "file": "06_corrupted_unsupported/broken.xlsx",
+      "category": "CORRUPTED_OR_UNSUPPORTED",
+      "size_bytes": 30,
+      "sha256": "d5b2ac0d7ae7adafe5011f26f3cbdee3f1f2ff2e6a7cb1b6e99343b4316fcc95",
+      "expected": {
+        "expected_classification": "CORRUPTED_XLSX"
+      },
+      "notes": "Negative fixture; expected to fail safely or be identified as unsupported."
+    },
+    {
+      "file": "06_corrupted_unsupported/empty.docx",
+      "category": "CORRUPTED_OR_UNSUPPORTED",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "expected": {
+        "expected_classification": "EMPTY_FILE"
+      },
+      "notes": "Negative fixture; expected to fail safely or be identified as unsupported."
+    },
+    {
+      "file": "06_corrupted_unsupported/random.bin",
+      "category": "CORRUPTED_OR_UNSUPPORTED",
+      "size_bytes": 512,
+      "sha256": "32adc32d98396b5709e8f8bf72d410ca29a496bbd56bda7d6c4fa3953bbeb0b3",
+      "expected": {
+        "expected_classification": "UNKNOWN_BINARY"
+      },
+      "notes": "Negative fixture; expected to fail safely or be identified as unsupported."
+    },
+    {
+      "file": "06_corrupted_unsupported/fake.png",
+      "category": "CORRUPTED_OR_UNSUPPORTED",
+      "size_bytes": 23,
+      "sha256": "ab16d3d9bb476ffe341ce9b77e3420face651567eb0d0568c82bddca5f31de10",
+      "expected": {
+        "expected_classification": "INVALID_IMAGE"
+      },
+      "notes": "Negative fixture; expected to fail safely or be identified as unsupported."
+    },
+    {
+      "file": "06_corrupted_unsupported/fake.jpg",
+      "category": "CORRUPTED_OR_UNSUPPORTED",
+      "size_bytes": 14,
+      "sha256": "ff0664618f701442fed22e01292cb0e6903751f089d81334dcf29b1b43311512",
+      "expected": {
+        "expected_classification": "CORRUPTED_IMAGE"
+      },
+      "notes": "Negative fixture; expected to fail safely or be identified as unsupported."
+    },
+    {
+      "file": "06_corrupted_unsupported/bad.zip",
+      "category": "CORRUPTED_OR_UNSUPPORTED",
+      "size_bytes": 14,
+      "sha256": "1090c316ecb05550f0c730e3e8dfa8595542494f7d6bf730aa50d4f75894b5de",
+      "expected": {
+        "expected_classification": "CORRUPTED_ARCHIVE"
+      },
+      "notes": "Negative fixture; expected to fail safely or be identified as unsupported."
+    },
+    {
+      "file": "06_corrupted_unsupported/unknown.dat",
+      "category": "CORRUPTED_OR_UNSUPPORTED",
+      "size_bytes": 34,
+      "sha256": "c17b2187d7765832131f12e314d387b47f0f6b9fd48b939133b27afc81e6e6f4",
+      "expected": {
+        "expected_classification": "UNKNOWN_FILE"
+      },
+      "notes": "Negative fixture; expected to fail safely or be identified as unsupported."
+    },
+    {
+      "file": "06_corrupted_unsupported/renamed_pdf.txt",
+      "category": "CORRUPTED_OR_UNSUPPORTED",
+      "size_bytes": 34,
+      "sha256": "7d0ba0f009bff26df5b1f5497b35bc90bad755baef5a4aa11131011be73c4e14",
+      "expected": {
+        "expected_classification": "EXTENSION_MISMATCH"
+      },
+      "notes": "Negative fixture; expected to fail safely or be identified as unsupported."
+    },
+    {
+      "file": "06_corrupted_unsupported/renamed_png.pdf",
+      "category": "CORRUPTED_OR_UNSUPPORTED",
+      "size_bytes": 72,
+      "sha256": "8c6806d8d6093084661ba908761d0bc076628c282907d140abe683606d5c0fdd",
+      "expected": {
+        "expected_classification": "EXTENSION_MISMATCH"
+      },
+      "notes": "Negative fixture; expected to fail safely or be identified as unsupported."
+    },
+    {
+      "file": "06_corrupted_unsupported/malformed.json",
+      "category": "CORRUPTED_OR_UNSUPPORTED",
+      "size_bytes": 17,
+      "sha256": "46298aec9003e49618a577fe72932127f154c7c4b124c1807abedc7eae464d07",
+      "expected": {
+        "expected_classification": "MALFORMED_STRUCTURED_TEXT"
+      },
+      "notes": "Negative fixture; expected to fail safely or be identified as unsupported."
+    },
+    {
+      "file": "06_corrupted_unsupported/malformed.xml",
+      "category": "CORRUPTED_OR_UNSUPPORTED",
+      "size_bytes": 19,
+      "sha256": "89471b387773611c84d490682a791c34dfe11e2b372b808ebf90d14f5fc56c7e",
+      "expected": {
+        "expected_classification": "MALFORMED_STRUCTURED_TEXT"
+      },
+      "notes": "Negative fixture; expected to fail safely or be identified as unsupported."
+    },
+    {
+      "file": "06_corrupted_unsupported/oversized_header.csv",
+      "category": "CORRUPTED_OR_UNSUPPORTED",
+      "size_bytes": 200007,
+      "sha256": "185e4e6c8768a2e5f8f2d5f7a8c9bd0fac7dbdd3d83e379b1feb4db2b7c475a1",
+      "expected": {
+        "expected_classification": "LARGE_FIELD"
+      },
+      "notes": "Negative fixture; expected to fail safely or be identified as unsupported."
+    },
+    {
+      "file": "06_corrupted_unsupported/fake.exe",
+      "category": "CORRUPTED_OR_UNSUPPORTED",
+      "size_bytes": 130,
+      "sha256": "4d68766e68d1f71853f6b23ccfccff56cadd360ca33462564a6091be3d8049a0",
+      "expected": {
+        "expected_classification": "UNSUPPORTED_EXECUTABLE"
+      },
+      "notes": "Negative fixture; expected to fail safely or be identified as unsupported."
+    },
+    {
+      "file": "06_corrupted_unsupported/partial.odt",
+      "category": "CORRUPTED_OR_UNSUPPORTED",
+      "size_bytes": 18,
+      "sha256": "02b1c5b828d89d2ce8f9b7bcf2fa2e186fc5244606497b4dbb5e7f90a6fff604",
+      "expected": {
+        "expected_classification": "CORRUPTED_CONTAINER"
+      },
+      "notes": "Negative fixture; expected to fail safely or be identified as unsupported."
+    },
+    {
+      "file": "03_other_documents/text_fixture_04.txt",
+      "category": "TXT",
+      "size_bytes": 168,
+      "sha256": "9c195225eb4dec37aec27badc6c202ba81f09d7ec5c74d0c1609ac849b816b4d",
+      "expected": {
+        "format": "TXT",
+        "contains_token": "ALPHA-TXT-004",
+        "unicode": "नमस्ते दुनिया — café — 東京"
+      },
+      "notes": ""
+    },
+    {
+      "file": "03_other_documents/text_fixture_05.txt",
+      "category": "TXT",
+      "size_bytes": 168,
+      "sha256": "346107d5a1c3d88a6488b9c7107fc14b9f14ca3aac2c0a30f3527569e6551b7a",
+      "expected": {
+        "format": "TXT",
+        "contains_token": "ALPHA-TXT-005",
+        "unicode": "नमस्ते दुनिया — café — 東京"
+      },
+      "notes": ""
+    }
+  ]
+}
