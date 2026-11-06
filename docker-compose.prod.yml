@@ -1,0 +1,163 @@
+# ==============================================================================
+# DocuMind AI — Production Docker Compose Architecture (Phase 14)
+# ==============================================================================
+services:
+  # ----------------------------------------------------------------------------
+  # 1. Reverse Proxy & Edge Ingress (Nginx)
+  # ----------------------------------------------------------------------------
+  reverse-proxy:
+    image: nginx:alpine
+    container_name: documind-edge-proxy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./infrastructure/docker/nginx.prod.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./certs:/etc/nginx/certs:ro
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - documind-prod-net
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "5"
+
+  # ----------------------------------------------------------------------------
+  # 2. PostgreSQL Relational Database (v16)
+  # ----------------------------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    container_name: documind-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-documind}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Error: POSTGRES_PASSWORD must be specified}
+      POSTGRES_DB: ${POSTGRES_DB:-documind_db}
+    volumes:
+      - postgres_prod_data:/var/lib/postgresql/data
+    deploy:
+      resources:
+        limits:
+          cpus: "4.0"
+          memory: 4096M
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-documind} -d ${POSTGRES_DB:-documind_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    networks:
+      - documind-prod-net
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "5"
+
+  # ----------------------------------------------------------------------------
+  # 3. Redis In-Memory Broker & Priority Queue (v7)
+  # ----------------------------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: documind-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes", "--requirepass", "${REDIS_PASSWORD:?Error: REDIS_PASSWORD must be specified}"]
+    volumes:
+      - redis_prod_data:/data
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 2048M
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    networks:
+      - documind-prod-net
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "5"
+
+  # ----------------------------------------------------------------------------
+  # 4. DocuMind FastAPI Backend API Gateway
+  # ----------------------------------------------------------------------------
+  backend:
+    build:
+      context: ./backend
+      dockerfile: ../infrastructure/docker/Dockerfile.backend
+    container_name: documind-backend
+    restart: unless-stopped
+    env_file:
+      - .env.production
+    environment:
+      - POSTGRES_SERVER=postgres
+      - REDIS_HOST=redis
+      - APP_ENV=production
+      - DEBUG=False
+    volumes:
+      - file_storage_prod:/app/storage
+    deploy:
+      resources:
+        limits:
+          cpus: "4.0"
+          memory: 6144M
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health/liveness"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    networks:
+      - documind-prod-net
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
+
+  # ----------------------------------------------------------------------------
+  # 5. DocuMind React SPA Frontend Client
+  # ----------------------------------------------------------------------------
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: ../infrastructure/docker/Dockerfile.frontend
+    container_name: documind-frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - documind-prod-net
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  postgres_prod_data:
+    name: documind_prod_postgres_data
+  redis_prod_data:
+    name: documind_prod_redis_data
+  file_storage_prod:
+    name: documind_prod_file_storage
+
+networks:
+  documind-prod-net:
+    name: documind_prod_network
+    driver: bridge

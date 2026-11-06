@@ -1,6 +1,6 @@
 # DocuMind AI — Alpha Test Suite Verification Report
 
-**Test Date:** 2026-11-06 06:24:34 UTC  
+**Test Date:** 2026-11-06 19:13:16 UTC  
 **Dataset Location:** `alpha test/`  
 **Output Directory:** `alpha test/test_output/`  
 **Overall Verdict:** **PASSED (100%)**  
@@ -12,9 +12,9 @@
 - **Total Fixtures Evaluated:** 130
 - **Passed:** **130 / 130** (100.0%)
 - **Failed:** 0
-- **Total Processing Duration:** 8.50 seconds
-- **Average Duration Per Fixture:** 65.38 ms
-- **Peak Resident Set Size:** 569.96 MB
+- **Total Processing Duration:** 8.57 seconds
+- **Average Duration Per Fixture:** 65.89 ms
+- **Peak Resident Set Size:** 1062.13 MB
 
 ---
 
@@ -22,24 +22,24 @@
 
 | Category | Fixtures | Passed | Failed | Pass Rate | Avg Latency | Latency Range |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **PDF** | 30 | 30 | 0 | **100.0%** | 262.05 ms | 196.5 ms – 670.9 ms |
-| **DOCX** | 18 | 18 | 0 | **100.0%** | 14.04 ms | 12.1 ms – 28.4 ms |
-| **NEGATIVE_DOC** | 2 | 2 | 0 | **100.0%** | 4.95 ms | 3.2 ms – 6.7 ms |
-| **TXT** | 5 | 5 | 0 | **100.0%** | 3.30 ms | 2.9 ms – 3.6 ms |
-| **MD** | 3 | 3 | 0 | **100.0%** | 3.52 ms | 3.4 ms – 3.7 ms |
-| **RTF** | 2 | 2 | 0 | **100.0%** | 3.12 ms | 3.1 ms – 3.2 ms |
-| **ODT** | 2 | 2 | 0 | **100.0%** | 1.44 ms | 1.3 ms – 1.6 ms |
-| **EPUB** | 3 | 3 | 0 | **100.0%** | 6.22 ms | 2.1 ms – 14.0 ms |
-| **PNG** | 6 | 6 | 0 | **100.0%** | 1.13 ms | 0.6 ms – 3.7 ms |
-| **JPEG** | 6 | 6 | 0 | **100.0%** | 0.86 ms | 0.7 ms – 1.6 ms |
-| **WEBP** | 6 | 6 | 0 | **100.0%** | 1.86 ms | 1.3 ms – 4.6 ms |
-| **TIFF** | 5 | 5 | 0 | **100.0%** | 3.08 ms | 2.2 ms – 5.9 ms |
-| **BMP** | 5 | 5 | 0 | **100.0%** | 3.14 ms | 2.9 ms – 3.9 ms |
-| **SVG** | 2 | 2 | 0 | **100.0%** | 1.32 ms | 1.2 ms – 1.4 ms |
-| **XLSX** | 12 | 12 | 0 | **100.0%** | 16.47 ms | 11.3 ms – 66.3 ms |
-| **CSV** | 6 | 6 | 0 | **100.0%** | 1.38 ms | 0.7 ms – 4.2 ms |
-| **TSV** | 2 | 2 | 0 | **100.0%** | 7.19 ms | 3.4 ms – 11.0 ms |
-| **CORRUPTED_OR_UNSUPPORTED** | 15 | 15 | 0 | **100.0%** | 1.92 ms | 0.0 ms – 8.2 ms |
+| **PDF** | 30 | 30 | 0 | **100.0%** | 262.91 ms | 203.4 ms – 616.1 ms |
+| **DOCX** | 18 | 18 | 0 | **100.0%** | 14.39 ms | 12.3 ms – 26.9 ms |
+| **NEGATIVE_DOC** | 2 | 2 | 0 | **100.0%** | 5.14 ms | 3.1 ms – 7.2 ms |
+| **TXT** | 5 | 5 | 0 | **100.0%** | 3.29 ms | 3.1 ms – 3.5 ms |
+| **MD** | 3 | 3 | 0 | **100.0%** | 3.69 ms | 3.5 ms – 4.0 ms |
+| **RTF** | 2 | 2 | 0 | **100.0%** | 3.24 ms | 3.1 ms – 3.4 ms |
+| **ODT** | 2 | 2 | 0 | **100.0%** | 1.61 ms | 1.6 ms – 1.6 ms |
+| **EPUB** | 3 | 3 | 0 | **100.0%** | 7.82 ms | 2.4 ms – 18.2 ms |
+| **PNG** | 6 | 6 | 0 | **100.0%** | 1.19 ms | 0.6 ms – 3.6 ms |
+| **JPEG** | 6 | 6 | 0 | **100.0%** | 0.94 ms | 0.7 ms – 1.7 ms |
+| **WEBP** | 6 | 6 | 0 | **100.0%** | 1.96 ms | 1.4 ms – 4.2 ms |
+| **TIFF** | 5 | 5 | 0 | **100.0%** | 16.89 ms | 2.5 ms – 73.1 ms |
+| **BMP** | 5 | 5 | 0 | **100.0%** | 3.71 ms | 3.3 ms – 4.5 ms |
+| **SVG** | 2 | 2 | 0 | **100.0%** | 1.43 ms | 1.3 ms – 1.6 ms |
+| **XLSX** | 12 | 12 | 0 | **100.0%** | 12.45 ms | 12.0 ms – 14.7 ms |
+| **CSV** | 6 | 6 | 0 | **100.0%** | 1.45 ms | 0.7 ms – 4.7 ms |
+| **TSV** | 2 | 2 | 0 | **100.0%** | 6.95 ms | 3.8 ms – 10.1 ms |
+| **CORRUPTED_OR_UNSUPPORTED** | 15 | 15 | 0 | **100.0%** | 2.01 ms | 0.0 ms – 8.7 ms |
 
 ---
 

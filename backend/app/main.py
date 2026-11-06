@@ -111,6 +111,13 @@ def create_application() -> FastAPI:
             process_time = time.perf_counter() - start_time
             response.headers["X-Request-ID"] = req_id
             response.headers["X-Process-Time"] = f"{process_time:.4f}s"
+            response.headers["X-Content-Type-Options"] = "nosniff"
+            response.headers["X-Frame-Options"] = "DENY"
+            response.headers["X-XSS-Protection"] = "1; mode=block"
+            response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+            response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
+            if not settings.DEBUG:
+                response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
             return response
         finally:
             request_id_ctx.reset(token)

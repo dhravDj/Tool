@@ -64,6 +64,10 @@ backend/storage/processed/*
 backend/storage/assets/*
 !backend/storage/assets/.gitkeep
 
+# Backups (Keep folder structure, ignore contents)
+backups/*
+!backups/.gitkeep
+
 # SQLite database (if used for local testing)
 *.db
 *.sqlite3

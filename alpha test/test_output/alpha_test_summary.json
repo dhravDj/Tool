@@ -1,173 +1,173 @@
 {
   "dataset": "DocuMind Alpha Test Dataset",
-  "timestamp": "2026-11-06T06:24:34Z",
+  "timestamp": "2026-11-06T19:13:16Z",
   "total_fixtures": 130,
   "total_passed": 130,
   "total_failed": 0,
   "overall_pass_rate_percent": 100.0,
-  "total_execution_seconds": 8.5,
+  "total_execution_seconds": 8.57,
   "category_breakdown": {
     "PDF": {
       "total": 30,
       "passed": 30,
       "failed": 0,
       "pass_rate_percent": 100.0,
-      "avg_latency_ms": 262.05,
-      "min_latency_ms": 196.51,
-      "max_latency_ms": 670.9
+      "avg_latency_ms": 262.91,
+      "min_latency_ms": 203.39,
+      "max_latency_ms": 616.12
     },
     "DOCX": {
       "total": 18,
       "passed": 18,
       "failed": 0,
       "pass_rate_percent": 100.0,
-      "avg_latency_ms": 14.04,
-      "min_latency_ms": 12.14,
-      "max_latency_ms": 28.43
+      "avg_latency_ms": 14.39,
+      "min_latency_ms": 12.28,
+      "max_latency_ms": 26.93
     },
     "NEGATIVE_DOC": {
       "total": 2,
       "passed": 2,
       "failed": 0,
       "pass_rate_percent": 100.0,
-      "avg_latency_ms": 4.95,
-      "min_latency_ms": 3.19,
-      "max_latency_ms": 6.71
+      "avg_latency_ms": 5.14,
+      "min_latency_ms": 3.13,
+      "max_latency_ms": 7.16
     },
     "TXT": {
       "total": 5,
       "passed": 5,
       "failed": 0,
       "pass_rate_percent": 100.0,
-      "avg_latency_ms": 3.3,
-      "min_latency_ms": 2.94,
-      "max_latency_ms": 3.65
+      "avg_latency_ms": 3.29,
+      "min_latency_ms": 3.1,
+      "max_latency_ms": 3.49
     },
     "MD": {
       "total": 3,
       "passed": 3,
       "failed": 0,
       "pass_rate_percent": 100.0,
-      "avg_latency_ms": 3.52,
-      "min_latency_ms": 3.37,
-      "max_latency_ms": 3.74
+      "avg_latency_ms": 3.69,
+      "min_latency_ms": 3.51,
+      "max_latency_ms": 4.01
     },
     "RTF": {
       "total": 2,
       "passed": 2,
       "failed": 0,
       "pass_rate_percent": 100.0,
-      "avg_latency_ms": 3.12,
-      "min_latency_ms": 3.06,
-      "max_latency_ms": 3.17
+      "avg_latency_ms": 3.24,
+      "min_latency_ms": 3.13,
+      "max_latency_ms": 3.35
     },
     "ODT": {
       "total": 2,
       "passed": 2,
       "failed": 0,
       "pass_rate_percent": 100.0,
-      "avg_latency_ms": 1.44,
-      "min_latency_ms": 1.29,
-      "max_latency_ms": 1.58
+      "avg_latency_ms": 1.61,
+      "min_latency_ms": 1.58,
+      "max_latency_ms": 1.64
     },
     "EPUB": {
       "total": 3,
       "passed": 3,
       "failed": 0,
       "pass_rate_percent": 100.0,
-      "avg_latency_ms": 6.22,
-      "min_latency_ms": 2.12,
-      "max_latency_ms": 13.96
+      "avg_latency_ms": 7.82,
+      "min_latency_ms": 2.4,
+      "max_latency_ms": 18.18
     },
     "PNG": {
       "total": 6,
       "passed": 6,
       "failed": 0,
       "pass_rate_percent": 100.0,
-      "avg_latency_ms": 1.13,
-      "min_latency_ms": 0.58,
-      "max_latency_ms": 3.68
+      "avg_latency_ms": 1.19,
+      "min_latency_ms": 0.6,
+      "max_latency_ms": 3.65
     },
     "JPEG": {
       "total": 6,
       "passed": 6,
       "failed": 0,
       "pass_rate_percent": 100.0,
-      "avg_latency_ms": 0.86,
-      "min_latency_ms": 0.68,
-      "max_latency_ms": 1.58
+      "avg_latency_ms": 0.94,
+      "min_latency_ms": 0.72,
+      "max_latency_ms": 1.72
     },
     "WEBP": {
       "total": 6,
       "passed": 6,
       "failed": 0,
       "pass_rate_percent": 100.0,
-      "avg_latency_ms": 1.86,
-      "min_latency_ms": 1.29,
-      "max_latency_ms": 4.61
+      "avg_latency_ms": 1.96,
+      "min_latency_ms": 1.38,
+      "max_latency_ms": 4.16
     },
     "TIFF": {
       "total": 5,
       "passed": 5,
       "failed": 0,
       "pass_rate_percent": 100.0,
-      "avg_latency_ms": 3.08,
-      "min_latency_ms": 2.23,
-      "max_latency_ms": 5.86
+      "avg_latency_ms": 16.89,
+      "min_latency_ms": 2.51,
+      "max_latency_ms": 73.07
     },
     "BMP": {
       "total": 5,
       "passed": 5,
       "failed": 0,
       "pass_rate_percent": 100.0,
-      "avg_latency_ms": 3.14,
-      "min_latency_ms": 2.86,
-      "max_latency_ms": 3.88
+      "avg_latency_ms": 3.71,
+      "min_latency_ms": 3.27,
+      "max_latency_ms": 4.46
     },
     "SVG": {
       "total": 2,
       "passed": 2,
       "failed": 0,
       "pass_rate_percent": 100.0,
-      "avg_latency_ms": 1.32,
-      "min_latency_ms": 1.24,
-      "max_latency_ms": 1.4
+      "avg_latency_ms": 1.43,
+      "min_latency_ms": 1.29,
+      "max_latency_ms": 1.56
     },
     "XLSX": {
       "total": 12,
       "passed": 12,
       "failed": 0,
       "pass_rate_percent": 100.0,
-      "avg_latency_ms": 16.47,
-      "min_latency_ms": 11.26,
-      "max_latency_ms": 66.35
+      "avg_latency_ms": 12.45,
+      "min_latency_ms": 12.02,
+      "max_latency_ms": 14.65
     },
     "CSV": {
       "total": 6,
       "passed": 6,
       "failed": 0,
       "pass_rate_percent": 100.0,
-      "avg_latency_ms": 1.38,
-      "min_latency_ms": 0.67,
-      "max_latency_ms": 4.16
+      "avg_latency_ms": 1.45,
+      "min_latency_ms": 0.65,
+      "max_latency_ms": 4.65
     },
     "TSV": {
       "total": 2,
       "passed": 2,
       "failed": 0,
       "pass_rate_percent": 100.0,
-      "avg_latency_ms": 7.19,
-      "min_latency_ms": 3.38,
-      "max_latency_ms": 10.99
+      "avg_latency_ms": 6.95,
+      "min_latency_ms": 3.82,
+      "max_latency_ms": 10.07
     },
     "CORRUPTED_OR_UNSUPPORTED": {
       "total": 15,
       "passed": 15,
       "failed": 0,
       "pass_rate_percent": 100.0,
-      "avg_latency_ms": 1.92,
+      "avg_latency_ms": 2.01,
       "min_latency_ms": 0.03,
-      "max_latency_ms": 8.25
+      "max_latency_ms": 8.65
     }
   },
   "results": [
@@ -180,8 +180,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "PDF text, page count, and table verified.",
-      "processing_ms": 670.9,
-      "peak_memory_mb": 569.96
+      "processing_ms": 616.12,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-002",
@@ -192,8 +192,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "PDF text, page count, and table verified.",
-      "processing_ms": 216.74,
-      "peak_memory_mb": 569.96
+      "processing_ms": 236.78,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-003",
@@ -204,8 +204,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "PDF text, page count, and table verified.",
-      "processing_ms": 238.29,
-      "peak_memory_mb": 569.96
+      "processing_ms": 206.54,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-004",
@@ -216,8 +216,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "PDF text, page count, and table verified.",
-      "processing_ms": 217.43,
-      "peak_memory_mb": 569.96
+      "processing_ms": 225.0,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-005",
@@ -228,8 +228,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "PDF text, page count, and table verified.",
-      "processing_ms": 357.65,
-      "peak_memory_mb": 569.96
+      "processing_ms": 372.7,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-006",
@@ -240,8 +240,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "PDF text, page count, and table verified.",
-      "processing_ms": 209.25,
-      "peak_memory_mb": 569.96
+      "processing_ms": 250.74,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-007",
@@ -252,8 +252,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "PDF text, page count, and table verified.",
-      "processing_ms": 224.14,
-      "peak_memory_mb": 569.96
+      "processing_ms": 210.79,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-008",
@@ -264,8 +264,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "PDF text, page count, and table verified.",
-      "processing_ms": 235.23,
-      "peak_memory_mb": 569.96
+      "processing_ms": 222.33,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-009",
@@ -276,8 +276,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "PDF text, page count, and table verified.",
-      "processing_ms": 216.18,
-      "peak_memory_mb": 569.96
+      "processing_ms": 221.7,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-010",
@@ -288,8 +288,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "PDF text, page count, and table verified.",
-      "processing_ms": 339.28,
-      "peak_memory_mb": 569.96
+      "processing_ms": 350.74,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-011",
@@ -300,8 +300,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "PDF text, page count, and table verified.",
-      "processing_ms": 216.28,
-      "peak_memory_mb": 569.96
+      "processing_ms": 251.48,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-012",
@@ -312,8 +312,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "PDF text, page count, and table verified.",
-      "processing_ms": 216.52,
-      "peak_memory_mb": 569.96
+      "processing_ms": 228.24,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-013",
@@ -324,8 +324,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "PDF text, page count, and table verified.",
-      "processing_ms": 199.62,
-      "peak_memory_mb": 569.96
+      "processing_ms": 218.81,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-014",
@@ -336,8 +336,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "PDF text, page count, and table verified.",
-      "processing_ms": 215.29,
-      "peak_memory_mb": 569.96
+      "processing_ms": 223.54,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-015",
@@ -348,8 +348,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "PDF text, page count, and table verified.",
-      "processing_ms": 357.25,
-      "peak_memory_mb": 569.96
+      "processing_ms": 355.01,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-016",
@@ -360,8 +360,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "PDF text, page count, and table verified.",
-      "processing_ms": 226.74,
-      "peak_memory_mb": 569.96
+      "processing_ms": 215.63,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-017",
@@ -372,8 +372,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "PDF text, page count, and table verified.",
-      "processing_ms": 210.47,
-      "peak_memory_mb": 569.96
+      "processing_ms": 220.42,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-018",
@@ -384,8 +384,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "PDF text, page count, and table verified.",
-      "processing_ms": 209.13,
-      "peak_memory_mb": 569.96
+      "processing_ms": 227.22,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-019",
@@ -396,8 +396,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "PDF text, page count, and table verified.",
-      "processing_ms": 225.07,
-      "peak_memory_mb": 569.96
+      "processing_ms": 210.34,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-020",
@@ -408,8 +408,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "PDF text, page count, and table verified.",
-      "processing_ms": 349.68,
-      "peak_memory_mb": 569.96
+      "processing_ms": 376.09,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-021",
@@ -420,8 +420,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "PDF text, page count, and table verified.",
-      "processing_ms": 225.34,
-      "peak_memory_mb": 569.96
+      "processing_ms": 209.2,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-022",
@@ -432,8 +432,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "PDF text, page count, and table verified.",
-      "processing_ms": 239.61,
-      "peak_memory_mb": 569.96
+      "processing_ms": 213.63,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-023",
@@ -444,8 +444,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "PDF text, page count, and table verified.",
-      "processing_ms": 196.51,
-      "peak_memory_mb": 569.96
+      "processing_ms": 223.46,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-024",
@@ -456,8 +456,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "PDF text, page count, and table verified.",
-      "processing_ms": 223.37,
-      "peak_memory_mb": 569.96
+      "processing_ms": 217.43,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-025",
@@ -468,8 +468,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "PDF text, page count, and table verified.",
-      "processing_ms": 346.02,
-      "peak_memory_mb": 569.96
+      "processing_ms": 345.74,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-026",
@@ -480,8 +480,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "PDF text, page count, and table verified.",
-      "processing_ms": 206.94,
-      "peak_memory_mb": 569.96
+      "processing_ms": 236.05,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-027",
@@ -492,8 +492,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "PDF text, page count, and table verified.",
-      "processing_ms": 225.38,
-      "peak_memory_mb": 569.96
+      "processing_ms": 207.8,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-028",
@@ -504,8 +504,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "PDF text, page count, and table verified.",
-      "processing_ms": 234.58,
-      "peak_memory_mb": 569.96
+      "processing_ms": 231.81,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-029",
@@ -516,8 +516,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "PDF text, page count, and table verified.",
-      "processing_ms": 245.17,
-      "peak_memory_mb": 569.96
+      "processing_ms": 203.39,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-030",
@@ -528,8 +528,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "PDF text, page count, and table verified.",
-      "processing_ms": 367.46,
-      "peak_memory_mb": 569.96
+      "processing_ms": 358.51,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-031",
@@ -540,8 +540,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "DOCX text, table=True, bullets=2 verified.",
-      "processing_ms": 28.43,
-      "peak_memory_mb": 569.96
+      "processing_ms": 26.93,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-032",
@@ -552,8 +552,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "DOCX text, table=True, bullets=2 verified.",
-      "processing_ms": 14.09,
-      "peak_memory_mb": 569.96
+      "processing_ms": 20.66,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-033",
@@ -564,8 +564,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "DOCX text, table=True, bullets=2 verified.",
-      "processing_ms": 13.71,
-      "peak_memory_mb": 569.96
+      "processing_ms": 15.95,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-034",
@@ -576,8 +576,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "DOCX text, table=True, bullets=2 verified.",
-      "processing_ms": 12.65,
-      "peak_memory_mb": 569.96
+      "processing_ms": 12.5,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-035",
@@ -588,8 +588,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "DOCX text, table=True, bullets=2 verified.",
-      "processing_ms": 12.68,
-      "peak_memory_mb": 569.96
+      "processing_ms": 12.36,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-036",
@@ -600,8 +600,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "DOCX text, table=True, bullets=2 verified.",
-      "processing_ms": 12.56,
-      "peak_memory_mb": 569.96
+      "processing_ms": 12.34,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-037",
@@ -612,8 +612,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "DOCX text, table=True, bullets=2 verified.",
-      "processing_ms": 18.82,
-      "peak_memory_mb": 569.96
+      "processing_ms": 18.02,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-038",
@@ -624,8 +624,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "DOCX text, table=True, bullets=2 verified.",
-      "processing_ms": 12.52,
-      "peak_memory_mb": 569.96
+      "processing_ms": 12.98,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-039",
@@ -636,8 +636,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "DOCX text, table=True, bullets=2 verified.",
-      "processing_ms": 12.22,
-      "peak_memory_mb": 569.96
+      "processing_ms": 12.78,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-040",
@@ -648,8 +648,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "DOCX text, table=True, bullets=2 verified.",
-      "processing_ms": 12.7,
-      "peak_memory_mb": 569.96
+      "processing_ms": 12.9,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-041",
@@ -660,8 +660,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "DOCX text, table=True, bullets=2 verified.",
-      "processing_ms": 12.35,
-      "peak_memory_mb": 569.96
+      "processing_ms": 12.47,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-042",
@@ -672,8 +672,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "DOCX text, table=True, bullets=2 verified.",
-      "processing_ms": 12.33,
-      "peak_memory_mb": 569.96
+      "processing_ms": 12.88,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-043",
@@ -684,8 +684,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "DOCX text, table=True, bullets=2 verified.",
-      "processing_ms": 14.03,
-      "peak_memory_mb": 569.96
+      "processing_ms": 12.97,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-044",
@@ -696,8 +696,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "DOCX text, table=True, bullets=2 verified.",
-      "processing_ms": 12.59,
-      "peak_memory_mb": 569.96
+      "processing_ms": 12.81,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-045",
@@ -708,8 +708,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "DOCX text, table=True, bullets=2 verified.",
-      "processing_ms": 12.14,
-      "peak_memory_mb": 569.96
+      "processing_ms": 12.69,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-046",
@@ -720,8 +720,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "DOCX text, table=True, bullets=2 verified.",
-      "processing_ms": 12.61,
-      "peak_memory_mb": 569.96
+      "processing_ms": 12.36,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-047",
@@ -732,8 +732,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "DOCX text, table=True, bullets=2 verified.",
-      "processing_ms": 13.71,
-      "peak_memory_mb": 569.96
+      "processing_ms": 13.1,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-048",
@@ -744,8 +744,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "DOCX text, table=True, bullets=2 verified.",
-      "processing_ms": 12.51,
-      "peak_memory_mb": 569.96
+      "processing_ms": 12.28,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-049",
@@ -756,8 +756,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "Successfully isolated mislabeled legacy doc file as text mismatch.",
-      "processing_ms": 6.71,
-      "peak_memory_mb": 569.96
+      "processing_ms": 7.16,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-050",
@@ -768,8 +768,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "Successfully isolated mislabeled legacy doc file as text mismatch.",
-      "processing_ms": 3.19,
-      "peak_memory_mb": 569.96
+      "processing_ms": 3.13,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-051",
@@ -780,8 +780,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "TXT content and encoding extracted accurately.",
-      "processing_ms": 3.48,
-      "peak_memory_mb": 569.96
+      "processing_ms": 3.25,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-052",
@@ -792,8 +792,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "TXT content and encoding extracted accurately.",
-      "processing_ms": 3.34,
-      "peak_memory_mb": 569.96
+      "processing_ms": 3.39,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-053",
@@ -804,8 +804,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "TXT content and encoding extracted accurately.",
-      "processing_ms": 3.65,
-      "peak_memory_mb": 569.96
+      "processing_ms": 3.1,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-054",
@@ -816,8 +816,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "MD content and encoding extracted accurately.",
-      "processing_ms": 3.74,
-      "peak_memory_mb": 569.96
+      "processing_ms": 4.01,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-055",
@@ -828,8 +828,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "MD content and encoding extracted accurately.",
-      "processing_ms": 3.37,
-      "peak_memory_mb": 569.96
+      "processing_ms": 3.51,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-056",
@@ -840,8 +840,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "MD content and encoding extracted accurately.",
-      "processing_ms": 3.46,
-      "peak_memory_mb": 569.96
+      "processing_ms": 3.54,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-057",
@@ -852,8 +852,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "RTF content and encoding extracted accurately.",
-      "processing_ms": 3.06,
-      "peak_memory_mb": 569.96
+      "processing_ms": 3.35,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-058",
@@ -864,8 +864,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "RTF content and encoding extracted accurately.",
-      "processing_ms": 3.17,
-      "peak_memory_mb": 569.96
+      "processing_ms": 3.13,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-059",
@@ -877,7 +877,7 @@
       "issue_id": "",
       "notes": "ODT content and encoding extracted accurately.",
       "processing_ms": 1.58,
-      "peak_memory_mb": 569.96
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-060",
@@ -888,8 +888,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "ODT content and encoding extracted accurately.",
-      "processing_ms": 1.29,
-      "peak_memory_mb": 569.96
+      "processing_ms": 1.64,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-061",
@@ -900,8 +900,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "EPUB content and encoding extracted accurately.",
-      "processing_ms": 13.96,
-      "peak_memory_mb": 569.96
+      "processing_ms": 18.18,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-062",
@@ -912,8 +912,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "EPUB content and encoding extracted accurately.",
-      "processing_ms": 2.57,
-      "peak_memory_mb": 569.96
+      "processing_ms": 2.87,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-063",
@@ -924,8 +924,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "EPUB content and encoding extracted accurately.",
-      "processing_ms": 2.12,
-      "peak_memory_mb": 569.96
+      "processing_ms": 2.4,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-064",
@@ -936,8 +936,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "PNG image validated: dimensions [900, 600], format PNG.",
-      "processing_ms": 3.68,
-      "peak_memory_mb": 569.96
+      "processing_ms": 3.65,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-065",
@@ -948,8 +948,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "JPEG image validated: dimensions [900, 600], format JPEG.",
-      "processing_ms": 1.58,
-      "peak_memory_mb": 569.96
+      "processing_ms": 1.72,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-066",
@@ -960,8 +960,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "WEBP image validated: dimensions [900, 600], format WEBP.",
-      "processing_ms": 4.61,
-      "peak_memory_mb": 569.96
+      "processing_ms": 4.16,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-067",
@@ -972,8 +972,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "TIFF image validated: dimensions [900, 600], format TIFF.",
-      "processing_ms": 5.86,
-      "peak_memory_mb": 569.96
+      "processing_ms": 73.07,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-068",
@@ -984,8 +984,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "BMP image validated: dimensions [900, 600], format BMP.",
-      "processing_ms": 3.88,
-      "peak_memory_mb": 569.96
+      "processing_ms": 4.46,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-069",
@@ -996,8 +996,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "PNG image validated: dimensions [900, 600], format PNG.",
-      "processing_ms": 0.66,
-      "peak_memory_mb": 569.96
+      "processing_ms": 0.79,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-070",
@@ -1008,8 +1008,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "JPEG image validated: dimensions [900, 600], format JPEG.",
-      "processing_ms": 0.75,
-      "peak_memory_mb": 569.96
+      "processing_ms": 0.86,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-071",
@@ -1020,8 +1020,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "WEBP image validated: dimensions [900, 600], format WEBP.",
-      "processing_ms": 1.3,
-      "peak_memory_mb": 569.96
+      "processing_ms": 1.57,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-072",
@@ -1032,8 +1032,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "TIFF image validated: dimensions [900, 600], format TIFF.",
-      "processing_ms": 2.52,
-      "peak_memory_mb": 569.96
+      "processing_ms": 3.05,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-073",
@@ -1044,8 +1044,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "BMP image validated: dimensions [900, 600], format BMP.",
-      "processing_ms": 3.16,
-      "peak_memory_mb": 569.96
+      "processing_ms": 3.61,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-074",
@@ -1057,7 +1057,7 @@
       "issue_id": "",
       "notes": "PNG image validated: dimensions [900, 600], format PNG.",
       "processing_ms": 0.6,
-      "peak_memory_mb": 569.96
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-075",
@@ -1068,8 +1068,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "JPEG image validated: dimensions [900, 600], format JPEG.",
-      "processing_ms": 0.68,
-      "peak_memory_mb": 569.96
+      "processing_ms": 0.72,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-076",
@@ -1080,8 +1080,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "WEBP image validated: dimensions [900, 600], format WEBP.",
-      "processing_ms": 1.29,
-      "peak_memory_mb": 569.96
+      "processing_ms": 1.55,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-077",
@@ -1092,8 +1092,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "TIFF image validated: dimensions [900, 600], format TIFF.",
-      "processing_ms": 2.38,
-      "peak_memory_mb": 569.96
+      "processing_ms": 2.83,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-078",
@@ -1104,8 +1104,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "BMP image validated: dimensions [900, 600], format BMP.",
-      "processing_ms": 2.92,
-      "peak_memory_mb": 569.96
+      "processing_ms": 3.27,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-079",
@@ -1116,8 +1116,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "PNG image validated: dimensions [900, 600], format PNG.",
-      "processing_ms": 0.58,
-      "peak_memory_mb": 569.96
+      "processing_ms": 0.79,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-080",
@@ -1128,8 +1128,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "JPEG image validated: dimensions [900, 600], format JPEG.",
-      "processing_ms": 0.71,
-      "peak_memory_mb": 569.96
+      "processing_ms": 0.82,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-081",
@@ -1140,8 +1140,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "WEBP image validated: dimensions [900, 600], format WEBP.",
-      "processing_ms": 1.29,
-      "peak_memory_mb": 569.96
+      "processing_ms": 1.41,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-082",
@@ -1152,8 +1152,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "TIFF image validated: dimensions [900, 600], format TIFF.",
-      "processing_ms": 2.39,
-      "peak_memory_mb": 569.96
+      "processing_ms": 2.51,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-083",
@@ -1164,8 +1164,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "BMP image validated: dimensions [900, 600], format BMP.",
-      "processing_ms": 2.9,
-      "peak_memory_mb": 569.96
+      "processing_ms": 3.92,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-084",
@@ -1176,8 +1176,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "PNG image validated: dimensions [900, 600], format PNG.",
-      "processing_ms": 0.62,
-      "peak_memory_mb": 569.96
+      "processing_ms": 0.68,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-085",
@@ -1189,7 +1189,7 @@
       "issue_id": "",
       "notes": "JPEG image validated: dimensions [900, 600], format JPEG.",
       "processing_ms": 0.72,
-      "peak_memory_mb": 569.96
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-086",
@@ -1200,8 +1200,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "WEBP image validated: dimensions [900, 600], format WEBP.",
-      "processing_ms": 1.35,
-      "peak_memory_mb": 569.96
+      "processing_ms": 1.38,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-087",
@@ -1212,8 +1212,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "TIFF image validated: dimensions [900, 600], format TIFF.",
-      "processing_ms": 2.23,
-      "peak_memory_mb": 569.96
+      "processing_ms": 3.0,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-088",
@@ -1224,8 +1224,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "BMP image validated: dimensions [900, 600], format BMP.",
-      "processing_ms": 2.86,
-      "peak_memory_mb": 569.96
+      "processing_ms": 3.31,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-089",
@@ -1236,8 +1236,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "PNG image validated: dimensions [900, 600], format PNG.",
-      "processing_ms": 0.65,
-      "peak_memory_mb": 569.96
+      "processing_ms": 0.64,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-090",
@@ -1248,8 +1248,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "JPEG image validated: dimensions [900, 600], format JPEG.",
-      "processing_ms": 0.72,
-      "peak_memory_mb": 569.96
+      "processing_ms": 0.78,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-091",
@@ -1260,8 +1260,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "WEBP image validated: dimensions [900, 600], format WEBP.",
-      "processing_ms": 1.32,
-      "peak_memory_mb": 569.96
+      "processing_ms": 1.68,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-092",
@@ -1272,8 +1272,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "SVG vector image and XML token verified.",
-      "processing_ms": 1.4,
-      "peak_memory_mb": 569.96
+      "processing_ms": 1.56,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-093",
@@ -1284,8 +1284,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "SVG vector image and XML token verified.",
-      "processing_ms": 1.24,
-      "peak_memory_mb": 569.96
+      "processing_ms": 1.29,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-094",
@@ -1296,8 +1296,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "XLSX multi-sheet (3 sheets), formulas (5), and charts verified.",
-      "processing_ms": 11.97,
-      "peak_memory_mb": 569.96
+      "processing_ms": 12.74,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-095",
@@ -1308,8 +1308,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "XLSX multi-sheet (3 sheets), formulas (5), and charts verified.",
-      "processing_ms": 11.26,
-      "peak_memory_mb": 569.96
+      "processing_ms": 12.02,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-096",
@@ -1320,8 +1320,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "XLSX multi-sheet (3 sheets), formulas (5), and charts verified.",
-      "processing_ms": 11.75,
-      "peak_memory_mb": 569.96
+      "processing_ms": 12.12,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-097",
@@ -1332,8 +1332,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "XLSX multi-sheet (3 sheets), formulas (5), and charts verified.",
-      "processing_ms": 11.58,
-      "peak_memory_mb": 569.96
+      "processing_ms": 12.16,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-098",
@@ -1344,8 +1344,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "XLSX multi-sheet (3 sheets), formulas (5), and charts verified.",
-      "processing_ms": 11.69,
-      "peak_memory_mb": 569.96
+      "processing_ms": 12.08,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-099",
@@ -1356,8 +1356,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "XLSX multi-sheet (3 sheets), formulas (5), and charts verified.",
-      "processing_ms": 14.39,
-      "peak_memory_mb": 569.96
+      "processing_ms": 12.04,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-100",
@@ -1368,8 +1368,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "XLSX multi-sheet (3 sheets), formulas (5), and charts verified.",
-      "processing_ms": 66.35,
-      "peak_memory_mb": 569.96
+      "processing_ms": 12.46,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-101",
@@ -1380,8 +1380,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "XLSX multi-sheet (3 sheets), formulas (5), and charts verified.",
-      "processing_ms": 11.55,
-      "peak_memory_mb": 569.96
+      "processing_ms": 12.1,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-102",
@@ -1392,8 +1392,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "XLSX multi-sheet (3 sheets), formulas (5), and charts verified.",
-      "processing_ms": 11.6,
-      "peak_memory_mb": 569.96
+      "processing_ms": 12.37,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-103",
@@ -1404,8 +1404,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "XLSX multi-sheet (3 sheets), formulas (5), and charts verified.",
-      "processing_ms": 12.04,
-      "peak_memory_mb": 569.96
+      "processing_ms": 12.36,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-104",
@@ -1416,8 +1416,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "XLSX multi-sheet (3 sheets), formulas (5), and charts verified.",
-      "processing_ms": 11.75,
-      "peak_memory_mb": 569.96
+      "processing_ms": 12.32,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-105",
@@ -1428,8 +1428,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "XLSX multi-sheet (3 sheets), formulas (5), and charts verified.",
-      "processing_ms": 11.73,
-      "peak_memory_mb": 569.96
+      "processing_ms": 14.65,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-106",
@@ -1440,8 +1440,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "CSV parsed (4 rows, 5 cols).",
-      "processing_ms": 1.34,
-      "peak_memory_mb": 569.96
+      "processing_ms": 1.38,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-107",
@@ -1452,8 +1452,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "CSV parsed (4 rows, 5 cols).",
-      "processing_ms": 0.75,
-      "peak_memory_mb": 569.96
+      "processing_ms": 0.73,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-108",
@@ -1464,8 +1464,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "CSV parsed (4 rows, 5 cols).",
-      "processing_ms": 0.69,
-      "peak_memory_mb": 569.96
+      "processing_ms": 0.66,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-109",
@@ -1476,8 +1476,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "CSV parsed (4 rows, 5 cols).",
-      "processing_ms": 0.67,
-      "peak_memory_mb": 569.96
+      "processing_ms": 0.65,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-110",
@@ -1488,8 +1488,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "CSV parsed (4 rows, 5 cols).",
-      "processing_ms": 0.67,
-      "peak_memory_mb": 569.96
+      "processing_ms": 0.65,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-111",
@@ -1500,8 +1500,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "CSV parsed (5 rows, 5 cols).",
-      "processing_ms": 4.16,
-      "peak_memory_mb": 569.96
+      "processing_ms": 4.65,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-112",
@@ -1512,8 +1512,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "TSV parsed (4 rows, 3 cols).",
-      "processing_ms": 3.38,
-      "peak_memory_mb": 569.96
+      "processing_ms": 3.82,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-113",
@@ -1524,8 +1524,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "TSV parsed (4 rows, 3 cols).",
-      "processing_ms": 10.99,
-      "peak_memory_mb": 569.96
+      "processing_ms": 10.07,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-114",
@@ -1536,8 +1536,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "Negative fixture safely handled (CORRUPTED_PDF): pdf (warnings=1).",
-      "processing_ms": 1.01,
-      "peak_memory_mb": 569.96
+      "processing_ms": 1.08,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-115",
@@ -1548,8 +1548,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "Negative fixture safely handled (CORRUPTED_XLSX): zip (warnings=2).",
-      "processing_ms": 1.75,
-      "peak_memory_mb": 569.96
+      "processing_ms": 1.71,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-116",
@@ -1561,7 +1561,7 @@
       "issue_id": "",
       "notes": "Negative fixture safely handled (EMPTY_FILE): invalid (warnings=1).",
       "processing_ms": 0.03,
-      "peak_memory_mb": 569.96
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-117",
@@ -1572,8 +1572,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "Negative fixture safely handled (UNKNOWN_BINARY): binary (warnings=0).",
-      "processing_ms": 1.25,
-      "peak_memory_mb": 569.96
+      "processing_ms": 1.2,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-118",
@@ -1584,8 +1584,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "Negative fixture safely handled (INVALID_IMAGE): txt (warnings=1).",
-      "processing_ms": 2.81,
-      "peak_memory_mb": 569.96
+      "processing_ms": 2.78,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-119",
@@ -1596,8 +1596,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "Negative fixture safely handled (CORRUPTED_IMAGE): jpeg (warnings=0).",
-      "processing_ms": 2.5,
-      "peak_memory_mb": 569.96
+      "processing_ms": 2.49,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-120",
@@ -1608,8 +1608,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "Negative fixture safely handled (CORRUPTED_ARCHIVE): zip (warnings=1).",
-      "processing_ms": 1.3,
-      "peak_memory_mb": 569.96
+      "processing_ms": 1.41,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-121",
@@ -1620,8 +1620,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "Negative fixture safely handled (UNKNOWN_FILE): binary (warnings=0).",
-      "processing_ms": 1.1,
-      "peak_memory_mb": 569.96
+      "processing_ms": 1.12,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-122",
@@ -1632,8 +1632,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "Negative fixture safely handled (EXTENSION_MISMATCH): pdf (warnings=2).",
-      "processing_ms": 0.75,
-      "peak_memory_mb": 569.96
+      "processing_ms": 0.77,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-123",
@@ -1644,8 +1644,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "Negative fixture safely handled (EXTENSION_MISMATCH): png (warnings=2).",
-      "processing_ms": 1.21,
-      "peak_memory_mb": 569.96
+      "processing_ms": 1.2,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-124",
@@ -1656,8 +1656,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "Negative fixture safely handled (MALFORMED_STRUCTURED_TEXT): txt (warnings=1).",
-      "processing_ms": 0.35,
-      "peak_memory_mb": 569.96
+      "processing_ms": 0.34,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-125",
@@ -1668,8 +1668,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "Negative fixture safely handled (MALFORMED_STRUCTURED_TEXT): txt (warnings=1).",
-      "processing_ms": 2.85,
-      "peak_memory_mb": 569.96
+      "processing_ms": 3.15,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-126",
@@ -1680,8 +1680,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "Negative fixture safely handled (LARGE_FIELD): csv (warnings=0).",
-      "processing_ms": 8.25,
-      "peak_memory_mb": 569.96
+      "processing_ms": 8.65,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-127",
@@ -1692,8 +1692,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "Negative fixture safely handled (UNSUPPORTED_EXECUTABLE): pe (warnings=0).",
-      "processing_ms": 2.5,
-      "peak_memory_mb": 569.96
+      "processing_ms": 2.77,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-128",
@@ -1704,8 +1704,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "Negative fixture safely handled (CORRUPTED_CONTAINER): zip (warnings=2).",
-      "processing_ms": 1.2,
-      "peak_memory_mb": 569.96
+      "processing_ms": 1.49,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-129",
@@ -1716,8 +1716,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "TXT content and encoding extracted accurately.",
-      "processing_ms": 3.1,
-      "peak_memory_mb": 569.96
+      "processing_ms": 3.23,
+      "peak_memory_mb": 1062.13
     },
     {
       "test_id": "DM-ALPHA-130",
@@ -1728,8 +1728,8 @@
       "status": "PASS",
       "issue_id": "",
       "notes": "TXT content and encoding extracted accurately.",
-      "processing_ms": 2.94,
-      "peak_memory_mb": 569.96
+      "processing_ms": 3.49,
+      "peak_memory_mb": 1062.13
     }
   ]
 }

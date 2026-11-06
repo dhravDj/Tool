@@ -1,0 +1,70 @@
+{
+  "total_workflows": 10,
+  "total_passed": 10,
+  "total_failed": 0,
+  "pass_rate_percent": 100.0,
+  "total_duration_seconds": 0.761,
+  "peak_rss_mb": 1062.13,
+  "workflows": [
+    {
+      "workflow": "Workflow 1: Document Flow",
+      "status": "PASSED",
+      "duration_ms": 522.35,
+      "details": "Extracted 6 blocks, 5 chunks, response verified with 1 citations"
+    },
+    {
+      "workflow": "Workflow 2: Image Flow",
+      "status": "PASSED",
+      "duration_ms": 43.76,
+      "details": "Dimensions: 900x600, format: png, caption: 'A landscape visual image (900x600 px) with dominant colors #FFFFFF, #EDEDED, #DBDBDB, featuring visual_graphic.'"
+    },
+    {
+      "workflow": "Workflow 3: Spreadsheet Flow",
+      "status": "PASSED",
+      "duration_ms": 12.36,
+      "details": "Analyzed 3 sheets, exported CSV (5 rows)"
+    },
+    {
+      "workflow": "Workflow 4: Presentation Flow",
+      "status": "PASSED",
+      "duration_ms": 12.33,
+      "details": "Extracted 1 slides with notes & shapes, Markdown exported (254 chars)"
+    },
+    {
+      "workflow": "Workflow 5: Audio Flow",
+      "status": "PASSED",
+      "duration_ms": 98.09,
+      "details": "Segments: 2, duration: 3.00s, SRT export verified"
+    },
+    {
+      "workflow": "Workflow 6: Video Flow",
+      "status": "PASSED",
+      "duration_ms": 60.0,
+      "details": "Detected 1 scenes, keyframes: 1, Markdown exported"
+    },
+    {
+      "workflow": "Workflow 7: Code Flow",
+      "status": "PASSED",
+      "duration_ms": 4.78,
+      "details": "Symbols: 4, Cyclomatic Complexity: 4.0, LOC: 32"
+    },
+    {
+      "workflow": "Workflow 8: Archive Flow",
+      "status": "PASSED",
+      "duration_ms": 1.43,
+      "details": "Entries: 6, Hierarchy depth: 1, Safe verification: 100%"
+    },
+    {
+      "workflow": "Workflow 9: Bulk Queue Flow",
+      "status": "PASSED",
+      "duration_ms": 3.97,
+      "details": "Enqueued & dequeued task 'f3927990' with priority 80 and ACK completed"
+    },
+    {
+      "workflow": "Workflow 10: Multi-File RAG & Citations",
+      "status": "PASSED",
+      "duration_ms": 0.2,
+      "details": "Cross-file grounded RAG verified with exact citations (2 citations from financial_2026.txt)"
+    }
+  ]
+}

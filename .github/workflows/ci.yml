@@ -1,0 +1,106 @@
+name: DocuMind AI Quality Gates & CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  backend-checks:
+    name: Backend Lint, Test & Coverage
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: documind_test
+          POSTGRES_PASSWORD: test_password_123
+          POSTGRES_DB: documind_test_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Install System Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            tesseract-ocr \
+            tesseract-ocr-eng \
+            libmagic1 \
+            ffmpeg \
+            libpq-dev
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: "pip"
+
+      - name: Install uv and Dependencies
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          uv pip install --system -e ".[dev]" pytest pytest-asyncio httpx ruff
+
+      - name: Code Quality & Linting (Ruff)
+        run: |
+          ruff check backend
+
+      - name: Run Backend Regression Test Suite
+        env:
+          DATABASE_URL: postgresql+asyncpg://documind_test:test_password_123@localhost:5432/documind_test_db
+          SYNC_DATABASE_URL: postgresql+psycopg2://documind_test:test_password_123@localhost:5432/documind_test_db
+          REDIS_URL: redis://localhost:6379/0
+          APP_ENV: testing
+          SECRET_KEY: test_secret_key_minimum_32_characters_for_ci_gate
+        run: |
+          pytest backend/tests/ --maxfail=5
+
+  frontend-checks:
+    name: Frontend Lint, Test & Production Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: frontend/package.json
+
+      - name: Install Frontend Dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: TypeScript Compilation Check
+        working-directory: frontend
+        run: npx tsc -b
+
+      - name: Run Vitest Unit & Component Suite
+        working-directory: frontend
+        run: npm test -- --run
+
+      - name: Execute Production Bundle Build
+        working-directory: frontend
+        run: npm run build
