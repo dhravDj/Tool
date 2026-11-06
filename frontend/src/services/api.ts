@@ -21,6 +21,8 @@ import {
   CodeDocument,
   CodeMetrics,
   CodeSymbol,
+  ConversionBundleFile,
+  ConversionRecordDTO,
   DataProfile,
   DetectionCapabilitiesData,
   DetectionResultData,
@@ -29,6 +31,7 @@ import {
   ExtractionRequest,
   ExtractionStatusResponse,
   FileRecordSummary,
+  FormatCapability,
   FormatDetailData,
   FormatListResponseData,
   HealthCheckResponse,
@@ -108,6 +111,27 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
   }
 
   return payload.data as T;
+}
+
+async function requestEnvelope<T>(endpoint: string, options: RequestInit = {}): Promise<APIResponse<T>> {
+  const headers = new Headers(options.headers || {});
+  if (!headers.has("Accept")) {
+    headers.set("Accept", "application/json");
+  }
+
+  const response = await fetch(`${API_BASE}${endpoint}`, {
+    ...options,
+    headers,
+  });
+
+  const payload: APIResponse<T> = await response.json();
+
+  if (!response.ok || !payload.success) {
+    const errorMsg = payload.error?.message || `HTTP request failed: ${response.statusText}`;
+    throw new Error(errorMsg);
+  }
+
+  return payload;
 }
 
 export const api = {
@@ -800,4 +824,71 @@ export const api = {
 
   getIndexStatus: (fileId: string): Promise<Record<string, unknown>> =>
     api.getAIIndexStatus(fileId),
+
+  // ==========================================
+  // Universal File Conversion & Extraction APIs
+  // ==========================================
+  getConversionCapabilities: (): Promise<FormatCapability[]> =>
+    request<FormatCapability[]>("/conversion/capabilities"),
+
+  convertFile: (formData: FormData): Promise<ConversionRecordDTO> =>
+    request<ConversionRecordDTO>("/conversions", {
+      method: "POST",
+      body: formData,
+    }),
+
+  convertBatch: (formData: FormData): Promise<ConversionRecordDTO[]> =>
+    request<ConversionRecordDTO[]>("/conversions/batch", {
+      method: "POST",
+      body: formData,
+    }),
+
+  getConversion: (conversionId: string): Promise<ConversionRecordDTO> =>
+    request<ConversionRecordDTO>(`/conversions/${encodeURIComponent(conversionId)}`),
+
+  getConversionResult: (
+    conversionId: string
+  ): Promise<{
+    conversion_id: string;
+    status: string;
+    output_filename: string;
+    mime_type: string;
+    preview_content: string;
+    warnings: string[];
+    duration_seconds: number;
+  }> =>
+    request(`/conversions/${encodeURIComponent(conversionId)}/result`),
+
+  getConversionDownloadUrl: (conversionId: string): string =>
+    `${API_BASE}/conversions/${encodeURIComponent(conversionId)}/download`,
+
+  getConversionFiles: (conversionId: string): Promise<ConversionBundleFile[]> =>
+    request<ConversionBundleFile[]>(`/conversions/${encodeURIComponent(conversionId)}/files`),
+
+  retryConversion: (conversionId: string): Promise<ConversionRecordDTO> =>
+    request<ConversionRecordDTO>(`/conversions/${encodeURIComponent(conversionId)}/retry`, {
+      method: "POST",
+    }),
+
+  deleteConversion: (conversionId: string): Promise<{ deleted_id: string }> =>
+    request<{ deleted_id: string }>(`/conversions/${encodeURIComponent(conversionId)}`, {
+      method: "DELETE",
+    }),
+
+  getConversionHistory: async (params?: {
+    page?: number;
+    limit?: number;
+    status?: string;
+  }): Promise<{ items: ConversionRecordDTO[]; meta?: { total: number; page: number; limit: number; total_pages: number } }> => {
+    const searchParams = new URLSearchParams();
+    if (params?.page) searchParams.set("page", String(params.page));
+    if (params?.limit) searchParams.set("limit", String(params.limit));
+    if (params?.status) searchParams.set("status", params.status);
+    const qs = searchParams.toString() ? `?${searchParams.toString()}` : "";
+    const res = await requestEnvelope<ConversionRecordDTO[]>(`/conversion-history${qs}`);
+    return {
+      items: res.data || [],
+      meta: res.meta as { total: number; page: number; limit: number; total_pages: number } | undefined,
+    };
+  },
 };

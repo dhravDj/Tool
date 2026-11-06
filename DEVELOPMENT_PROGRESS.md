@@ -1007,3 +1007,63 @@
 
 **All 14 Phases of the DocuMind AI Platform Roadmap are 100% Implemented, Verified, Hardened, and Production Ready.**
 No further roadmap phases remain. The system is ready for live operational deployment.
+
+
+---
+
+## 14. Universal File Converter & Extractor Refactoring
+
+### 14.1 Product Pivot & Architecture
+- **Objective:** Pivot DocuMind into a high-performance **Universal File Converter and Content Extraction Tool**.
+- **Scope:** Completely decoupled conversational interfaces, AI chat with documents, vector search, embeddings, and RAG knowledge bases. Focused 100% on genuine format-specific extraction and universal conversion to TXT, Markdown, JSON, CSV, HTML, and ZIP bundles.
+- **Workflow:** `UPLOAD FILES → AUTOMATIC FORMAT DETECTION → SELECT EXTRACTION ENGINE → EXTRACT ORIGINAL CONTENT → NORMALIZE CONTENT → CONVERT INTO SELECTED OUTPUT FORMAT → PREVIEW AND DOWNLOAD`.
+
+### 14.2 Universal Converters Subsystem (`backend/app/modules/converters/`)
+- [x] **Canonical Content Model (`UniversalContent`):** Standardized intermediate representation unifying text blocks, sections, tables, code blocks, media segments, and metadata across all 60+ formats.
+- [x] **Three User-Facing Modes:**
+  - **Mode A (Plain Text):** Extract readable text only (`.txt`).
+  - **Mode B (Structured Text):** Preserve document semantics, headings, tables, code fences, and boundaries (`.md`).
+  - **Mode C (Complete Extraction):** Full ZIP export bundle containing `.txt`, `.md`, `.json`, `.html`, extracted tables as `.csv`, media subtitles, and `manifest.json`.
+- [x] **Universal Output Writers (`writers/`):**
+  - `TxtWriter`: Clean UTF-8 text formatting.
+  - `MarkdownWriter`: GitHub Flavored Markdown with aligned tables, frontmatter, and code fences.
+  - `JsonWriter`: Full schema-compliant JSON serialization.
+  - `CsvWriter`: Formula injection neutralization (`=, +, -, @, \t, \r`) while preserving legitimate negative numbers (`-42.5`, `-100`).
+  - `HtmlWriter`: Responsive, styled HTML5 documents with complete XSS escaping.
+  - `SubtitleWriter`: Standard `.srt` and `.vtt` generation with millisecond timestamps.
+  - `BundleWriter`: Mode C self-contained ZIP archive packaging.
+- [x] **Universal Adapters (`adapters/`):**
+  - `DocumentAdapter` (PDF, DOCX, DOC, ODT, RTF, TXT, MD, EPUB)
+  - `SpreadsheetAdapter` (XLSX, XLS, CSV, TSV, ODS)
+  - `PresentationAdapter` (PPTX, PPT, ODP)
+  - `ImageAdapter` (PNG, JPG, JPEG, WEBP, TIFF, BMP, SVG via Tesseract OCR)
+  - `AudioAdapter` (MP3, WAV, M4A, AAC, FLAC, OGG via Whisper STT)
+  - `VideoAdapter` (MP4, MKV, MOV, AVI, WEBM via PyAV / Scene Cut)
+  - `CodeAdapter` (PY, JS, TS, JSX, TSX, HTML, CSS, JAVA, C, CPP, GO, RS, PHP, SQL)
+  - `StructuredDataAdapter` (JSON, XML, YAML, TOML, PARQUET)
+  - `ArchiveAdapter` (ZIP, 7Z, TAR, GZ, BZ2, XZ)
+- [x] **UniversalConversionService (`service.py`):** Central orchestrator managing detection, routing, normalization, output writing, disk storage, and database persistence.
+
+### 14.3 Conversion REST API (`backend/app/api/v1/endpoints/conversion.py`)
+- [x] `GET /api/v1/conversion/capabilities`: Full capability matrix of 60 formats.
+- [x] `POST /api/v1/conversions`: Upload, detect, extract, and convert single file.
+- [x] `POST /api/v1/conversions/batch`: Batch multi-file conversion.
+- [x] `GET /api/v1/conversions/{conversion_id}`: Status and metadata polling.
+- [x] `GET /api/v1/conversions/{conversion_id}/result`: Direct content preview.
+- [x] `GET /api/v1/conversions/{conversion_id}/download`: File streaming download.
+- [x] `GET /api/v1/conversions/{conversion_id}/files`: ZIP bundle contents listing.
+- [x] `POST /api/v1/conversions/{conversion_id}/retry`: Re-queue conversion.
+- [x] `DELETE /api/v1/conversions/{conversion_id}`: Purge record and artifacts.
+- [x] `GET /api/v1/conversion-history`: Paginated history of past conversions.
+
+### 14.4 Frontend Redesign
+- [x] Clean navigation in `Sidebar.tsx`: Dashboard, Convert Files, My Files, Conversion History, System Status, Settings.
+- [x] Implemented `ConvertPage.tsx`: Drag-and-drop upload, auto format detection pill, Mode cards (A, B, C), target format chips, options toggles, live progress, formatted/raw/files preview tabs, and download buttons.
+- [x] Implemented `ConversionHistoryPage.tsx`: Paginated history table, status badges, duration, size, preview modal, retry, and download actions.
+- [x] Updated `DashboardPage.tsx`: Real conversion metrics, storage stats, worker capacity, and recent conversions list.
+- [x] Verified zero TypeScript build errors (`tsc -b && vite build`) and 30/30 passing Vitest tests.
+
+### 14.5 Verification & Audit Reports
+- [x] Authored `reports/PRODUCT_AUDIT_REPORT.md`: Comprehensive audit of all existing modules.
+- [x] Authored `reports/CONVERSION_TEST_REPORT.md`: 100% test pass verification across all modalities.
+- [x] Authored complete documentation in `docs/`: `PRODUCT_OVERVIEW.md`, `FORMAT_SUPPORT_MATRIX.md`, `EXTRACTION_ARCHITECTURE.md`, `OUTPUT_CONVERSION.md`, `API_REFERENCE.md`, `SECURITY.md`, `PERFORMANCE.md`.

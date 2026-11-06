@@ -18,9 +18,7 @@ import {
   Layers,
   Music,
   Package,
-  Plus,
   RefreshCw,
-  Sparkles,
   Video,
 } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
@@ -30,7 +28,6 @@ import { ErrorState } from "@/components/ui/ErrorState";
 import { LoadingState } from "@/components/ui/LoadingState";
 import { PageContainer } from "@/components/ui/PageContainer";
 import { StatCard } from "@/components/ui/StatCard";
-import { StatusIndicator } from "@/components/ui/StatusIndicator";
 import { api } from "@/services/api";
 
 export const DashboardPage: React.FC = () => {
@@ -49,14 +46,14 @@ export const DashboardPage: React.FC = () => {
     refetchInterval: 15000,
   });
 
-  const { data: health } = useQuery({
-    queryKey: ["health"],
-    queryFn: api.getHealth,
-    refetchInterval: 30000,
+  const { data: conversionsData } = useQuery({
+    queryKey: ["dashboardConversionHistory"],
+    queryFn: () => api.getConversionHistory({ limit: 5 }),
+    refetchInterval: 10000,
   });
 
   if (isLoading) {
-    return <LoadingState message="Loading DocuMind AI platform metrics..." />;
+    return <LoadingState message="Loading DocuMind platform metrics..." />;
   }
 
   if (error || !analytics) {
@@ -71,11 +68,9 @@ export const DashboardPage: React.FC = () => {
 
   const {
     files_summary,
-    ai_summary,
     batches_summary,
     format_distribution,
     recent_files,
-    recent_batches,
     capacity,
     queue_status,
     disk_storage,
@@ -115,8 +110,6 @@ export const DashboardPage: React.FC = () => {
   const totalFiles = files_summary.total_files;
   const processedPercent =
     totalFiles > 0 ? Math.round((files_summary.processed_files / totalFiles) * 100) : 0;
-  const indexingPercent =
-    totalFiles > 0 ? Math.round((ai_summary.indexed_documents / totalFiles) * 100) : 0;
 
   return (
     <PageContainer
@@ -154,60 +147,55 @@ export const DashboardPage: React.FC = () => {
           <Button
             variant="primary"
             size="sm"
-            onClick={() => navigate("/upload")}
-            leftIcon={<Plus className="h-3.5 w-3.5" />}
+            onClick={() => navigate("/convert")}
+            leftIcon={<RefreshCw className="h-3.5 w-3.5" />}
           >
-            Upload
+            Convert Files
           </Button>
         </div>
       }
     >
       {/* Platform Banner */}
-      <div className="rounded-2xl border border-primary/20 bg-linear-to-r from-primary/10 via-primary/5 to-transparent p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-2xs">
+      <div className="rounded-2xl border border-blue-500/20 bg-linear-to-r from-blue-500/10 via-indigo-500/5 to-transparent p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-2xs">
         <div className="flex items-center gap-3.5">
-          <div className="p-3 rounded-xl bg-primary text-white shadow-xs">
-            <Sparkles className="h-6 w-6" />
+          <div className="p-3 rounded-xl bg-blue-600 text-white shadow-xs">
+            <RefreshCw className="h-6 w-6" />
           </div>
           <div>
             <div className="flex items-center gap-2">
               <h2 className="text-base font-bold text-foreground tracking-tight">
-                DocuMind AI Platform Online
+                DocuMind Universal File Converter &amp; Extractor
               </h2>
               <Badge variant="primary" size="sm">
-                v0.12.0
+                v2.0
               </Badge>
             </div>
             <p className="text-xs text-muted-foreground mt-0.5 max-w-xl">
-              Phases 1–12 active: 44+ registered formats, multimodal extraction engines, sovereign
-              RAG &amp; hybrid knowledge search, bounded multi-tier bulk worker queues.
+              Upload any supported file → Automatically detect → Extract actual content → Convert to TXT, Markdown, JSON, CSV, HTML, or Mode C ZIP bundles.
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2.5 self-end md:self-center">
-          <div className="text-right hidden sm:block">
-            <span className="text-[11px] text-muted-foreground block">System Gateway</span>
-            <StatusIndicator
-              status={health?.status || "ok"}
-              label={health?.status?.toUpperCase() || "OK"}
-              size="sm"
-            />
-          </div>
-          {capacity.backpressure_active && (
-            <Badge variant="warning" size="md">
-              Backpressure Active
-            </Badge>
-          )}
+          <Button size="sm" onClick={() => navigate("/convert")}>
+            Convert a File Now
+          </Button>
         </div>
       </div>
 
       {/* KPI Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
         <StatCard
-          title="Files Ingested"
+          title="Total Files Processed"
           value={totalFiles.toLocaleString()}
-          subtext={`${files_summary.processed_files} processed (${processedPercent}%), ${files_summary.failed_files} errors`}
+          subtext={`${files_summary.processed_files} completed, ${files_summary.failed_files} errors`}
           icon={<Files className="h-5 w-5 text-blue-500" />}
+        />
+        <StatCard
+          title="Conversion Jobs"
+          value={(conversionsData?.meta?.total || conversionsData?.items?.length || 0).toString()}
+          subtext="Universal conversions executed"
+          icon={<RefreshCw className="h-5 w-5 text-indigo-500" />}
         />
         <StatCard
           title="Storage Consumption"
@@ -216,16 +204,10 @@ export const DashboardPage: React.FC = () => {
           icon={<HardDrive className="h-5 w-5 text-emerald-500" />}
         />
         <StatCard
-          title="AI Knowledge Base"
-          value={ai_summary.indexed_documents.toLocaleString()}
-          subtext={`${ai_summary.indexed_chunks.toLocaleString()} chunks embedded (${indexingPercent}% coverage)`}
-          icon={<Sparkles className="h-5 w-5 text-purple-500" />}
-        />
-        <StatCard
-          title="Processing Infrastructure"
+          title="Worker Infrastructure"
           value={`${capacity.active_cpu_workers}/${capacity.max_parallel_cpu_workers} Slots`}
           subtext={`${queue_status.total_queued} tasks queued, ${batches_summary.active_batches} active batches`}
-          icon={<Cpu className="h-5 w-5 text-indigo-500" />}
+          icon={<Cpu className="h-5 w-5 text-purple-500" />}
         />
       </div>
 
@@ -502,69 +484,67 @@ export const DashboardPage: React.FC = () => {
           )}
         </div>
 
-        {/* Recent Batches Card */}
+        {/* Recent Conversions Card */}
         <div className="rounded-2xl border border-border bg-card p-5 shadow-2xs">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-              <Layers className="h-4 w-4 text-indigo-500" />
-              Recent Bulk Batches
+              <RefreshCw className="h-4 w-4 text-blue-500" />
+              Recent Conversions
             </h3>
             <button
-              onClick={() => navigate("/bulk-processing")}
+              onClick={() => navigate("/history")}
               className="text-xs text-primary font-medium hover:underline"
             >
-              View All
+              View History
             </button>
           </div>
 
-          {recent_batches.length === 0 ? (
+          {!conversionsData || conversionsData.items.length === 0 ? (
             <EmptyState
-              icon={<Layers className="h-6 w-6" />}
-              title="No Bulk Batches Submitted"
-              description="High-volume file collections and batch processing jobs will appear here."
+              icon={<RefreshCw className="h-6 w-6" />}
+              title="No Conversions Yet"
+              description="Convert documents, spreadsheets, presentations, code, or media to TXT, MD, JSON, CSV, or HTML."
             />
           ) : (
             <div className="divide-y divide-border/60">
-              {recent_batches.map((batch) => (
+              {conversionsData.items.map((conv) => (
                 <div
-                  key={batch.id}
-                  onClick={() => navigate("/bulk-processing")}
+                  key={conv.id}
+                  onClick={() => navigate("/history")}
                   className="py-2.5 flex items-center justify-between gap-3 hover:bg-muted/40 px-2 rounded-xl transition cursor-pointer"
                 >
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
                       <p className="text-xs font-semibold text-foreground truncate max-w-xs">
-                        {batch.name}
+                        {conv.original_filename}
                       </p>
-                      <Badge
-                        variant={
-                          batch.status === "completed"
-                            ? "success"
-                            : batch.status === "processing"
-                              ? "primary"
-                              : "default"
-                        }
-                        size="sm"
-                      >
-                        {batch.status}
+                      <Badge variant="primary" size="sm" className="uppercase font-mono text-[9px]">
+                        .{conv.target_format}
                       </Badge>
                     </div>
-                    <div className="flex items-center gap-2 text-[10px] text-muted-foreground mt-1">
-                      <span>
-                        {batch.completed_files} of {batch.total_files} files
-                      </span>
+                    <div className="flex items-center gap-2 text-[10px] text-muted-foreground mt-0.5">
+                      <span>{conv.extraction_mode}</span>
                       <span>•</span>
-                      <span>{Math.round(batch.progress_percent)}%</span>
-                    </div>
-                    <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden mt-1.5">
-                      <div
-                        className="h-full bg-indigo-500 rounded-full transition-all"
-                        style={{ width: `${batch.progress_percent}%` }}
-                      />
+                      <span>{conv.duration_seconds}s</span>
+                      <span>•</span>
+                      <span>{(conv.output_size_bytes / 1024).toFixed(1)} KB</span>
                     </div>
                   </div>
 
-                  <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0 ml-2" />
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={`text-[10px] font-semibold px-2 py-0.5 rounded capitalize ${
+                        conv.status === "completed"
+                          ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                          : conv.status === "processing"
+                          ? "bg-blue-500/10 text-blue-500"
+                          : "bg-red-500/10 text-red-500"
+                      }`}
+                    >
+                      {conv.status}
+                    </span>
+                    <ArrowRight className="h-3.5 w-3.5 text-muted-foreground" />
+                  </div>
                 </div>
               ))}
             </div>

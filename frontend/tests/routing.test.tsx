@@ -12,9 +12,9 @@ describe("Frontend Routing and Shell Rendering", () => {
 
     // Nav links
     expect(screen.getAllByText("Dashboard").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("Upload & Ingest").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("Processing Jobs").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("File Library").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Convert Files").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("My Files").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Conversion History").length).toBeGreaterThan(0);
     expect(screen.getAllByText("System Status").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Settings").length).toBeGreaterThan(0);
   });

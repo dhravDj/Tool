@@ -5,14 +5,13 @@ import {
   ChevronLeft,
   ChevronRight,
   Cpu,
+  FileBox,
   Files,
   Layers,
   LayoutDashboard,
-  Search,
+  RefreshCw,
   Server,
   Settings,
-  Sparkles,
-  UploadCloud,
   X,
 } from "lucide-react";
 import { Tooltip } from "@/components/ui/Tooltip";
@@ -39,26 +38,12 @@ export const Sidebar: React.FC = () => {
 
   const navGroups: NavGroup[] = [
     {
-      name: "Workspace",
+      name: "Conversion",
       items: [
         { label: "Dashboard", path: "/", icon: <LayoutDashboard className="h-4.5 w-4.5" /> },
-        { label: "Upload & Ingest", path: "/upload", icon: <UploadCloud className="h-4.5 w-4.5" /> },
-        { label: "File Library", path: "/files", icon: <Files className="h-4.5 w-4.5" /> },
-      ],
-    },
-    {
-      name: "Intelligence",
-      items: [
-        {
-          label: "AI Workspace",
-          path: "/ai",
-          icon: <Sparkles className="h-4.5 w-4.5 text-blue-500" />,
-        },
-        {
-          label: "Knowledge Search",
-          path: "/search",
-          icon: <Search className="h-4.5 w-4.5 text-amber-500" />,
-        },
+        { label: "Convert Files", path: "/convert", icon: <RefreshCw className="h-4.5 w-4.5 text-blue-500" /> },
+        { label: "My Files", path: "/files", icon: <Files className="h-4.5 w-4.5 text-indigo-500" /> },
+        { label: "Conversion History", path: "/history", icon: <Activity className="h-4.5 w-4.5 text-emerald-500" /> },
       ],
     },
     {
@@ -72,7 +57,7 @@ export const Sidebar: React.FC = () => {
         {
           label: "Processing Jobs",
           path: "/jobs",
-          icon: <Activity className="h-4.5 w-4.5 text-pink-500" />,
+          icon: <FileBox className="h-4.5 w-4.5 text-pink-500" />,
         },
       ],
     },

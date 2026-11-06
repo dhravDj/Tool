@@ -2053,3 +2053,41 @@ export interface DashboardAnalytics {
     percent_used: number;
   };
 }
+
+export interface FormatCapability {
+  input_format: string;
+  category: string;
+  display_name: string;
+  description: string;
+  supported_modes: string[];
+  allowed_output_formats: string[];
+  supports_ocr: boolean;
+}
+
+export interface ConversionRecordDTO {
+  id: string;
+  status: "pending" | "processing" | "completed" | "failed";
+  original_filename: string;
+  source_format: string;
+  target_format: string;
+  extraction_mode: "plain_text" | "structured_text" | "complete";
+  progress_percent: number;
+  output_filename: string;
+  output_size_bytes: number;
+  mime_type: string;
+  preview_content: string;
+  download_url: string;
+  duration_seconds: number;
+  warnings: string[];
+  error_message: string | null;
+  created_at: string;
+  completed_at: string | null;
+}
+
+export interface ConversionBundleFile {
+  filename: string;
+  size_bytes: number;
+  compressed_size_bytes?: number;
+  is_directory?: boolean;
+}
+

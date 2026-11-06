@@ -55,6 +55,8 @@ storage/extracted/*
 !storage/extracted/.gitkeep
 storage/assets/*
 !storage/assets/.gitkeep
+storage/conversions/*
+!storage/conversions/.gitkeep
 backend/storage/uploads/*
 !backend/storage/uploads/.gitkeep
 backend/storage/temporary/*

@@ -1399,6 +1399,55 @@ class WorkerHeartbeatRecord(Base):
     )
 
 
+class ConversionRecord(Base):
+    """Tracks universal file conversion requests, progress, and generated artifacts."""
+
+    __tablename__ = "conversions"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+    owner_id: Mapped[uuid.UUID | None] = mapped_column(
+        Uuid(as_uuid=True),
+        ForeignKey("users.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
+    source_file_id: Mapped[uuid.UUID | None] = mapped_column(
+        Uuid(as_uuid=True),
+        ForeignKey("files.id", ondelete="CASCADE"),
+        nullable=True,
+        index=True,
+    )
+    original_filename: Mapped[str] = mapped_column(String(255), nullable=False)
+    source_format: Mapped[str] = mapped_column(String(32), nullable=False, index=True)
+    target_format: Mapped[str] = mapped_column(String(32), nullable=False, index=True)
+    extraction_mode: Mapped[str] = mapped_column(String(32), default="structured_text", nullable=False)
+    status: Mapped[str] = mapped_column(String(32), default="pending", index=True, nullable=False)
+    progress_percent: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
+    output_filename: Mapped[str] = mapped_column(String(255), default="", nullable=False)
+    output_path: Mapped[str] = mapped_column(Text, default="", nullable=False)
+    output_size_bytes: Mapped[int] = mapped_column(BigInteger, default=0, nullable=False)
+    mime_type: Mapped[str] = mapped_column(String(128), default="text/plain", nullable=False)
+    preview_content: Mapped[str] = mapped_column(Text, default="", nullable=False)
+    options: Mapped[dict[str, Any]] = mapped_column(JSON_TYPE, default=dict, nullable=False)
+    warnings: Mapped[list[str]] = mapped_column(JSON_TYPE, default=list, nullable=False)
+    error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
+    duration_seconds: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        default=lambda: datetime.now(UTC),
+        index=True,
+        nullable=False,
+    )
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+
+
 
 
 
