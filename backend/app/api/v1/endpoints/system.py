@@ -266,7 +266,7 @@ async def get_dashboard_analytics(
             "total_files": b.total_files,
             "completed_files": b.completed_files,
             "failed_files": b.failed_files,
-            "progress_percent": b.progress_percent,
+            "progress_percent": getattr(b, "overall_progress", 0.0),
             "created_at": b.created_at.isoformat() if b.created_at else None,
         }
         for b in recent_batches_res.scalars().all()
