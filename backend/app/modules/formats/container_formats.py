@@ -148,7 +148,10 @@ class ContainerInspector:
         elif b"W\x00o\x00r\x00d\x00D\x00o\x00c\x00u\x00m\x00e\x00n\x00t\x00" in buffer:
             result.identified_format_id = "doc"
             result.manifest_entries = ["stream:WordDocument"]
-        elif b"P\x00o\x00w\x00e\x00r\x00P\x00o\x00i\x00n\x00t\x00" in buffer:
+        elif (
+            b"P\x00o\x00w\x00e\x00r\x00P\x00o\x00i\x00n\x00t\x00" in buffer
+            or b"C\x00u\x00r\x00r\x00e\x00n\x00t\x00 \x00U\x00s\x00e\x00r\x00" in buffer
+        ):
             result.identified_format_id = "ppt"
             result.manifest_entries = ["stream:PowerPoint Document"]
         elif (

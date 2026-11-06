@@ -20,6 +20,11 @@ import {
   ImageDocument,
   ImageManifest,
   PluginListResponse,
+  PresentationCapabilities,
+  PresentationDocument,
+  PresentationManifest,
+  SlideData,
+  SlideSummary,
   SpreadsheetCapabilities,
   SpreadsheetDocument,
   SpreadsheetManifest,
@@ -196,4 +201,43 @@ export const api = {
     `${API_BASE}/files/${encodeURIComponent(fileId)}/spreadsheet-analysis/download?format=${encodeURIComponent(
       format
     )}&sheet_position=${sheetPosition}`,
+
+  // Phase 6: Presentation Intelligence Methods
+  getPresentationCapabilities: (): Promise<PresentationCapabilities> =>
+    request<PresentationCapabilities>("/presentation-intelligence/capabilities"),
+
+  analyzePresentationFile: (
+    fileId: string,
+    payload?: Record<string, unknown>
+  ): Promise<PresentationManifest> =>
+    request<PresentationManifest>(`/files/${encodeURIComponent(fileId)}/analyze-presentation`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload || {}),
+    }),
+
+  getPresentationAnalysis: (fileId: string): Promise<Record<string, unknown>> =>
+    request<Record<string, unknown>>(`/files/${encodeURIComponent(fileId)}/presentation-analysis`),
+
+  getPresentationDocumentResult: (fileId: string): Promise<PresentationDocument> =>
+    request<PresentationDocument>(`/files/${encodeURIComponent(fileId)}/presentation-analysis/result`),
+
+  getPresentationSlides: (fileId: string): Promise<SlideSummary[]> =>
+    request<SlideSummary[]>(`/files/${encodeURIComponent(fileId)}/presentation-analysis/slides`),
+
+  getSlideDetail: (fileId: string, slideId: string): Promise<SlideData> =>
+    request<SlideData>(
+      `/files/${encodeURIComponent(fileId)}/presentation-analysis/slides/${encodeURIComponent(slideId)}`
+    ),
+
+  getPresentationAssets: (fileId: string): Promise<Record<string, unknown>[]> =>
+    request<Record<string, unknown>[]>(`/files/${encodeURIComponent(fileId)}/presentation-analysis/assets`),
+
+  getPresentationSummary: (fileId: string): Promise<Record<string, unknown>> =>
+    request<Record<string, unknown>>(`/files/${encodeURIComponent(fileId)}/presentation-analysis/summary`),
+
+  getPresentationDownloadUrl: (fileId: string, format = "json"): string =>
+    `${API_BASE}/files/${encodeURIComponent(fileId)}/presentation-analysis/download?format=${encodeURIComponent(
+      format
+    )}`,
 };

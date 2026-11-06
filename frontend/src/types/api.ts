@@ -662,3 +662,240 @@ export interface WorksheetSummary {
   tables_count: number;
   charts_count: number;
 }
+
+// ---------------------------------------------------------------------------
+// Phase 6: Presentation Intelligence Types
+// ---------------------------------------------------------------------------
+
+export interface ElementPosition {
+  left: number;
+  top: number;
+}
+
+export interface ElementDimensions {
+  width: number;
+  height: number;
+}
+
+export interface SlideTextRun {
+  text: string;
+  font_name?: string | null;
+  font_size?: number | null;
+  bold: boolean;
+  italic: boolean;
+  underline: boolean;
+  color?: string | null;
+}
+
+export interface SlideParagraph {
+  text: string;
+  level: number;
+  bullet: boolean;
+  alignment?: string | null;
+  runs: SlideTextRun[];
+}
+
+export interface SlideTableCell {
+  row: number;
+  column: number;
+  text: string;
+  is_header: boolean;
+  formatting?: Record<string, unknown>;
+}
+
+export interface SlideTable {
+  table_id: string;
+  slide_id: string;
+  slide_number: number;
+  rows_count: number;
+  columns_count: number;
+  headers: string[];
+  rows: SlideTableCell[][];
+  has_header: boolean;
+}
+
+export interface SlideChartSeries {
+  name: string;
+  values: (number | null)[];
+}
+
+export interface SlideChart {
+  chart_id: string;
+  slide_id: string;
+  slide_number: number;
+  chart_type: string;
+  title?: string | null;
+  axis_titles?: Record<string, string>;
+  categories: string[];
+  series: SlideChartSeries[];
+  legends: string[];
+  data_labels: string[];
+  position?: ElementPosition | null;
+  dimensions?: ElementDimensions | null;
+  is_inferred: boolean;
+  confidence: number;
+}
+
+export interface SlideAsset {
+  asset_id: string;
+  slide_id: string;
+  slide_number: number;
+  original_filename?: string | null;
+  format: string;
+  content_type: string;
+  sha256: string;
+  size_bytes: number;
+  width?: number | null;
+  height?: number | null;
+  position?: ElementPosition | null;
+  dimensions?: ElementDimensions | null;
+  alt_text?: string | null;
+  storage_path?: string | null;
+}
+
+export interface DiagramNode {
+  node_id: string;
+  label: string;
+  shape_type: string;
+  position?: ElementPosition | null;
+  dimensions?: ElementDimensions | null;
+}
+
+export interface DiagramEdge {
+  edge_id: string;
+  source_id: string;
+  target_id: string;
+  label?: string | null;
+  arrow_type?: string | null;
+}
+
+export interface SlideDiagram {
+  diagram_id: string;
+  slide_id: string;
+  slide_number: number;
+  nodes: DiagramNode[];
+  edges: DiagramEdge[];
+  groups: Record<string, unknown>[];
+}
+
+export interface PresentationElement {
+  element_id: string;
+  element_type: "title" | "text" | "table" | "chart" | "image" | "shape" | "connector" | "group" | "unknown";
+  text?: string | null;
+  paragraphs: SlideParagraph[];
+  position: ElementPosition;
+  dimensions: ElementDimensions;
+  rotation?: number;
+  relationships?: Record<string, unknown>[];
+  asset_reference?: string | null;
+  source_provenance?: Record<string, unknown>;
+  confidence?: number;
+  raw_data?: Record<string, unknown> | null;
+}
+
+export interface SlideData {
+  slide_id: string;
+  slide_number: number;
+  title?: string | null;
+  layout?: string | null;
+  dimensions?: ElementDimensions | null;
+  elements: PresentationElement[];
+  speaker_notes?: string | null;
+  hidden: boolean;
+  reading_order: string[];
+}
+
+export interface PresentationDimensions {
+  width: number;
+  height: number;
+  aspect_ratio: string;
+  unit: string;
+}
+
+export interface PresentationMetadata {
+  title?: string | null;
+  subject?: string | null;
+  author?: string | null;
+  created_at?: string | null;
+  modified_at?: string | null;
+  language?: string | null;
+  slide_count: number;
+  hidden_slide_count: number;
+  presentation_dimensions: PresentationDimensions;
+  theme?: string | null;
+  layout_names: string[];
+  embedded_media_count: number;
+  properties?: Record<string, unknown>;
+}
+
+export interface SpeakerNoteSummary {
+  slide_id: string;
+  slide_number: number;
+  text: string;
+  word_count: number;
+}
+
+export interface PresentationDocument {
+  document_id: string;
+  file_id: string;
+  format: string;
+  metadata: PresentationMetadata;
+  presentation_dimensions: PresentationDimensions;
+  slide_count: number;
+  slides: SlideData[];
+  assets: SlideAsset[];
+  charts: SlideChart[];
+  tables: SlideTable[];
+  diagrams: SlideDiagram[];
+  speaker_notes: SpeakerNoteSummary[];
+  extraction_metadata: Record<string, unknown>;
+  warnings: string[];
+  confidence: number;
+  processing_status: string;
+  created_at: string;
+}
+
+export interface PresentationManifest {
+  document_id: string;
+  file_id: string;
+  source_filename: string;
+  source_format: string;
+  status: string;
+  engine_name: string;
+  engine_version: string;
+  processing_time_seconds: number;
+  slide_count: number;
+  hidden_slide_count: number;
+  total_elements: number;
+  asset_count: number;
+  table_count: number;
+  chart_count: number;
+  diagram_count: number;
+  artifacts: Record<string, string>;
+  warnings: string[];
+  errors: string[];
+}
+
+export interface PresentationCapabilities {
+  supported_formats: string[];
+  max_upload_size_mb: number;
+  max_slides_limit: number;
+  max_shapes_per_slide: number;
+  native_pptx_supported: boolean;
+  native_odp_supported: boolean;
+  legacy_ppt_supported: boolean;
+  chart_extraction_supported: boolean;
+  diagram_extraction_supported: boolean;
+  speaker_notes_supported: boolean;
+  image_intelligence_integration: boolean;
+}
+
+export interface SlideSummary {
+  slide_id: string;
+  slide_number: number;
+  title?: string | null;
+  elements_count: number;
+  has_notes: boolean;
+  hidden: boolean;
+  reading_order: string[];
+}

@@ -115,6 +115,9 @@ class FileRecord(Base):
     spreadsheet_analyses: Mapped[list["SpreadsheetAnalysisRecord"]] = relationship(
         "SpreadsheetAnalysisRecord", back_populates="file", cascade="all, delete-orphan"
     )
+    presentation_analyses: Mapped[list["PresentationAnalysisRecord"]] = relationship(
+        "PresentationAnalysisRecord", back_populates="file", cascade="all, delete-orphan"
+    )
 
     __table_args__ = (
         Index("ix_files_owner_status", "owner_id", "status"),
@@ -341,4 +344,48 @@ class SpreadsheetAnalysisRecord(Base):
 
     # Relationships
     file: Mapped["FileRecord"] = relationship("FileRecord", back_populates="spreadsheet_analyses")
+
+
+class PresentationAnalysisRecord(Base):
+    """Historical presentation intelligence analysis record and slide findings."""
+
+    __tablename__ = "presentation_analysis_records"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+    file_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True),
+        ForeignKey("files.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    status: Mapped[str] = mapped_column(String(32), default="completed", index=True, nullable=False)
+    format: Mapped[str] = mapped_column(String(32), index=True, nullable=False)
+    slide_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    hidden_slide_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    total_elements: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    has_notes: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    has_tables: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    has_charts: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    has_diagrams: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    has_images: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    artifacts: Mapped[dict[str, Any]] = mapped_column(JSON_TYPE, default=dict, nullable=False)
+    presentation_metadata: Mapped[dict[str, Any]] = mapped_column(JSON_TYPE, default=dict, nullable=False)
+    warnings: Mapped[list[str]] = mapped_column(JSON_TYPE, default=list, nullable=False)
+    engine_version: Mapped[str] = mapped_column(String(32), default="6.0.0", nullable=False)
+    confidence: Mapped[float] = mapped_column(Float, default=1.0, nullable=False)
+    processing_duration: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
+    error_details: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        default=lambda: datetime.now(UTC),
+        nullable=False,
+    )
+
+    # Relationships
+    file: Mapped["FileRecord"] = relationship("FileRecord", back_populates="presentation_analyses")
 

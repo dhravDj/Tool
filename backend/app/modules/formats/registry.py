@@ -332,7 +332,7 @@ class FormatRegistry:
                 magic_signatures=[OLE2_SIGNATURE],
                 is_container=True,
                 container_type="ole2",
-                support_status=SupportStatus.DETECTED_BUT_NOT_IMPLEMENTED,
+                support_status=SupportStatus.DETECTED_AND_SUPPORTED,
                 description="Legacy binary PowerPoint presentation",
             )
         )
@@ -346,7 +346,7 @@ class FormatRegistry:
                 extensions=["odp"],
                 is_container=True,
                 container_type="zip",
-                support_status=SupportStatus.DETECTED_BUT_NOT_IMPLEMENTED,
+                support_status=SupportStatus.DETECTED_AND_SUPPORTED,
                 description="Open Document Format for presentations",
             )
         )

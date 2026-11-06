@@ -26,6 +26,7 @@ import { LoadingState } from "@/components/ui/LoadingState";
 import { PageContainer } from "@/components/ui/PageContainer";
 import { DocumentExtractionView } from "@/components/DocumentExtractionView";
 import { ImageIntelligenceView } from "@/components/ImageIntelligenceView";
+import { PresentationIntelligenceView } from "@/components/PresentationIntelligenceView";
 import { SpreadsheetIntelligenceView } from "@/components/SpreadsheetIntelligenceView";
 import { api } from "@/services/api";
 import { FileRecordSummary, FormatDetailData } from "@/types/api";
@@ -36,7 +37,7 @@ export const FileLibraryPage: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [inspectingFile, setInspectingFile] = useState<FileRecordSummary | null>(null);
   const [modalTab, setModalTab] = useState<
-    "extraction" | "image_intelligence" | "spreadsheet_intelligence" | "detection"
+    "extraction" | "image_intelligence" | "spreadsheet_intelligence" | "presentation_intelligence" | "detection"
   >("extraction");
 
   // Queries
@@ -136,12 +137,20 @@ export const FileLibraryPage: React.FC = () => {
       (f.detection_format_id || f.actual_extension || f.claimed_extension || "").toLowerCase()
     );
 
+  const isPresentation = (f: FileRecordSummary) =>
+    f.format_category === "presentation" ||
+    ["pptx", "ppt", "odp"].includes(
+      (f.detection_format_id || f.actual_extension || f.claimed_extension || "").toLowerCase()
+    );
+
   const handleInspect = (file: FileRecordSummary) => {
     setInspectingFile(file);
     if (isSpreadsheet(file)) {
       setModalTab("spreadsheet_intelligence");
     } else if (isImage(file)) {
       setModalTab("image_intelligence");
+    } else if (isPresentation(file)) {
+      setModalTab("presentation_intelligence");
     } else {
       setModalTab("extraction");
     }
@@ -409,7 +418,19 @@ export const FileLibraryPage: React.FC = () => {
                       Image Intelligence
                     </button>
                   )}
-                  {!isSpreadsheet(inspectingFile) && !isImage(inspectingFile) && (
+                  {isPresentation(inspectingFile) && (
+                    <button
+                      onClick={() => setModalTab("presentation_intelligence")}
+                      className={`px-3 py-1 rounded-md font-medium transition ${
+                        modalTab === "presentation_intelligence"
+                          ? "bg-card text-foreground shadow-sm"
+                          : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      Presentation Intelligence
+                    </button>
+                  )}
+                  {!isSpreadsheet(inspectingFile) && !isImage(inspectingFile) && !isPresentation(inspectingFile) && (
                     <button
                       onClick={() => setModalTab("extraction")}
                       className={`px-3 py-1 rounded-md font-medium transition ${
@@ -453,6 +474,12 @@ export const FileLibraryPage: React.FC = () => {
                 filename={inspectingFile.original_filename}
                 formatId={inspectingFile.detection_format_id || inspectingFile.extension}
                 onClose={() => setInspectingFile(null)}
+              />
+            ) : modalTab === "presentation_intelligence" ? (
+              <PresentationIntelligenceView
+                fileId={inspectingFile.id}
+                filename={inspectingFile.original_filename}
+                format={inspectingFile.detection_format_id || inspectingFile.actual_extension}
               />
             ) : modalTab === "image_intelligence" ? (
               <ImageIntelligenceView

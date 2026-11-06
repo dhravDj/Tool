@@ -1,7 +1,7 @@
 # DocuMind AI — Development Progress Tracker
 
-**Current Platform Version:** 0.5.0 (Spreadsheet Intelligence)  
-**Active Task:** Phase 5 — Spreadsheet Intelligence Engine  
+**Current Platform Version:** 0.6.0 (Presentation Intelligence)  
+**Active Task:** Phase 6 — Presentation Intelligence Engine  
 **Overall Status:** **STABLE & VERIFIED (100%)**  
 **Last Updated:** November 6, 2026  
 
@@ -15,7 +15,8 @@
 | **Phase 2** | Universal File Detection Engine | **HARDENED (100%)** | 7-step detection pipeline, parallel batch detection (<2.1ms), corruption checks for WEBP/BMP/TIFF/SVG, high-risk executable disguise defense, 100% accuracy on real-world fixtures. |
 | **Phase 3** | Document Extraction Engines | **HARDENED (100%)** | 8 formats, multi-column PDF reading order clustering, Word FIB stream parser, defensive XML and table parsing, 100% text recall across test fixtures. |
 | **Phase 4** | Image & Visual Intelligence Engine | **HARDENED (100%)** | Transparent non-neural classification (`documind-heuristic-cv-v1`, `engine_type="heuristic"`), sub-8ms deskew (4.77ms), OCR CER/WER metrics, grounded VQA, 124 backend tests + 9 frontend tests (133 total passed). |
-| **Phase 5** | Spreadsheet Intelligence Engine | **COMPLETED (100%)** | Complete 5-format support (XLSX, XLS, CSV, TSV, ODS), OLE2 compound container detection, non-executing AST formula inspector with cross-sheet tracking, automated data understanding & column profiling, DDE CSV formula injection sanitization (`'`), zero macro execution, 6 export generators, 9 REST API endpoints, full React spreadsheet viewer, 135 backend tests + 10 frontend tests (145 total passed). |
+| **Phase 5** | Spreadsheet Intelligence Engine | **HARDENED (100%)** | Complete 5-format support (XLSX, XLS, CSV, TSV, ODS), OLE2 compound container detection, non-executing AST formula inspector with cross-sheet tracking, automated data understanding & column profiling, DDE CSV formula injection sanitization (`'`), zero macro execution, 6 export generators, 9 REST API endpoints, full React spreadsheet viewer, 135 backend tests + 10 frontend tests (145 total passed). |
+| **Phase 6** | Presentation Intelligence Engine | **COMPLETED (100%)** | Complete 3-format support (PPTX, PPT, ODP), slide hierarchy, bullet nesting levels, tables, native charts with series & categories, embedded picture assets, speaker notes isolation, diagram node-edge graphs, grouped shapes, hidden slide detection, sandboxed LibreOffice conversion + native OLE2 binary stream parser fallback, zero macro execution, 4 output generators (JSON, MD, TXT, Manifest), 9 REST API endpoints, full React presentation viewer, 155 backend tests + 11 frontend tests (166 total passed). |
 
 ---
 
@@ -360,7 +361,37 @@
 
 ---
 
-## 4. Next Phase
+## 4. Completed Phase 6 Milestones — Presentation Intelligence
 
-- **Phase 6:** To be determined based on user instructions.
-- Awaiting user instruction before initiating Phase 6 (strictly deferred).
+### 4.1 Multi-Format Presentation Adapters
+- [x] **PPTX Adapter (`PPTXPresentationAdapter`)**: Complete slide-level extraction using `python-pptx`, reading order determination, paragraph bullet hierarchy (levels 0..N), text runs with formatting (bold, italic, font, size, color), tables, native charts, images, speaker notes, grouped shapes, connectors, and hidden slides.
+- [x] **ODP Adapter (`ODPPresentationAdapter`)**: Native OpenDocument Presentation parsing using `defusedxml` over `content.xml` and `meta.xml`, resolving `<draw:page>`, `<text:list>` hierarchies, tables, pictures, and `<presentation:notes>`.
+- [x] **Legacy PPT Adapter (`PPTPresentationAdapter`)**: Sandboxed LibreOffice headless conversion fallback with 20s timeout, paired with a native pure-Python OLE2 binary stream parser (`olefile`) extracting `\x05SummaryInformation` metadata and `PowerPoint Document` stream atom records (`TextBytesAtom`, `TextCharsAtom`).
+
+### 4.2 Chart & Diagram Intelligence
+- [x] **Native Chart Extraction (`PresentationChartExtractor`)**: Extracts column, bar, line, pie, doughnut, area, scatter, and radar charts with full series names, categories, numeric values, and legends.
+- [x] **Diagram & Shape Reconstruction (`PresentationDiagramExtractor`)**: Graph reconstruction for connected flowchart boxes, directional arrows, and recursive grouped shape hierarchies.
+
+### 4.3 Asset & Notes Preservation
+- [x] **Embedded Asset Storage**: Pictures extracted, hashed with SHA256, deduplicated, and persisted in `local_storage`.
+- [x] **Speaker Notes Isolation**: Distinguishes notes from visible slide body text with word count calculation.
+
+### 4.4 Canonical Presentation Schemas & Database
+- [x] **Canonical Schema (`PresentationDocument`)**: Strongly-typed Pydantic v2 representation with `Slide`, `Element`, `SlideTable`, `SlideChart`, `SlideAsset`, `SlideDiagram`, `SpeakerNoteSummary`, and `PresentationManifest`.
+- [x] **Database & Migrations**: `PresentationAnalysisRecord` in `models.py` with Alembic migration `005_presentation_analysis_records.py` (revision `005_presentation_analysis`) applied and verified on PostgreSQL 16.
+
+### 4.5 REST API & Frontend
+- [x] **9 REST API Endpoints**: Endpoints under `/api/v1/presentation-intelligence` and `/api/v1/files/{file_id}/presentation-analysis/...`.
+- [x] **Interactive React Frontend (`PresentationIntelligenceView.tsx`)**: Slide navigator with thumbnails/hidden badges, slide inspector (paragraphs, tables, charts, images, diagrams, speaker notes), asset inspector, and export downloads (Markdown, JSON, Plain Text, Manifest). Integrated into `FileLibraryPage.tsx`.
+
+### 4.6 Verification & Test Suites
+- [x] **Backend Quality Suite:** 155 passed in Pytest (18 new Phase 6 unit tests, 2 new Phase 6 API integration tests, 135 regression tests).
+- [x] **Frontend Quality Suite:** 11 passed across 7 Vitest suites (1 new Phase 6 component test suite).
+- [x] **Typecheck & Linting:** 0 Ruff errors, 0 Mypy errors across 164 source files, 0 TypeScript errors.
+- [x] **Production Build:** `npm run build` compiled in 1.97s.
+
+---
+
+## 5. Next Phase
+
+- **Phase 7:** Audio Intelligence Engine (strictly deferred pending explicit user instruction).
