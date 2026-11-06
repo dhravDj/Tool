@@ -89,7 +89,7 @@ class HardwareGovernor:
             free_ram_mb = 8192
 
         # GPU / CUDA detection
-        if self._gpu_detected is None:
+        if not self._gpu_detected:
             self._check_gpu_presence()
 
         return {
