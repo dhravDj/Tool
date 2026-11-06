@@ -3,6 +3,7 @@
 from fastapi import APIRouter
 
 from app.api.v1.endpoints import (
+    archive_intelligence,
     audio_intelligence,
     batches,
     code_intelligence,
@@ -37,3 +38,4 @@ api_router.include_router(audio_intelligence.router)
 api_router.include_router(video_intelligence.router)
 api_router.include_router(code_intelligence.router)
 api_router.include_router(structured_data_intelligence.router)
+api_router.include_router(archive_intelligence.router)

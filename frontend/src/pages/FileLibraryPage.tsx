@@ -32,6 +32,7 @@ import { AudioIntelligenceView } from "@/components/AudioIntelligenceView";
 import { VideoIntelligenceView } from "@/components/VideoIntelligenceView";
 import { CodeIntelligenceView } from "@/components/CodeIntelligenceView";
 import { StructuredDataIntelligenceView } from "@/components/StructuredDataIntelligenceView";
+import { ArchiveIntelligenceView } from "@/components/ArchiveIntelligenceView";
 import { api } from "@/services/api";
 import { FileRecordSummary, FormatDetailData } from "@/types/api";
 
@@ -41,7 +42,7 @@ export const FileLibraryPage: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [inspectingFile, setInspectingFile] = useState<FileRecordSummary | null>(null);
   const [modalTab, setModalTab] = useState<
-    "extraction" | "image_intelligence" | "spreadsheet_intelligence" | "presentation_intelligence" | "audio_intelligence" | "video_intelligence" | "code_intelligence" | "structured_data_intelligence" | "detection"
+    "extraction" | "image_intelligence" | "spreadsheet_intelligence" | "presentation_intelligence" | "audio_intelligence" | "video_intelligence" | "code_intelligence" | "structured_data_intelligence" | "archive_intelligence" | "detection"
   >("extraction");
 
   // Queries
@@ -174,9 +175,17 @@ export const FileLibraryPage: React.FC = () => {
       (f.detection_format_id || f.actual_extension || f.claimed_extension || "").toLowerCase()
     );
 
+  const isArchive = (f: FileRecordSummary) =>
+    f.format_category === "archive" ||
+    ["zip", "7z", "tar", "gz", "tgz", "bz2", "tbz2", "xz", "txz"].includes(
+      (f.detection_format_id || f.actual_extension || f.claimed_extension || "").toLowerCase()
+    );
+
   const handleInspect = (file: FileRecordSummary) => {
     setInspectingFile(file);
-    if (isCode(file)) {
+    if (isArchive(file)) {
+      setModalTab("archive_intelligence");
+    } else if (isCode(file)) {
       setModalTab("code_intelligence");
     } else if (isStructuredData(file)) {
       setModalTab("structured_data_intelligence");
@@ -517,7 +526,19 @@ export const FileLibraryPage: React.FC = () => {
                       Structured Data
                     </button>
                   )}
-                  {!isSpreadsheet(inspectingFile) && !isImage(inspectingFile) && !isPresentation(inspectingFile) && !isAudio(inspectingFile) && !isVideo(inspectingFile) && !isCode(inspectingFile) && !isStructuredData(inspectingFile) && (
+                  {isArchive(inspectingFile) && (
+                    <button
+                      onClick={() => setModalTab("archive_intelligence")}
+                      className={`px-3 py-1 rounded-md font-medium transition ${
+                        modalTab === "archive_intelligence"
+                          ? "bg-card text-foreground shadow-sm"
+                          : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      Archive Intelligence
+                    </button>
+                  )}
+                  {!isArchive(inspectingFile) && !isSpreadsheet(inspectingFile) && !isImage(inspectingFile) && !isPresentation(inspectingFile) && !isAudio(inspectingFile) && !isVideo(inspectingFile) && !isCode(inspectingFile) && !isStructuredData(inspectingFile) && (
                     <button
                       onClick={() => setModalTab("extraction")}
                       className={`px-3 py-1 rounded-md font-medium transition ${
@@ -549,7 +570,13 @@ export const FileLibraryPage: React.FC = () => {
               </button>
             </div>
 
-            {modalTab === "code_intelligence" ? (
+            {modalTab === "archive_intelligence" ? (
+              <ArchiveIntelligenceView
+                fileId={inspectingFile.id}
+                filename={inspectingFile.original_filename}
+                onClose={() => setInspectingFile(null)}
+              />
+            ) : modalTab === "code_intelligence" ? (
               <CodeIntelligenceView
                 fileId={inspectingFile.id}
                 filename={inspectingFile.original_filename}

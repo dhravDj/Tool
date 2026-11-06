@@ -2,6 +2,11 @@
 
 import {
   APIResponse,
+  ArchiveAnalysisOverview,
+  ArchiveCapabilities,
+  ArchiveDocument,
+  ArchiveEntry,
+  ArchiveHierarchyNode,
   AudioCapabilities,
   AudioDocument,
   AudioEvent,
@@ -439,4 +444,83 @@ export const api = {
 
   getStructuredDataExportUrl: (fileId: string, format = "json"): string =>
     `${API_BASE}/files/${encodeURIComponent(fileId)}/structured-data-analysis/export/${encodeURIComponent(format)}`,
+
+  // Phase 10: Archive Intelligence Methods
+  getArchiveCapabilities: (): Promise<ArchiveCapabilities> =>
+    request<ArchiveCapabilities>("/archive-intelligence/capabilities"),
+
+  analyzeArchiveFile: (
+    fileId: string,
+    payload?: { mode?: string; selected_entry_ids?: string[]; password?: string }
+  ): Promise<ArchiveDocument> =>
+    request<ArchiveDocument>(`/files/${encodeURIComponent(fileId)}/analyze-archive`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload || {}),
+    }),
+
+  getArchiveAnalysis: (fileId: string): Promise<ArchiveAnalysisOverview> =>
+    request<ArchiveAnalysisOverview>(`/files/${encodeURIComponent(fileId)}/archive-analysis`),
+
+  getArchiveDocumentResult: (fileId: string): Promise<ArchiveDocument> =>
+    request<ArchiveDocument>(`/files/${encodeURIComponent(fileId)}/archive-analysis/result`),
+
+  getArchiveSummary: (fileId: string): Promise<Record<string, unknown>> =>
+    request<Record<string, unknown>>(`/files/${encodeURIComponent(fileId)}/archive-analysis/summary`),
+
+  getArchiveEntries: (
+    fileId: string,
+    params?: { skip?: number; limit?: number; entry_type?: string; search?: string }
+  ): Promise<ArchiveEntry[]> => {
+    const q = new URLSearchParams();
+    if (params?.skip !== undefined) q.set("skip", String(params.skip));
+    if (params?.limit !== undefined) q.set("limit", String(params.limit));
+    if (params?.entry_type) q.set("entry_type", params.entry_type);
+    if (params?.search) q.set("search", params.search);
+    const qs = q.toString() ? `?${q.toString()}` : "";
+    return request<ArchiveEntry[]>(`/files/${encodeURIComponent(fileId)}/archive-analysis/entries${qs}`);
+  },
+
+  getArchiveEntryById: (fileId: string, entryId: string): Promise<ArchiveEntry> =>
+    request<ArchiveEntry>(
+      `/files/${encodeURIComponent(fileId)}/archive-analysis/entries/${encodeURIComponent(entryId)}`
+    ),
+
+  getArchiveTree: (fileId: string): Promise<ArchiveHierarchyNode> =>
+    request<ArchiveHierarchyNode>(`/files/${encodeURIComponent(fileId)}/archive-analysis/tree`),
+
+  getNestedArchives: (fileId: string): Promise<Record<string, unknown>[]> =>
+    request<Record<string, unknown>[]>(`/files/${encodeURIComponent(fileId)}/archive-analysis/nested-archives`),
+
+  extractArchiveEntries: (
+    fileId: string,
+    payload?: { mode?: string; password?: string }
+  ): Promise<ArchiveDocument> =>
+    request<ArchiveDocument>(`/files/${encodeURIComponent(fileId)}/archive-analysis/extract`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload || {}),
+    }),
+
+  analyzeSelectedArchiveEntries: (
+    fileId: string,
+    payload: { entry_ids: string[]; password?: string }
+  ): Promise<ArchiveDocument> =>
+    request<ArchiveDocument>(`/files/${encodeURIComponent(fileId)}/archive-analysis/analyze-selected`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    }),
+
+  getArchiveExtractionStatus: (fileId: string): Promise<Record<string, unknown>> =>
+    request<Record<string, unknown>>(`/files/${encodeURIComponent(fileId)}/archive-analysis/extraction-status`),
+
+  getArchiveChildren: (fileId: string): Promise<Record<string, unknown>[]> =>
+    request<Record<string, unknown>[]>(`/files/${encodeURIComponent(fileId)}/archive-analysis/children`),
+
+  getArchiveSecurityReport: (fileId: string): Promise<Record<string, unknown>> =>
+    request<Record<string, unknown>>(`/files/${encodeURIComponent(fileId)}/archive-analysis/security-report`),
+
+  getArchiveExportUrl: (fileId: string, format = "json"): string =>
+    `${API_BASE}/files/${encodeURIComponent(fileId)}/archive-analysis/export/${encodeURIComponent(format)}`,
 };

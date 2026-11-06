@@ -18,6 +18,8 @@ def test_hypothesis_arbitrary_binary_never_crashes(tmp_path_factory, data: bytes
     temp_dir = tmp_path_factory.mktemp("hypo")
     # Sanitize filename for local filesystem
     safe_name = "".join(c if c.isalnum() or c in "._-" else "_" for c in filename) or "file.bin"
+    if safe_name in (".", ".."):
+        safe_name = "file.bin"
     file_path = temp_dir / safe_name
     file_path.write_bytes(data)
 

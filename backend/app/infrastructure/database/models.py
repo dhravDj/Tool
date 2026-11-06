@@ -130,6 +130,9 @@ class FileRecord(Base):
     structured_data_analyses: Mapped[list["StructuredDataAnalysisRecord"]] = relationship(
         "StructuredDataAnalysisRecord", back_populates="file", cascade="all, delete-orphan"
     )
+    archive_analyses: Mapped[list["ArchiveAnalysisRecord"]] = relationship(
+        "ArchiveAnalysisRecord", back_populates="file", cascade="all, delete-orphan"
+    )
 
     __table_args__ = (
         Index("ix_files_owner_status", "owner_id", "status"),
@@ -592,6 +595,179 @@ class StructuredDataAnalysisRecord(Base):
 
     # Relationships
     file: Mapped["FileRecord"] = relationship("FileRecord", back_populates="structured_data_analyses")
+
+
+class ArchiveAnalysisRecord(Base):
+    """Historical archive inspection, extraction, and nested hierarchy record."""
+
+    __tablename__ = "archive_analysis_records"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+    file_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True),
+        ForeignKey("files.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    status: Mapped[str] = mapped_column(String(32), default="completed", index=True, nullable=False)
+    archive_format: Mapped[str] = mapped_column(String(32), index=True, nullable=False)
+    processing_mode: Mapped[str] = mapped_column(String(32), default="inspect_only", nullable=False)
+    entry_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    file_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    directory_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    nested_archive_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    total_uncompressed_size: Mapped[int] = mapped_column(BigInteger, default=0, nullable=False)
+    extracted_size: Mapped[int] = mapped_column(BigInteger, default=0, nullable=False)
+    compression_ratio: Mapped[float] = mapped_column(Float, default=1.0, nullable=False)
+    nesting_depth: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    is_encrypted: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    is_corrupted: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    archive_comment: Mapped[str | None] = mapped_column(Text, nullable=True)
+    model_name: Mapped[str] = mapped_column(String(64), default="documind-archive-v1", nullable=False)
+    engine_name: Mapped[str] = mapped_column(String(64), default="documind-archive", nullable=False)
+    confidence: Mapped[float] = mapped_column(Float, default=1.0, nullable=False)
+    processing_duration: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
+    safety_report: Mapped[dict[str, Any]] = mapped_column(JSON_TYPE, default=dict, nullable=False)
+    artifacts: Mapped[dict[str, Any]] = mapped_column(JSON_TYPE, default=dict, nullable=False)
+    archive_metadata: Mapped[dict[str, Any]] = mapped_column(JSON_TYPE, default=dict, nullable=False)
+    warnings: Mapped[list[str]] = mapped_column(JSON_TYPE, default=list, nullable=False)
+    error_details: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        default=lambda: datetime.now(UTC),
+        nullable=False,
+    )
+
+    # Relationships
+    file: Mapped["FileRecord"] = relationship("FileRecord", back_populates="archive_analyses")
+    entries: Mapped[list["ArchiveEntryRecord"]] = relationship(
+        "ArchiveEntryRecord", back_populates="archive_analysis", cascade="all, delete-orphan"
+    )
+    relationships: Mapped[list["ArchiveRelationshipRecord"]] = relationship(
+        "ArchiveRelationshipRecord",
+        foreign_keys="ArchiveRelationshipRecord.parent_archive_id",
+        back_populates="parent_archive",
+        cascade="all, delete-orphan",
+    )
+
+
+class ArchiveEntryRecord(Base):
+    """Individual archive entry record preserving metadata, checksums, and extraction linkages."""
+
+    __tablename__ = "archive_entry_records"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+    archive_analysis_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True),
+        ForeignKey("archive_analysis_records.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    entry_id: Mapped[str] = mapped_column(String(128), index=True, nullable=False)
+    original_path: Mapped[str] = mapped_column(Text, nullable=False)
+    normalized_path: Mapped[str] = mapped_column(Text, nullable=False)
+    filename: Mapped[str] = mapped_column(String(512), nullable=False)
+    extension: Mapped[str] = mapped_column(String(64), default="", nullable=False)
+    entry_type: Mapped[str] = mapped_column(String(32), default="file", nullable=False)
+    compressed_size: Mapped[int] = mapped_column(BigInteger, default=0, nullable=False)
+    uncompressed_size: Mapped[int] = mapped_column(BigInteger, default=0, nullable=False)
+    compression_method: Mapped[str] = mapped_column(String(64), default="", nullable=False)
+    checksum: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    encrypted: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    is_directory: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    is_symlink: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    is_nested_archive: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    detection_result: Mapped[dict[str, Any]] = mapped_column(JSON_TYPE, default=dict, nullable=False)
+    extracted_file_id: Mapped[uuid.UUID | None] = mapped_column(
+        Uuid(as_uuid=True),
+        ForeignKey("files.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
+    processing_status: Mapped[str] = mapped_column(String(32), default="inspected", index=True, nullable=False)
+    error: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        default=lambda: datetime.now(UTC),
+        nullable=False,
+    )
+
+    # Relationships
+    archive_analysis: Mapped["ArchiveAnalysisRecord"] = relationship(
+        "ArchiveAnalysisRecord", back_populates="entries"
+    )
+    extracted_file: Mapped[Optional["FileRecord"]] = relationship(
+        "FileRecord", foreign_keys=[extracted_file_id]
+    )
+
+
+class ArchiveRelationshipRecord(Base):
+    """Parent-child hierarchy and provenance linkage for nested archives and extracted child files."""
+
+    __tablename__ = "archive_relationship_records"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+    parent_file_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True),
+        ForeignKey("files.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    parent_archive_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True),
+        ForeignKey("archive_analysis_records.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    parent_entry_id: Mapped[str] = mapped_column(String(128), index=True, nullable=False)
+    child_file_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True),
+        ForeignKey("files.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    root_archive_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True),
+        ForeignKey("archive_analysis_records.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    nesting_depth: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
+    original_path: Mapped[str] = mapped_column(Text, nullable=False)
+    extracted_storage_reference: Mapped[str | None] = mapped_column(Text, nullable=True)
+    sha256: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
+    detection_result: Mapped[dict[str, Any]] = mapped_column(JSON_TYPE, default=dict, nullable=False)
+    processing_status: Mapped[str] = mapped_column(String(32), default="extracted", nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        default=lambda: datetime.now(UTC),
+        nullable=False,
+    )
+
+    # Relationships
+    parent_file: Mapped["FileRecord"] = relationship("FileRecord", foreign_keys=[parent_file_id])
+    parent_archive: Mapped["ArchiveAnalysisRecord"] = relationship(
+        "ArchiveAnalysisRecord", foreign_keys=[parent_archive_id], back_populates="relationships"
+    )
+    child_file: Mapped["FileRecord"] = relationship("FileRecord", foreign_keys=[child_file_id])
+    root_archive: Mapped["ArchiveAnalysisRecord"] = relationship(
+        "ArchiveAnalysisRecord", foreign_keys=[root_archive_id]
+    )
 
 
 

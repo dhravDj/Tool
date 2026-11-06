@@ -1458,5 +1458,114 @@ export interface StructuredCapabilities {
   max_file_size_bytes: number;
 }
 
+// -----------------------------------------------------------------------------
+// Phase 10: Archive & Nested File Processing Engine
+// -----------------------------------------------------------------------------
+
+export interface ArchiveEntry {
+  entry_id: string;
+  original_path: string;
+  normalized_path: string;
+  filename: string;
+  extension: string;
+  entry_type: string;
+  compressed_size: number;
+  uncompressed_size: number;
+  compression_method: string;
+  checksum?: string | null;
+  encrypted: boolean;
+  is_directory: boolean;
+  is_symlink: boolean;
+  is_nested_archive: boolean;
+  detection_result: Record<string, any>;
+  extracted_file_id?: string | null;
+  processing_status: string;
+  error?: string | null;
+}
+
+export interface ArchiveHierarchyNode {
+  id: string;
+  name: string;
+  path: string;
+  is_directory: boolean;
+  is_nested_archive: boolean;
+  entry_id?: string | null;
+  children: ArchiveHierarchyNode[];
+  file_count: number;
+  total_size: number;
+  warnings: string[];
+}
+
+export interface ArchiveSafetyReport {
+  path_traversal_blocked: number;
+  symlink_entries_blocked: number;
+  suspicious_entries: number;
+  size_limit_exceeded: boolean;
+  compression_ratio_exceeded: boolean;
+  entry_limit_exceeded: boolean;
+  nesting_limit_exceeded: boolean;
+  timeout_exceeded: boolean;
+  encryption_detected: boolean;
+  corruption_detected: boolean;
+  blocked_entry_count: number;
+  warnings: string[];
+}
+
+export interface ArchiveDocument {
+  archive_id: string;
+  source_file_id: string;
+  archive_format: string;
+  metadata: Record<string, any>;
+  entries: ArchiveEntry[];
+  hierarchy: ArchiveHierarchyNode;
+  nested_archives: Record<string, any>[];
+  extracted_files: Record<string, any>[];
+  blocked_entries: Record<string, any>[];
+  failed_entries: Record<string, any>[];
+  processing_mode: string;
+  processing_status: string;
+  extracted_size: number;
+  total_entry_count: number;
+  nesting_depth: number;
+  safety_report: ArchiveSafetyReport;
+  processing_metadata: Record<string, any>;
+  warnings: string[];
+  errors: string[];
+}
+
+export interface ArchiveAnalysisOverview {
+  id: string;
+  file_id: string;
+  status: string;
+  archive_format: string;
+  processing_mode: string;
+  entry_count: number;
+  file_count: number;
+  directory_count: number;
+  nested_archive_count: number;
+  total_uncompressed_size: number;
+  extracted_size: number;
+  compression_ratio: number;
+  is_encrypted: boolean;
+  is_corrupted: boolean;
+  safety_report: ArchiveSafetyReport;
+  artifacts: Record<string, string>;
+  created_at?: string | null;
+}
+
+export interface ArchiveCapabilities {
+  supported_formats: string[];
+  max_nesting_depth: number;
+  max_entries_per_archive: number;
+  max_total_entries_per_job: number;
+  max_single_file_size_bytes: number;
+  max_total_extracted_size_bytes: number;
+  max_archive_size_bytes: number;
+  max_path_length: number;
+  max_extraction_time_seconds: number;
+  max_concurrent_jobs: number;
+  features: string[];
+}
+
 
 
