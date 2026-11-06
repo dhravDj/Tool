@@ -84,6 +84,7 @@ import {
   ResourceUsage,
   SystemCapacity,
   WorkerStatus,
+  DashboardAnalytics,
 } from "@/types/api";
 
 const API_BASE = "/api/v1";
@@ -755,4 +756,48 @@ export const api = {
 
   getResourceUsage: (): Promise<ResourceUsage> =>
     request<ResourceUsage>("/system/resource-usage"),
+
+  getDashboardAnalytics: (): Promise<DashboardAnalytics> =>
+    request<DashboardAnalytics>("/system/dashboard-analytics"),
+
+  deleteFile: (fileId: string): Promise<{ id: string; deleted: boolean }> =>
+    request<{ id: string; deleted: boolean }>(`/files/${encodeURIComponent(fileId)}`, {
+      method: "DELETE",
+    }),
+
+  getFileDownloadUrl: (fileId: string): string =>
+    `${API_BASE}/files/${encodeURIComponent(fileId)}/download`,
+
+  inspectDeduplication: (req: {
+    filename: string;
+    sha256: string;
+    file_size: number;
+    owner_id?: string;
+  }): Promise<{
+    is_duplicate: boolean;
+    existing_file_id?: string;
+    action: string;
+    dedup_decision: string;
+    existing_filename?: string;
+  }> =>
+    request("/bulk/inspect-deduplication", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(req),
+    }),
+
+  getJobs: (params?: {
+    batch_id?: string;
+    status?: string;
+    stage?: string;
+    priority?: number;
+    limit?: number;
+    offset?: number;
+  }): Promise<ProcessingJob[]> => api.listJobs(params),
+
+  indexFile: (fileId: string, options?: { force?: boolean }): Promise<Record<string, unknown>> =>
+    api.indexFileForAI(fileId, options?.force ?? false),
+
+  getIndexStatus: (fileId: string): Promise<Record<string, unknown>> =>
+    api.getAIIndexStatus(fileId),
 };

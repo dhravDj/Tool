@@ -5,6 +5,7 @@ import uuid
 from datetime import UTC, datetime
 
 from fastapi import APIRouter, Depends, File, Form, Query, UploadFile
+from pydantic import BaseModel
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -18,6 +19,7 @@ from app.infrastructure.database.models import (
     ProcessingBatchRecord,
     ProcessingJobRecord,
 )
+from app.modules.bulk_processing.dedup.deduplicator import deduplication_engine
 from app.modules.bulk_processing.pipeline import bulk_processing_pipeline
 from app.modules.bulk_processing.queue.priority_queue import priority_task_queue
 from app.modules.bulk_processing.schemas.batch import (
@@ -114,6 +116,54 @@ def _to_batch_response(batch: ProcessingBatchRecord) -> ProcessingBatchResponse:
 # ---------------------------------------------------------
 # Bulk Endpoints (/bulk)
 # ---------------------------------------------------------
+
+
+class DedupInspectRequest(BaseModel):
+    filename: str
+    sha256: str
+    file_size: int
+    owner_id: str | None = None
+
+
+class DedupInspectResponse(BaseModel):
+    is_duplicate: bool
+    existing_file_id: str | None = None
+    action: str
+    dedup_decision: str
+    existing_filename: str | None = None
+
+
+@bulk_router.post("/inspect-deduplication", response_model=APIResponse[DedupInspectResponse])
+async def inspect_deduplication(
+    request: DedupInspectRequest,
+    session: AsyncSession = Depends(get_session),
+) -> APIResponse[DedupInspectResponse]:
+    """Inspect whether a file payload is a duplicate before uploading."""
+    owner_uuid = None
+    if request.owner_id:
+        try:
+            owner_uuid = uuid.UUID(request.owner_id)
+        except ValueError:
+            pass
+
+    existing_file, decision = await deduplication_engine.inspect_file_deduplication(
+        session=session,
+        owner_id=owner_uuid,
+        sha256=request.sha256,
+        file_size=request.file_size,
+    )
+    is_dup = existing_file is not None
+    action = "skip" if is_dup else "new"
+    return APIResponse.ok(
+        data=DedupInspectResponse(
+            is_duplicate=is_dup,
+            existing_file_id=str(existing_file.id) if existing_file else None,
+            action=action,
+            dedup_decision=decision,
+            existing_filename=existing_file.original_filename if existing_file else None,
+        ),
+        message="Deduplication inspection completed.",
+    )
 
 
 @bulk_router.post("/upload", response_model=APIResponse[BulkUploadManifestResponse])

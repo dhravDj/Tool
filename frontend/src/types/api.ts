@@ -1986,3 +1986,70 @@ export interface ResourceUsage {
   };
   timestamp: string;
 }
+
+export interface DashboardAnalytics {
+  files_summary: {
+    total_files: number;
+    supported_files: number;
+    processed_files: number;
+    processing_files: number;
+    failed_files: number;
+    pending_files: number;
+    total_storage_bytes: number;
+  };
+  ai_summary: {
+    indexed_documents: number;
+    indexed_chunks: number;
+    unindexed_files: number;
+  };
+  batches_summary: {
+    total_batches: number;
+    active_batches: number;
+    completed_batches: number;
+  };
+  format_distribution: Record<string, number>;
+  status_distribution: Record<string, number>;
+  recent_files: Array<{
+    id: string;
+    filename: string;
+    format_category: string | null;
+    detected_mime_type: string | null;
+    file_size_bytes: number;
+    status: string;
+    created_at: string | null;
+  }>;
+  recent_batches: Array<{
+    id: string;
+    name: string;
+    status: string;
+    total_files: number;
+    completed_files: number;
+    failed_files: number;
+    progress_percent: number;
+    created_at: string | null;
+  }>;
+  capacity: {
+    max_parallel_cpu_workers: number;
+    max_concurrent_gpu_slots: number;
+    active_cpu_workers: number;
+    active_gpu_workers: number;
+    backpressure_active: boolean;
+    queue_depth_total: number;
+  };
+  queue_status: {
+    interactive_depth: number;
+    normal_depth: number;
+    bulk_depth: number;
+    maintenance_depth: number;
+    dead_letter_depth: number;
+    in_flight: number;
+    total_queued: number;
+    active_workers_count: number;
+  };
+  disk_storage: {
+    total_gb: number;
+    free_gb: number;
+    used_gb: number;
+    percent_used: number;
+  };
+}

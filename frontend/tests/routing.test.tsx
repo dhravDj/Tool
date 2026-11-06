@@ -8,14 +8,14 @@ describe("Frontend Routing and Shell Rendering", () => {
 
     // Brand and platform indicators
     expect(screen.getByText("DocuMind AI")).toBeInTheDocument();
-    expect(screen.getByText("Phase 1 Core")).toBeInTheDocument();
+    expect(screen.getByText("Universal SaaS")).toBeInTheDocument();
 
     // Nav links
-    expect(screen.getByText("Dashboard")).toBeInTheDocument();
-    expect(screen.getByText("Upload & Ingest")).toBeInTheDocument();
-    expect(screen.getByText("Processing Jobs")).toBeInTheDocument();
-    expect(screen.getByText("File Library")).toBeInTheDocument();
-    expect(screen.getByText("System Status")).toBeInTheDocument();
-    expect(screen.getByText("Settings")).toBeInTheDocument();
+    expect(screen.getAllByText("Dashboard").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Upload & Ingest").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Processing Jobs").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("File Library").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("System Status").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Settings").length).toBeGreaterThan(0);
   });
 });

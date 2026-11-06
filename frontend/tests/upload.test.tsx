@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ToastProvider } from "../src/context/ToastContext";
 import { UploadPage } from "../src/pages/UploadPage";
 
 const queryClient = new QueryClient();
@@ -10,9 +11,11 @@ describe("UploadPage Component", () => {
   it("renders upload dropzone, security safeguards banner, and controls", () => {
     render(
       <QueryClientProvider client={queryClient}>
-        <BrowserRouter>
-          <UploadPage />
-        </BrowserRouter>
+        <ToastProvider>
+          <BrowserRouter>
+            <UploadPage />
+          </BrowserRouter>
+        </ToastProvider>
       </QueryClientProvider>
     );
 
@@ -20,22 +23,25 @@ describe("UploadPage Component", () => {
       screen.getByText("Universal Detection & Ingestion Gateway")
     ).toBeInTheDocument();
     expect(
-      screen.getByText("Zero-Trust Multi-Signal Detection Active")
+      screen.getByText("Zero-Trust Multi-Signal Ingestion Active")
     ).toBeInTheDocument();
     expect(
-      screen.getByText("Drag and drop files to detect")
+      screen.getByText(/Drag & drop files or folders to ingest/i)
     ).toBeInTheDocument();
     expect(
-      screen.getByText("Browse Local Files")
+      screen.getByText("Browse Files")
     ).toBeInTheDocument();
     expect(
-      screen.getByText("Persist identified files to storage library")
+      screen.getByText("Select Directory")
     ).toBeInTheDocument();
     expect(
-      screen.getByText("Detection Results")
+      screen.getByText(/Persist validated files to platform library automatically/i)
     ).toBeInTheDocument();
     expect(
-      screen.getByText("No files evaluated yet")
+      screen.getByText("Ingested File Results")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("No files evaluated in current session")
     ).toBeInTheDocument();
   });
 });

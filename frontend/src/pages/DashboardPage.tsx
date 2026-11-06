@@ -1,16 +1,32 @@
-import React from "react";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import {
   Activity,
+  ArrowRight,
+  CheckCircle2,
+  Clock,
   Cpu,
   Database,
-  FileCheck2,
+  FileBox,
+  FileCode,
+  Files,
+  FileSpreadsheet,
+  FileText,
   HardDrive,
+  Image as ImageIcon,
   Layers,
+  Music,
+  Package,
+  Plus,
+  RefreshCw,
   Sparkles,
-  Zap,
+  Video,
 } from "lucide-react";
+import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { ErrorState } from "@/components/ui/ErrorState";
 import { LoadingState } from "@/components/ui/LoadingState";
 import { PageContainer } from "@/components/ui/PageContainer";
 import { StatCard } from "@/components/ui/StatCard";
@@ -18,145 +34,541 @@ import { StatusIndicator } from "@/components/ui/StatusIndicator";
 import { api } from "@/services/api";
 
 export const DashboardPage: React.FC = () => {
-  const { data: health, isLoading: isHealthLoading } = useQuery({
+  const navigate = useNavigate();
+  const [timeRange, setTimeRange] = useState<"all" | "30d" | "7d" | "24h">("all");
+
+  const {
+    data: analytics,
+    isLoading,
+    error,
+    refetch,
+    isFetching,
+  } = useQuery({
+    queryKey: ["dashboardAnalytics"],
+    queryFn: api.getDashboardAnalytics,
+    refetchInterval: 15000,
+  });
+
+  const { data: health } = useQuery({
     queryKey: ["health"],
     queryFn: api.getHealth,
-    refetchInterval: 10000,
+    refetchInterval: 30000,
   });
 
-  const { data: system, isLoading: isSystemLoading } = useQuery({
-    queryKey: ["systemStatus"],
-    queryFn: api.getSystemStatus,
-  });
-
-  const { data: pluginsData } = useQuery({
-    queryKey: ["plugins"],
-    queryFn: () => api.getPlugins(),
-  });
-
-  if (isHealthLoading && isSystemLoading) {
-    return <LoadingState message="Loading DocuMind platform dashboard..." />;
+  if (isLoading) {
+    return <LoadingState message="Loading DocuMind AI platform metrics..." />;
   }
 
-  const aiMode = system?.ai_engine?.mode || "local";
-  const pluginsCount = pluginsData?.total_plugins ?? 0;
-  const storageUsed = system?.storage?.disk_usage?.percent_used ?? 0;
+  if (error || !analytics) {
+    return (
+      <ErrorState
+        title="Failed to Load Dashboard Telemetry"
+        message={error instanceof Error ? error.message : "Unable to reach system analytics API."}
+        onRetry={() => refetch()}
+      />
+    );
+  }
+
+  const {
+    files_summary,
+    ai_summary,
+    batches_summary,
+    format_distribution,
+    recent_files,
+    recent_batches,
+    capacity,
+    queue_status,
+    disk_storage,
+  } = analytics;
+
+  const formatBytes = (bytes: number): string => {
+    if (!bytes || bytes === 0) return "0 B";
+    const k = 1024;
+    const sizes = ["B", "KB", "MB", "GB", "TB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
+  };
+
+  const getFormatIcon = (cat?: string | null) => {
+    switch (cat) {
+      case "pdf":
+      case "document":
+        return <FileText className="h-4 w-4 text-blue-500" />;
+      case "spreadsheet":
+        return <FileSpreadsheet className="h-4 w-4 text-emerald-500" />;
+      case "image":
+        return <ImageIcon className="h-4 w-4 text-purple-500" />;
+      case "audio":
+        return <Music className="h-4 w-4 text-pink-500" />;
+      case "video":
+        return <Video className="h-4 w-4 text-red-500" />;
+      case "archive":
+        return <Package className="h-4 w-4 text-amber-500" />;
+      case "code":
+      case "structured_data":
+        return <FileCode className="h-4 w-4 text-indigo-500" />;
+      default:
+        return <FileBox className="h-4 w-4 text-muted-foreground" />;
+    }
+  };
+
+  const totalFiles = files_summary.total_files;
+  const processedPercent =
+    totalFiles > 0 ? Math.round((files_summary.processed_files / totalFiles) * 100) : 0;
+  const indexingPercent =
+    totalFiles > 0 ? Math.round((ai_summary.indexed_documents / totalFiles) * 100) : 0;
 
   return (
     <PageContainer
       title="Platform Overview"
-      subtitle="Universal File Intelligence Platform — Engineering Foundation"
+      subtitle="Universal File Intelligence & Bulk Scalability Infrastructure"
+      action={
+        <div className="flex items-center gap-2">
+          {/* Time range selector */}
+          <div className="hidden sm:flex items-center rounded-xl bg-muted/60 p-1 border border-border">
+            {(["all", "30d", "7d", "24h"] as const).map((r) => (
+              <button
+                key={r}
+                onClick={() => setTimeRange(r)}
+                className={`px-2.5 py-1 text-xs font-medium rounded-lg transition-all ${
+                  timeRange === r
+                    ? "bg-card text-foreground shadow-2xs"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {r === "all" ? "All Time" : r.toUpperCase()}
+              </button>
+            ))}
+          </div>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => refetch()}
+            isLoading={isFetching}
+            leftIcon={<RefreshCw className="h-3.5 w-3.5" />}
+          >
+            Refresh
+          </Button>
+
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={() => navigate("/upload")}
+            leftIcon={<Plus className="h-3.5 w-3.5" />}
+          >
+            Upload
+          </Button>
+        </div>
+      }
     >
-      {/* Phase 1 Status Banner */}
-      <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-lg bg-primary text-white">
-            <Sparkles className="h-5 w-5" />
+      {/* Platform Banner */}
+      <div className="rounded-2xl border border-primary/20 bg-linear-to-r from-primary/10 via-primary/5 to-transparent p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-2xs">
+        <div className="flex items-center gap-3.5">
+          <div className="p-3 rounded-xl bg-primary text-white shadow-xs">
+            <Sparkles className="h-6 w-6" />
           </div>
           <div>
-            <h4 className="text-sm font-semibold text-foreground">Phase 1 Foundation Active</h4>
-            <p className="text-xs text-muted-foreground">
-              Modular Monolith architecture, database schemas, plugin interfaces, and health monitoring are live.
+            <div className="flex items-center gap-2">
+              <h2 className="text-base font-bold text-foreground tracking-tight">
+                DocuMind AI Platform Online
+              </h2>
+              <Badge variant="primary" size="sm">
+                v0.12.0
+              </Badge>
+            </div>
+            <p className="text-xs text-muted-foreground mt-0.5 max-w-xl">
+              Phases 1–12 active: 44+ registered formats, multimodal extraction engines, sovereign
+              RAG &amp; hybrid knowledge search, bounded multi-tier bulk worker queues.
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-mono px-2.5 py-1 rounded bg-muted border border-border">
-            v{system?.platform?.version || "0.1.0"}
-          </span>
-          <StatusIndicator status={health?.status || "ok"} label={health?.status?.toUpperCase()} />
+
+        <div className="flex items-center gap-2.5 self-end md:self-center">
+          <div className="text-right hidden sm:block">
+            <span className="text-[11px] text-muted-foreground block">System Gateway</span>
+            <StatusIndicator
+              status={health?.status || "ok"}
+              label={health?.status?.toUpperCase() || "OK"}
+              size="sm"
+            />
+          </div>
+          {capacity.backpressure_active && (
+            <Badge variant="warning" size="md">
+              Backpressure Active
+            </Badge>
+          )}
         </div>
       </div>
 
-      {/* Metric Cards Grid */}
+      {/* KPI Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
         <StatCard
-          title="AI Execution Mode"
-          value={aiMode.toUpperCase()}
-          subtext={`Provider: ${system?.ai_engine?.local_provider || "ollama"} (${system?.ai_engine?.device || "cpu"})`}
-          icon={<Cpu className="h-5 w-5 text-indigo-500" />}
+          title="Files Ingested"
+          value={totalFiles.toLocaleString()}
+          subtext={`${files_summary.processed_files} processed (${processedPercent}%), ${files_summary.failed_files} errors`}
+          icon={<Files className="h-5 w-5 text-blue-500" />}
         />
         <StatCard
-          title="Registered Plugins"
-          value={pluginsCount}
-          subtext="Detectors, Extractors, AI & Formatters"
-          icon={<Layers className="h-5 w-5 text-blue-500" />}
-        />
-        <StatCard
-          title="Storage Subsystem"
-          value={`${storageUsed}%`}
-          subtext={`${system?.storage?.disk_usage?.free_gb || 0} GB free capacity`}
+          title="Storage Consumption"
+          value={formatBytes(files_summary.total_storage_bytes)}
+          subtext={`${disk_storage.used_gb} GB used (${disk_storage.percent_used}%), ${disk_storage.free_gb} GB free`}
           icon={<HardDrive className="h-5 w-5 text-emerald-500" />}
         />
         <StatCard
-          title="Database State"
-          value={health?.database?.status === "ok" ? "Connected" : "Standby"}
-          subtext={`PostgreSQL (${health?.database?.latency_ms ?? 0} ms)`}
-          icon={<Database className="h-5 w-5 text-amber-500" />}
+          title="AI Knowledge Base"
+          value={ai_summary.indexed_documents.toLocaleString()}
+          subtext={`${ai_summary.indexed_chunks.toLocaleString()} chunks embedded (${indexingPercent}% coverage)`}
+          icon={<Sparkles className="h-5 w-5 text-purple-500" />}
+        />
+        <StatCard
+          title="Processing Infrastructure"
+          value={`${capacity.active_cpu_workers}/${capacity.max_parallel_cpu_workers} Slots`}
+          subtext={`${queue_status.total_queued} tasks queued, ${batches_summary.active_batches} active batches`}
+          icon={<Cpu className="h-5 w-5 text-indigo-500" />}
         />
       </div>
 
-      {/* Subsystem & Plugin Grid */}
+      {/* Distribution & Telemetry Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
-        {/* Left Column: Registered Plugins List */}
-        <div className="lg:col-span-2 rounded-xl border border-border bg-card p-5">
-          <div className="flex items-center justify-between border-b border-border pb-4 mb-4">
-            <div>
-              <h3 className="text-base font-semibold text-foreground">Registered Core Plugins</h3>
-              <p className="text-xs text-muted-foreground">Active adapters complying with Phase 1 interfaces</p>
+        {/* Format Category Distribution */}
+        <div className="rounded-2xl border border-border bg-card p-5 flex flex-col justify-between shadow-2xs">
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                <Layers className="h-4 w-4 text-blue-500" />
+                Format Distribution
+              </h3>
+              <span className="text-[11px] font-mono text-muted-foreground">
+                {Object.keys(format_distribution).length} types
+              </span>
             </div>
-            <span className="text-xs font-mono bg-muted px-2 py-1 rounded text-muted-foreground">
-              {pluginsCount} plugins
-            </span>
+
+            {Object.keys(format_distribution).length === 0 ? (
+              <div className="py-8 text-center text-xs text-muted-foreground">
+                No files categorized yet.
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {Object.entries(format_distribution)
+                  .sort((a, b) => b[1] - a[1])
+                  .slice(0, 6)
+                  .map(([cat, count]) => {
+                    const pct = totalFiles > 0 ? Math.round((count / totalFiles) * 100) : 0;
+                    return (
+                      <div key={cat} className="space-y-1">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="capitalize text-foreground font-medium flex items-center gap-1.5">
+                            {getFormatIcon(cat)}
+                            {cat}
+                          </span>
+                          <span className="text-muted-foreground font-mono">
+                            {count} ({pct}%)
+                          </span>
+                        </div>
+                        <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-primary rounded-full transition-all duration-500"
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+              </div>
+            )}
           </div>
 
-          {pluginsData?.plugins && pluginsData.plugins.length > 0 ? (
+          <button
+            onClick={() => navigate("/files")}
+            className="mt-4 pt-3 border-t border-border flex items-center justify-between text-xs text-primary font-medium hover:underline"
+          >
+            <span>Explore full format catalog</span>
+            <ArrowRight className="h-3.5 w-3.5" />
+          </button>
+        </div>
+
+        {/* Processing Status Breakdown */}
+        <div className="rounded-2xl border border-border bg-card p-5 flex flex-col justify-between shadow-2xs">
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                <Activity className="h-4 w-4 text-emerald-500" />
+                File Processing State
+              </h3>
+              <span className="text-[11px] font-mono text-muted-foreground">
+                {processedPercent}% completed
+              </span>
+            </div>
+
+            <div className="space-y-3">
+              <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                  <span className="text-xs font-semibold text-emerald-900 dark:text-emerald-200">
+                    Ready &amp; Processed
+                  </span>
+                </div>
+                <span className="text-xs font-mono font-bold text-emerald-700 dark:text-emerald-300">
+                  {files_summary.processed_files}
+                </span>
+              </div>
+
+              <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <RefreshCw className="h-4 w-4 text-blue-500 animate-spin" />
+                  <span className="text-xs font-semibold text-blue-900 dark:text-blue-200">
+                    In Progress / Detecting
+                  </span>
+                </div>
+                <span className="text-xs font-mono font-bold text-blue-600 dark:text-blue-400">
+                  {files_summary.processing_files}
+                </span>
+              </div>
+
+              <div className="p-3 rounded-xl bg-muted border border-border flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-xs font-medium text-foreground">Pending / Queued</span>
+                </div>
+                <span className="text-xs font-mono font-bold text-muted-foreground">
+                  {files_summary.pending_files}
+                </span>
+              </div>
+
+              {files_summary.failed_files > 0 && (
+                <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="h-2 w-2 rounded-full bg-red-500" />
+                    <span className="text-xs font-semibold text-red-900 dark:text-red-200">
+                      Failed Files
+                    </span>
+                  </div>
+                  <span className="text-xs font-mono font-bold text-red-600 dark:text-red-400">
+                    {files_summary.failed_files}
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <button
+            onClick={() => navigate("/jobs")}
+            className="mt-4 pt-3 border-t border-border flex items-center justify-between text-xs text-primary font-medium hover:underline"
+          >
+            <span>View job logs &amp; retry failed</span>
+            <ArrowRight className="h-3.5 w-3.5" />
+          </button>
+        </div>
+
+        {/* Queue Backlog & Worker Health */}
+        <div className="rounded-2xl border border-border bg-card p-5 flex flex-col justify-between shadow-2xs">
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                <Database className="h-4 w-4 text-purple-500" />
+                Queue &amp; Worker Health
+              </h3>
+              <Badge variant="outline" size="sm">
+                4 Priority Tiers
+              </Badge>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              <div className="p-2.5 rounded-xl bg-muted/60 border border-border/80">
+                <span className="text-[10px] text-muted-foreground uppercase font-semibold block">
+                  Interactive (80+)
+                </span>
+                <span className="text-sm font-mono font-bold text-foreground">
+                  {queue_status.interactive_depth}
+                </span>
+              </div>
+              <div className="p-2.5 rounded-xl bg-muted/60 border border-border/80">
+                <span className="text-[10px] text-muted-foreground uppercase font-semibold block">
+                  Normal (50..79)
+                </span>
+                <span className="text-sm font-mono font-bold text-foreground">
+                  {queue_status.normal_depth}
+                </span>
+              </div>
+              <div className="p-2.5 rounded-xl bg-muted/60 border border-border/80">
+                <span className="text-[10px] text-muted-foreground uppercase font-semibold block">
+                  Bulk (20..49)
+                </span>
+                <span className="text-sm font-mono font-bold text-foreground">
+                  {queue_status.bulk_depth}
+                </span>
+              </div>
+              <div className="p-2.5 rounded-xl bg-muted/60 border border-border/80">
+                <span className="text-[10px] text-muted-foreground uppercase font-semibold block">
+                  Dead Letter (DLQ)
+                </span>
+                <span className="text-sm font-mono font-bold text-red-500">
+                  {queue_status.dead_letter_depth}
+                </span>
+              </div>
+            </div>
+
+            <div className="mt-4 p-3 rounded-xl bg-card border border-border/80 space-y-1.5 text-xs">
+              <div className="flex justify-between text-muted-foreground text-[11px]">
+                <span>Active CPU Slots:</span>
+                <span className="font-mono text-foreground font-semibold">
+                  {capacity.active_cpu_workers} / {capacity.max_parallel_cpu_workers}
+                </span>
+              </div>
+              <div className="flex justify-between text-muted-foreground text-[11px]">
+                <span>GPU Mutex Slot:</span>
+                <span className="font-mono text-foreground font-semibold">
+                  {capacity.active_gpu_workers} / {capacity.max_concurrent_gpu_slots}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <button
+            onClick={() => navigate("/bulk-processing")}
+            className="mt-4 pt-3 border-t border-border flex items-center justify-between text-xs text-primary font-medium hover:underline"
+          >
+            <span>Monitor bulk processing</span>
+            <ArrowRight className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      </div>
+
+      {/* Recent Files & Batches */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+        {/* Recent Files Card */}
+        <div className="rounded-2xl border border-border bg-card p-5 shadow-2xs">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+              <Files className="h-4 w-4 text-blue-500" />
+              Recent Files
+            </h3>
+            <button
+              onClick={() => navigate("/files")}
+              className="text-xs text-primary font-medium hover:underline"
+            >
+              View All
+            </button>
+          </div>
+
+          {recent_files.length === 0 ? (
+            <EmptyState
+              icon={<Files className="h-6 w-6" />}
+              title="No Files Uploaded Yet"
+              description="Upload documents, media, or archives to begin intelligence processing."
+            />
+          ) : (
             <div className="divide-y divide-border/60">
-              {pluginsData.plugins.map((plugin) => (
-                <div key={plugin.name} className="py-3 flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-3 truncate">
-                    <div className="p-2 rounded bg-muted/70 text-foreground shrink-0">
-                      <Zap className="h-4 w-4" />
+              {recent_files.map((file) => (
+                <div
+                  key={file.id}
+                  onClick={() => navigate("/files")}
+                  className="py-2.5 flex items-center justify-between gap-3 hover:bg-muted/40 px-2 rounded-xl transition cursor-pointer"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="p-2 rounded-lg bg-muted text-muted-foreground shrink-0">
+                      {getFormatIcon(file.format_category)}
                     </div>
-                    <div className="truncate">
-                      <p className="text-sm font-medium text-foreground truncate">{plugin.name}</p>
-                      <p className="text-xs text-muted-foreground truncate">{plugin.description}</p>
+                    <div className="min-w-0">
+                      <p className="text-xs font-semibold text-foreground truncate max-w-xs">
+                        {file.filename}
+                      </p>
+                      <div className="flex items-center gap-2 text-[10px] text-muted-foreground mt-0.5">
+                        <span className="uppercase font-mono">{file.format_category || "file"}</span>
+                        <span>•</span>
+                        <span>{formatBytes(file.file_size_bytes)}</span>
+                      </div>
                     </div>
                   </div>
+
                   <div className="flex items-center gap-2 shrink-0">
-                    <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-muted text-muted-foreground">
-                      {plugin.plugin_type}
+                    <span
+                      className={`text-[10px] font-semibold px-2 py-0.5 rounded capitalize ${
+                        file.status === "ready" || file.status === "processed"
+                          ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                          : file.status === "processing"
+                            ? "bg-blue-500/10 text-blue-500"
+                            : "bg-muted text-muted-foreground"
+                      }`}
+                    >
+                      {file.status}
                     </span>
-                    <StatusIndicator status="ok" label="Active" size="sm" />
+                    <ArrowRight className="h-3.5 w-3.5 text-muted-foreground" />
                   </div>
                 </div>
               ))}
             </div>
-          ) : (
-            <EmptyState
-              title="No Plugins Registered"
-              description="Plugins will appear here once loaded by the backend registry."
-            />
           )}
         </div>
 
-        {/* Right Column: Processing Activity Shell */}
-        <div className="rounded-xl border border-border bg-card p-5 flex flex-col">
-          <div className="flex items-center justify-between border-b border-border pb-4 mb-4">
-            <div>
-              <h3 className="text-base font-semibold text-foreground">Recent Activity</h3>
-              <p className="text-xs text-muted-foreground">Batch execution and job progress</p>
-            </div>
-            <Activity className="h-4 w-4 text-muted-foreground" />
+        {/* Recent Batches Card */}
+        <div className="rounded-2xl border border-border bg-card p-5 shadow-2xs">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+              <Layers className="h-4 w-4 text-indigo-500" />
+              Recent Bulk Batches
+            </h3>
+            <button
+              onClick={() => navigate("/bulk-processing")}
+              className="text-xs text-primary font-medium hover:underline"
+            >
+              View All
+            </button>
           </div>
 
-          <div className="flex-1 flex items-center justify-center">
+          {recent_batches.length === 0 ? (
             <EmptyState
-              icon={<FileCheck2 className="h-8 w-8" />}
-              title="No Active Batches"
-              description="Extraction engines are deferred to Phase 2. Batch ingestion will populate records here."
+              icon={<Layers className="h-6 w-6" />}
+              title="No Bulk Batches Submitted"
+              description="High-volume file collections and batch processing jobs will appear here."
             />
-          </div>
+          ) : (
+            <div className="divide-y divide-border/60">
+              {recent_batches.map((batch) => (
+                <div
+                  key={batch.id}
+                  onClick={() => navigate("/bulk-processing")}
+                  className="py-2.5 flex items-center justify-between gap-3 hover:bg-muted/40 px-2 rounded-xl transition cursor-pointer"
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <p className="text-xs font-semibold text-foreground truncate max-w-xs">
+                        {batch.name}
+                      </p>
+                      <Badge
+                        variant={
+                          batch.status === "completed"
+                            ? "success"
+                            : batch.status === "processing"
+                              ? "primary"
+                              : "default"
+                        }
+                        size="sm"
+                      >
+                        {batch.status}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center gap-2 text-[10px] text-muted-foreground mt-1">
+                      <span>
+                        {batch.completed_files} of {batch.total_files} files
+                      </span>
+                      <span>•</span>
+                      <span>{Math.round(batch.progress_percent)}%</span>
+                    </div>
+                    <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden mt-1.5">
+                      <div
+                        className="h-full bg-indigo-500 rounded-full transition-all"
+                        style={{ width: `${batch.progress_percent}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0 ml-2" />
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </PageContainer>

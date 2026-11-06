@@ -1,51 +1,58 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import {
   AlertTriangle,
   BookOpen,
   Calendar,
-  CheckCircle,
+  Download,
   FileBox,
   FileCode,
   Files,
   FileSpreadsheet,
   FileText,
   Filter,
+  Grid,
   Hash,
   Image as ImageIcon,
   Info,
+  LayoutList,
+  MessageSquare,
   Music,
   Package,
+  Plus,
+  RefreshCw,
   Search,
-  Sparkles,
+  Trash2,
   Video,
-  X,
 } from "lucide-react";
+import { UniversalFileInspector } from "@/components/inspector/UniversalFileInspector";
+import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { LoadingState } from "@/components/ui/LoadingState";
 import { PageContainer } from "@/components/ui/PageContainer";
-import { DocumentExtractionView } from "@/components/DocumentExtractionView";
-import { ImageIntelligenceView } from "@/components/ImageIntelligenceView";
-import { PresentationIntelligenceView } from "@/components/PresentationIntelligenceView";
-import { SpreadsheetIntelligenceView } from "@/components/SpreadsheetIntelligenceView";
-import { AudioIntelligenceView } from "@/components/AudioIntelligenceView";
-import { VideoIntelligenceView } from "@/components/VideoIntelligenceView";
-import { CodeIntelligenceView } from "@/components/CodeIntelligenceView";
-import { StructuredDataIntelligenceView } from "@/components/StructuredDataIntelligenceView";
-import { ArchiveIntelligenceView } from "@/components/ArchiveIntelligenceView";
-import { AIWorkspace } from "@/components/ai/AIWorkspace";
+import { useToast } from "@/context/ToastContext";
 import { api } from "@/services/api";
 import { FileRecordSummary, FormatDetailData } from "@/types/api";
 
 export const FileLibraryPage: React.FC = () => {
+  const navigate = useNavigate();
+  const { success, error } = useToast();
+
   const [activeTab, setActiveTab] = useState<"files" | "registry">("files");
+  const [viewMode, setViewMode] = useState<"list" | "grid">("list");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedStatus, setSelectedStatus] = useState("all");
+  const [sortBy, setSortBy] = useState<"date_desc" | "date_asc" | "name_asc" | "size_desc">("date_desc");
+
+  // Selection & Actions
   const [inspectingFile, setInspectingFile] = useState<FileRecordSummary | null>(null);
-  const [modalTab, setModalTab] = useState<
-    "extraction" | "image_intelligence" | "spreadsheet_intelligence" | "presentation_intelligence" | "audio_intelligence" | "video_intelligence" | "code_intelligence" | "structured_data_intelligence" | "archive_intelligence" | "detection" | "ai_intelligence"
-  >("extraction");
+  const [fileToDelete, setFileToDelete] = useState<FileRecordSummary | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Queries
   const {
@@ -53,9 +60,10 @@ export const FileLibraryPage: React.FC = () => {
     isLoading: filesLoading,
     error: filesError,
     refetch: refetchFiles,
+    isFetching,
   } = useQuery({
     queryKey: ["files"],
-    queryFn: () => api.getFiles(50, 0),
+    queryFn: () => api.getFiles(100, 0),
   });
 
   const {
@@ -79,17 +87,12 @@ export const FileLibraryPage: React.FC = () => {
     "archive",
     "code",
     "structured_data",
-    "email",
-    "ebook",
-    "font",
-    "executable",
-    "other_binary",
   ];
 
   const formatBytes = (bytes: number): string => {
-    if (bytes === 0) return "0 Bytes";
+    if (!bytes || bytes === 0) return "0 B";
     const k = 1024;
-    const sizes = ["Bytes", "KB", "MB", "GB"];
+    const sizes = ["B", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
   };
@@ -117,105 +120,90 @@ export const FileLibraryPage: React.FC = () => {
     }
   };
 
-  const filteredFiles = (files || []).filter((f) => {
-    const matchesSearch =
-      f.original_filename.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      f.sha256.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (f.detected_mime_type && f.detected_mime_type.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (f.detection_format_id && f.detection_format_id.toLowerCase().includes(searchTerm.toLowerCase()));
-
-    const matchesCat =
-      selectedCategory === "all" ||
-      f.format_category === selectedCategory ||
-      (selectedCategory === "document" && f.format_category === "pdf");
-
-    return matchesSearch && matchesCat;
-  });
-
-  const isSpreadsheet = (f: FileRecordSummary) =>
-    f.format_category === "spreadsheet" ||
-    ["xlsx", "xls", "csv", "tsv", "ods"].includes(
-      (f.detection_format_id || f.actual_extension || f.claimed_extension || "").toLowerCase()
-    );
-
-  const isImage = (f: FileRecordSummary) =>
-    f.format_category === "image" ||
-    ["png", "jpeg", "jpg", "webp", "tiff", "bmp", "gif"].includes(
-      (f.detection_format_id || f.actual_extension || f.claimed_extension || "").toLowerCase()
-    );
-
-  const isPresentation = (f: FileRecordSummary) =>
-    f.format_category === "presentation" ||
-    ["pptx", "ppt", "odp"].includes(
-      (f.detection_format_id || f.actual_extension || f.claimed_extension || "").toLowerCase()
-    );
-
-  const isAudio = (f: FileRecordSummary) =>
-    f.format_category === "audio" ||
-    ["mp3", "wav", "m4a", "aac", "flac", "ogg", "oga"].includes(
-      (f.detection_format_id || f.actual_extension || f.claimed_extension || "").toLowerCase()
-    );
-
-  const isVideo = (f: FileRecordSummary) =>
-    f.format_category === "video" ||
-    ["mp4", "mkv", "mov", "avi", "webm", "m4v", "qt"].includes(
-      (f.detection_format_id || f.actual_extension || f.claimed_extension || "").toLowerCase()
-    );
-
-  const isCode = (f: FileRecordSummary) =>
-    f.format_category === "code" ||
-    [
-      "py", "js", "ts", "jsx", "tsx", "html", "css",
-      "java", "c", "cpp", "go", "rs", "php", "sql",
-    ].includes(
-      (f.detection_format_id || f.actual_extension || f.claimed_extension || "").toLowerCase()
-    );
-
-  const isStructuredData = (f: FileRecordSummary) =>
-    f.format_category === "structured_data" ||
-    ["json", "xml", "yaml", "yml", "toml", "parquet", "pq"].includes(
-      (f.detection_format_id || f.actual_extension || f.claimed_extension || "").toLowerCase()
-    );
-
-  const isArchive = (f: FileRecordSummary) =>
-    f.format_category === "archive" ||
-    ["zip", "7z", "tar", "gz", "tgz", "bz2", "tbz2", "xz", "txz"].includes(
-      (f.detection_format_id || f.actual_extension || f.claimed_extension || "").toLowerCase()
-    );
-
-  const handleInspect = (file: FileRecordSummary) => {
-    setInspectingFile(file);
-    if (isArchive(file)) {
-      setModalTab("archive_intelligence");
-    } else if (isCode(file)) {
-      setModalTab("code_intelligence");
-    } else if (isStructuredData(file)) {
-      setModalTab("structured_data_intelligence");
-    } else if (isVideo(file)) {
-      setModalTab("video_intelligence");
-    } else if (isAudio(file)) {
-      setModalTab("audio_intelligence");
-    } else if (isSpreadsheet(file)) {
-      setModalTab("spreadsheet_intelligence");
-    } else if (isImage(file)) {
-      setModalTab("image_intelligence");
-    } else if (isPresentation(file)) {
-      setModalTab("presentation_intelligence");
-    } else {
-      setModalTab("extraction");
+  const handleDeleteFile = async () => {
+    if (!fileToDelete) return;
+    setIsDeleting(true);
+    try {
+      await api.deleteFile(fileToDelete.id);
+      success("File Deleted", `${fileToDelete.original_filename} was successfully removed.`);
+      setFileToDelete(null);
+      refetchFiles();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to delete file.";
+      error("Deletion Failed", msg);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
+  const filteredFiles = (files || [])
+    .filter((f) => {
+      const term = searchTerm.toLowerCase();
+      const matchesSearch =
+        f.original_filename.toLowerCase().includes(term) ||
+        f.sha256.toLowerCase().includes(term) ||
+        (f.detected_mime_type && f.detected_mime_type.toLowerCase().includes(term)) ||
+        (f.detection_format_id && f.detection_format_id.toLowerCase().includes(term));
+
+      const matchesCat =
+        selectedCategory === "all" ||
+        f.format_category === selectedCategory ||
+        (selectedCategory === "document" && f.format_category === "pdf");
+
+      const matchesStatus =
+        selectedStatus === "all" ||
+        f.status === selectedStatus;
+
+      return matchesSearch && matchesCat && matchesStatus;
+    })
+    .sort((a, b) => {
+      if (sortBy === "date_desc") {
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      }
+      if (sortBy === "date_asc") {
+        return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+      }
+      if (sortBy === "name_asc") {
+        return a.original_filename.localeCompare(b.original_filename);
+      }
+      if (sortBy === "size_desc") {
+        return b.file_size - a.file_size;
+      }
+      return 0;
+    });
+
   return (
     <PageContainer
-      title="File Library & Format Registry"
-      subtitle="Catalog of evaluated files, multi-signal detection records, and registered format definitions"
+      title="File Library & Explorer"
+      subtitle="Universal file catalog with deep inspection, multi-engine analysis, and AI Q&A"
+      action={
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => refetchFiles()}
+            isLoading={isFetching}
+            leftIcon={<RefreshCw className="h-3.5 w-3.5" />}
+          >
+            Refresh
+          </Button>
+
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={() => navigate("/upload")}
+            leftIcon={<Plus className="h-3.5 w-3.5" />}
+          >
+            Upload Files
+          </Button>
+        </div>
+      }
     >
-      {/* Navigation Tabs */}
-      <div className="flex items-center gap-3 border-b border-border pb-3 mb-6">
+      {/* Top Tab Bar */}
+      <div className="flex items-center border-b border-border gap-6">
         <button
           onClick={() => setActiveTab("files")}
-          className={`flex items-center gap-2 pb-1 text-sm font-semibold transition border-b-2 -mb-[13px] ${
+          className={`flex items-center gap-2 pb-3 text-xs font-semibold border-b-2 transition ${
             activeTab === "files"
               ? "border-primary text-primary"
               : "border-transparent text-muted-foreground hover:text-foreground"
@@ -224,9 +212,10 @@ export const FileLibraryPage: React.FC = () => {
           <Files className="h-4 w-4" />
           Ingested Files ({files?.length ?? 0})
         </button>
+
         <button
           onClick={() => setActiveTab("registry")}
-          className={`flex items-center gap-2 pb-1 text-sm font-semibold transition border-b-2 -mb-[13px] ${
+          className={`flex items-center gap-2 pb-3 text-xs font-semibold border-b-2 transition ${
             activeTab === "registry"
               ? "border-primary text-primary"
               : "border-transparent text-muted-foreground hover:text-foreground"
@@ -237,44 +226,97 @@ export const FileLibraryPage: React.FC = () => {
         </button>
       </div>
 
-      {/* Search and Filters Bar */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1">
+      {/* Search & Filter Toolbar */}
+      <div className="flex flex-col md:flex-row gap-3 mt-4 items-stretch md:items-center justify-between">
+        <div className="relative flex-1 max-w-lg">
           <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
           <input
             type="text"
             placeholder={
               activeTab === "files"
-                ? "Search files by name, hash, MIME, or detected format..."
-                : "Search registered formats by name, category, or extension..."
+                ? "Search files by name, checksum, MIME, or extension..."
+                : "Search registered formats by category or extension..."
             }
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full rounded-lg border border-border bg-card pl-9 pr-4 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+            className="w-full rounded-xl border border-border bg-card pl-9 pr-4 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:outline-hidden focus:ring-1 focus:ring-primary shadow-2xs"
           />
         </div>
 
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-2 sm:pb-0">
-          <Filter className="h-4 w-4 text-muted-foreground shrink-0 mr-1" />
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setSelectedCategory(cat)}
-              className={`rounded-lg px-2.5 py-1.5 text-xs capitalize font-medium transition shrink-0 ${
-                selectedCategory === cat
-                  ? "bg-primary text-white"
-                  : "bg-muted text-muted-foreground hover:text-foreground"
-              }`}
+        {activeTab === "files" && (
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* Status Filter */}
+            <select
+              value={selectedStatus}
+              onChange={(e) => setSelectedStatus(e.target.value)}
+              className="text-xs px-2.5 py-2 rounded-xl border border-border bg-card text-foreground focus:outline-hidden shadow-2xs"
             >
-              {cat}
-            </button>
-          ))}
-        </div>
+              <option value="all">All Statuses</option>
+              <option value="processed">Ready / Processed</option>
+              <option value="processing">Processing</option>
+              <option value="failed">Failed</option>
+            </select>
+
+            {/* Sort Dropdown */}
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as any)}
+              className="text-xs px-2.5 py-2 rounded-xl border border-border bg-card text-foreground focus:outline-hidden shadow-2xs"
+            >
+              <option value="date_desc">Newest Ingested</option>
+              <option value="date_asc">Oldest Ingested</option>
+              <option value="name_asc">Name (A-Z)</option>
+              <option value="size_desc">File Size (Largest)</option>
+            </select>
+
+            {/* View Mode Toggle */}
+            <div className="flex items-center rounded-xl bg-muted/60 p-1 border border-border shadow-2xs">
+              <button
+                onClick={() => setViewMode("list")}
+                className={`p-1.5 rounded-lg transition ${
+                  viewMode === "list" ? "bg-card text-foreground shadow-xs" : "text-muted-foreground"
+                }`}
+                title="List View"
+                aria-label="List View"
+              >
+                <LayoutList className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => setViewMode("grid")}
+                className={`p-1.5 rounded-lg transition ${
+                  viewMode === "grid" ? "bg-card text-foreground shadow-xs" : "text-muted-foreground"
+                }`}
+                title="Grid View"
+                aria-label="Grid View"
+              >
+                <Grid className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Tab 1: Ingested Files Library */}
+      {/* Category Filter Pills */}
+      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 mt-3">
+        <Filter className="h-3.5 w-3.5 text-muted-foreground shrink-0 mr-1" />
+        {categories.map((cat) => (
+          <button
+            key={cat}
+            onClick={() => setSelectedCategory(cat)}
+            className={`rounded-lg px-2.5 py-1 text-xs capitalize font-medium transition shrink-0 ${
+              selectedCategory === cat
+                ? "bg-primary text-white shadow-2xs"
+                : "bg-muted text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {cat}
+          </button>
+        ))}
+      </div>
+
+      {/* Tab 1: Files Explorer */}
       {activeTab === "files" && (
-        <div className="mt-6 rounded-xl border border-border bg-card p-5">
+        <div className="mt-4">
           {filesLoading ? (
             <LoadingState message="Loading cataloged files..." />
           ) : filesError ? (
@@ -286,66 +328,61 @@ export const FileLibraryPage: React.FC = () => {
           ) : filteredFiles.length === 0 ? (
             <EmptyState
               icon={<Files className="h-8 w-8" />}
-              title="No Files Found"
-              description="No files match your current filters. Upload or detect files from the Upload gateway."
+              title="No Files Matching Filters"
+              description="Upload files from the Ingestion gateway or adjust your search criteria."
             />
-          ) : (
-            <div className="divide-y divide-border">
+          ) : viewMode === "list" ? (
+            /* List View */
+            <div className="rounded-2xl border border-border bg-card overflow-hidden shadow-2xs divide-y divide-border/60">
               {filteredFiles.map((file) => (
                 <div
                   key={file.id}
-                  className="py-3.5 flex flex-col md:flex-row md:items-center justify-between gap-3 hover:bg-muted/30 px-3 rounded-lg transition"
+                  className="p-3.5 flex flex-col md:flex-row md:items-center justify-between gap-3 hover:bg-muted/30 transition group"
                 >
                   <div className="flex items-start gap-3 min-w-0">
-                    <div className="p-2 rounded-lg bg-muted text-muted-foreground shrink-0 mt-0.5">
+                    <div className="p-2.5 rounded-xl bg-muted text-muted-foreground shrink-0 mt-0.5">
                       {getCategoryIcon(file.format_category)}
                     </div>
                     <div className="min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <p className="text-sm font-medium text-foreground truncate max-w-sm">
+                        <button
+                          onClick={() => setInspectingFile(file)}
+                          className="text-xs font-semibold text-foreground hover:text-primary transition truncate max-w-sm sm:max-w-md text-left"
+                        >
                           {file.original_filename}
-                        </p>
-                        <span className="text-[11px] text-muted-foreground">
+                        </button>
+                        <span className="text-[11px] text-muted-foreground font-mono">
                           ({formatBytes(file.file_size)})
                         </span>
-
                         {file.detection_format_id && (
-                          <span className="rounded bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">
+                          <Badge variant="primary" size="sm">
                             {file.detection_format_id.toUpperCase()}
-                          </span>
+                          </Badge>
                         )}
-
-                        {file.detected_mime_type && (
-                          <span className="rounded bg-muted px-2 py-0.5 text-[11px] font-mono text-muted-foreground">
-                            {file.detected_mime_type}
-                          </span>
-                        )}
-
-                        {file.confidence_score !== undefined && (
-                          <span
-                            className={`rounded px-2 py-0.5 text-[11px] font-medium ${
-                              file.confidence_level === "high"
-                                ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                                : "bg-amber-500/10 text-amber-600 dark:text-amber-400"
-                            }`}
-                          >
-                            {Math.round(file.confidence_score * 100)}% Confidence
-                          </span>
-                        )}
+                        <span
+                          className={`text-[10px] font-semibold px-2 py-0.5 rounded capitalize ${
+                            file.status === "processed"
+                              ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                              : file.status === "processing"
+                                ? "bg-blue-500/10 text-blue-500"
+                                : "bg-muted text-muted-foreground"
+                          }`}
+                        >
+                          {file.status}
+                        </span>
                       </div>
 
                       {file.is_mismatch && (
                         <div className="mt-1 flex items-center gap-1.5 text-[11px] text-amber-600 dark:text-amber-400 font-semibold">
-                          <AlertTriangle className="h-3.5 w-3.5" />
-                          Extension Mismatch: Claimed .{file.claimed_extension}, actually .
-                          {file.actual_extension}
+                          <AlertTriangle className="h-3 w-3" />
+                          Extension Mismatch: Claimed .{file.claimed_extension}, actually .{file.actual_extension}
                         </div>
                       )}
 
-                      <div className="mt-1 flex items-center gap-3 text-[11px] text-muted-foreground font-mono">
+                      <div className="mt-1 flex items-center gap-3 text-[10px] text-muted-foreground font-mono">
                         <span className="flex items-center gap-1">
                           <Hash className="h-3 w-3" />
-                          {file.sha256.slice(0, 16)}...
+                          {file.sha256.slice(0, 12)}...
                         </span>
                         <span className="flex items-center gap-1">
                           <Calendar className="h-3 w-3" />
@@ -355,14 +392,110 @@ export const FileLibraryPage: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 self-end md:self-center shrink-0">
-                    <button
-                      onClick={() => handleInspect(file)}
-                      className="rounded border border-border px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground transition flex items-center gap-1"
+                  {/* Actions */}
+                  <div className="flex items-center gap-2 shrink-0 self-end md:self-center">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setInspectingFile(file)}
+                      leftIcon={<Info className="h-3.5 w-3.5" />}
                     >
-                      <Info className="h-3.5 w-3.5" />
-                      Inspect Record
+                      Inspect
+                    </Button>
+
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => navigate(`/ai`)}
+                      leftIcon={<MessageSquare className="h-3.5 w-3.5 text-blue-500" />}
+                    >
+                      Chat
+                    </Button>
+
+                    <a
+                      href={api.getFileDownloadUrl(file.id)}
+                      download={file.original_filename}
+                      className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition"
+                      title="Download Original"
+                    >
+                      <Download className="h-4 w-4" />
+                    </a>
+
+                    <button
+                      onClick={() => setFileToDelete(file)}
+                      className="p-1.5 rounded-lg text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition"
+                      title="Delete File"
+                      aria-label="Delete File"
+                    >
+                      <Trash2 className="h-4 w-4" />
                     </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            /* Grid View */
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredFiles.map((file) => (
+                <div
+                  key={file.id}
+                  className="rounded-2xl border border-border bg-card p-4 hover:border-primary/50 transition flex flex-col justify-between shadow-2xs space-y-3"
+                >
+                  <div className="space-y-2">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="p-2 rounded-xl bg-muted text-muted-foreground">
+                        {getCategoryIcon(file.format_category)}
+                      </div>
+                      <Badge variant="primary" size="sm">
+                        {(file.detection_format_id || file.extension).toUpperCase()}
+                      </Badge>
+                    </div>
+
+                    <div>
+                      <h4
+                        onClick={() => setInspectingFile(file)}
+                        className="text-xs font-semibold text-foreground hover:text-primary transition truncate cursor-pointer"
+                        title={file.original_filename}
+                      >
+                        {file.original_filename}
+                      </h4>
+                      <p className="text-[11px] text-muted-foreground mt-0.5">
+                        {formatBytes(file.file_size)} • {file.format_category || "Document"}
+                      </p>
+                    </div>
+
+                    <div className="text-[10px] text-muted-foreground font-mono truncate">
+                      SHA: {file.sha256.slice(0, 16)}...
+                    </div>
+                  </div>
+
+                  <div className="pt-3 border-t border-border/60 flex items-center justify-between">
+                    <span
+                      className={`text-[10px] font-semibold px-2 py-0.5 rounded capitalize ${
+                        file.status === "processed"
+                          ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                          : "bg-muted text-muted-foreground"
+                      }`}
+                    >
+                      {file.status}
+                    </span>
+
+                    <div className="flex items-center gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setInspectingFile(file)}
+                      >
+                        Inspect
+                      </Button>
+                      <button
+                        onClick={() => setFileToDelete(file)}
+                        className="p-1 rounded text-muted-foreground hover:text-red-500"
+                        title="Delete"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -373,7 +506,7 @@ export const FileLibraryPage: React.FC = () => {
 
       {/* Tab 2: Supported Formats Registry */}
       {activeTab === "registry" && (
-        <div className="mt-6 rounded-xl border border-border bg-card p-5">
+        <div className="mt-4">
           {registryLoading ? (
             <LoadingState message="Loading format registry..." />
           ) : registryError ? (
@@ -386,9 +519,9 @@ export const FileLibraryPage: React.FC = () => {
               {(formatRegistry?.formats || []).map((fmt: FormatDetailData) => (
                 <div
                   key={fmt.format_id}
-                  className="rounded-lg border border-border bg-background p-3.5 hover:border-primary/50 transition flex flex-col justify-between"
+                  className="rounded-2xl border border-border bg-card p-4 hover:border-primary/50 transition flex flex-col justify-between shadow-2xs"
                 >
-                  <div>
+                  <div className="space-y-2">
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex items-center gap-2">
                         {getCategoryIcon(fmt.category)}
@@ -396,32 +529,32 @@ export const FileLibraryPage: React.FC = () => {
                           {fmt.display_name}
                         </h4>
                       </div>
-                      <span className="rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-mono text-primary">
+                      <Badge variant="primary" size="sm">
                         {fmt.format_id}
-                      </span>
+                      </Badge>
                     </div>
 
-                    <p className="mt-1 text-[11px] text-muted-foreground line-clamp-2">
+                    <p className="text-[11px] text-muted-foreground line-clamp-2">
                       {fmt.description}
                     </p>
-                  </div>
 
-                  <div className="mt-3 pt-2 border-t border-border/50 text-[10px] space-y-1">
-                    <div className="flex items-center justify-between text-muted-foreground">
-                      <span>Category:</span>
-                      <span className="font-medium capitalize text-foreground">{fmt.category}</span>
-                    </div>
-                    <div className="flex items-center justify-between text-muted-foreground">
-                      <span>Extensions:</span>
-                      <span className="font-mono text-foreground">
-                        {fmt.extensions.map((e) => `.${e}`).join(", ")}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between text-muted-foreground">
-                      <span>Support Status:</span>
-                      <span className="font-semibold uppercase text-emerald-600 dark:text-emerald-400">
-                        {fmt.support_status}
-                      </span>
+                    <div className="pt-2 text-[10px] space-y-1 text-muted-foreground">
+                      <div className="flex justify-between">
+                        <span>Category:</span>
+                        <span className="font-medium capitalize text-foreground">{fmt.category}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Extensions:</span>
+                        <span className="font-mono text-foreground">
+                          {fmt.extensions.map((e) => `.${e}`).join(", ")}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Support Status:</span>
+                        <span className="font-semibold uppercase text-emerald-600 dark:text-emerald-400">
+                          {fmt.support_status}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -431,296 +564,29 @@ export const FileLibraryPage: React.FC = () => {
         </div>
       )}
 
-      {/* File Record Inspection & Extraction Modal */}
+      {/* Universal File Inspector Modal */}
       {inspectingFile && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="rounded-xl border border-border bg-card w-full max-w-6xl max-h-[90vh] overflow-y-auto p-6 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-border">
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2">
-                  <FileBox className="h-5 w-5 text-primary" />
-                  <h3 className="font-semibold text-foreground text-sm truncate max-w-xs">
-                    {inspectingFile.original_filename}
-                  </h3>
-                </div>
-                <div className="flex items-center rounded-lg bg-muted p-0.5 text-xs">
-                  {isSpreadsheet(inspectingFile) && (
-                    <button
-                      onClick={() => setModalTab("spreadsheet_intelligence")}
-                      className={`px-3 py-1 rounded-md font-medium transition ${
-                        modalTab === "spreadsheet_intelligence"
-                          ? "bg-card text-foreground shadow-sm"
-                          : "text-muted-foreground hover:text-foreground"
-                      }`}
-                    >
-                      Spreadsheet Intelligence
-                    </button>
-                  )}
-                  {isImage(inspectingFile) && (
-                    <button
-                      onClick={() => setModalTab("image_intelligence")}
-                      className={`px-3 py-1 rounded-md font-medium transition ${
-                        modalTab === "image_intelligence"
-                          ? "bg-card text-foreground shadow-sm"
-                          : "text-muted-foreground hover:text-foreground"
-                      }`}
-                    >
-                      Image Intelligence
-                    </button>
-                  )}
-                  {isAudio(inspectingFile) && (
-                    <button
-                      onClick={() => setModalTab("audio_intelligence")}
-                      className={`px-3 py-1 rounded-md font-medium transition ${
-                        modalTab === "audio_intelligence"
-                          ? "bg-card text-foreground shadow-sm"
-                          : "text-muted-foreground hover:text-foreground"
-                      }`}
-                    >
-                      Audio Intelligence
-                    </button>
-                  )}
-                  {isVideo(inspectingFile) && (
-                    <button
-                      onClick={() => setModalTab("video_intelligence")}
-                      className={`px-3 py-1 rounded-md font-medium transition ${
-                        modalTab === "video_intelligence"
-                          ? "bg-card text-foreground shadow-sm"
-                          : "text-muted-foreground hover:text-foreground"
-                      }`}
-                    >
-                      Video Intelligence
-                    </button>
-                  )}
-                  {isPresentation(inspectingFile) && (
-                    <button
-                      onClick={() => setModalTab("presentation_intelligence")}
-                      className={`px-3 py-1 rounded-md font-medium transition ${
-                        modalTab === "presentation_intelligence"
-                          ? "bg-card text-foreground shadow-sm"
-                          : "text-muted-foreground hover:text-foreground"
-                      }`}
-                    >
-                      Presentation Intelligence
-                    </button>
-                  )}
-                  {isCode(inspectingFile) && (
-                    <button
-                      onClick={() => setModalTab("code_intelligence")}
-                      className={`px-3 py-1 rounded-md font-medium transition ${
-                        modalTab === "code_intelligence"
-                          ? "bg-card text-foreground shadow-sm"
-                          : "text-muted-foreground hover:text-foreground"
-                      }`}
-                    >
-                      Code Intelligence
-                    </button>
-                  )}
-                  {isStructuredData(inspectingFile) && (
-                    <button
-                      onClick={() => setModalTab("structured_data_intelligence")}
-                      className={`px-3 py-1 rounded-md font-medium transition ${
-                        modalTab === "structured_data_intelligence"
-                          ? "bg-card text-foreground shadow-sm"
-                          : "text-muted-foreground hover:text-foreground"
-                      }`}
-                    >
-                      Structured Data
-                    </button>
-                  )}
-                  {isArchive(inspectingFile) && (
-                    <button
-                      onClick={() => setModalTab("archive_intelligence")}
-                      className={`px-3 py-1 rounded-md font-medium transition ${
-                        modalTab === "archive_intelligence"
-                          ? "bg-card text-foreground shadow-sm"
-                          : "text-muted-foreground hover:text-foreground"
-                      }`}
-                    >
-                      Archive Intelligence
-                    </button>
-                  )}
-                  {!isArchive(inspectingFile) && !isSpreadsheet(inspectingFile) && !isImage(inspectingFile) && !isPresentation(inspectingFile) && !isAudio(inspectingFile) && !isVideo(inspectingFile) && !isCode(inspectingFile) && !isStructuredData(inspectingFile) && (
-                    <button
-                      onClick={() => setModalTab("extraction")}
-                      className={`px-3 py-1 rounded-md font-medium transition ${
-                        modalTab === "extraction"
-                          ? "bg-card text-foreground shadow-sm"
-                          : "text-muted-foreground hover:text-foreground"
-                      }`}
-                    >
-                      Document Content
-                    </button>
-                  )}
-                  <button
-                    onClick={() => setModalTab("detection")}
-                    className={`px-3 py-1 rounded-md font-medium transition ${
-                      modalTab === "detection"
-                        ? "bg-card text-foreground shadow-sm"
-                        : "text-muted-foreground hover:text-foreground"
-                    }`}
-                  >
-                    Detection Provenance
-                  </button>
-                  <button
-                    onClick={() => setModalTab("ai_intelligence")}
-                    className={`px-3 py-1 rounded-md font-medium transition flex items-center gap-1.5 ${
-                      modalTab === "ai_intelligence"
-                        ? "bg-blue-600 text-white shadow-sm"
-                        : "text-blue-600 dark:text-blue-400 hover:text-blue-700 bg-blue-50 dark:bg-blue-950/40"
-                    }`}
-                  >
-                    <Sparkles className="h-3.5 w-3.5" />
-                    AI Intelligence
-                  </button>
-                </div>
-              </div>
-              <button
-                onClick={() => setInspectingFile(null)}
-                className="text-muted-foreground hover:text-foreground transition p-1"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            {modalTab === "ai_intelligence" ? (
-              <AIWorkspace
-                selectedFileId={inspectingFile.id}
-                selectedFilename={inspectingFile.original_filename}
-              />
-            ) : modalTab === "archive_intelligence" ? (
-              <ArchiveIntelligenceView
-                fileId={inspectingFile.id}
-                filename={inspectingFile.original_filename}
-                onClose={() => setInspectingFile(null)}
-              />
-            ) : modalTab === "code_intelligence" ? (
-              <CodeIntelligenceView
-                fileId={inspectingFile.id}
-                filename={inspectingFile.original_filename}
-                onClose={() => setInspectingFile(null)}
-              />
-            ) : modalTab === "structured_data_intelligence" ? (
-              <StructuredDataIntelligenceView
-                fileId={inspectingFile.id}
-                filename={inspectingFile.original_filename}
-                onClose={() => setInspectingFile(null)}
-              />
-            ) : modalTab === "spreadsheet_intelligence" ? (
-              <SpreadsheetIntelligenceView
-                fileId={inspectingFile.id}
-                filename={inspectingFile.original_filename}
-                format={inspectingFile.detection_format_id || inspectingFile.actual_extension}
-              />
-            ) : modalTab === "extraction" ? (
-              <DocumentExtractionView
-                fileId={inspectingFile.id}
-                filename={inspectingFile.original_filename}
-                formatId={inspectingFile.detection_format_id || inspectingFile.extension}
-                onClose={() => setInspectingFile(null)}
-              />
-            ) : modalTab === "presentation_intelligence" ? (
-              <PresentationIntelligenceView
-                fileId={inspectingFile.id}
-                filename={inspectingFile.original_filename}
-                format={inspectingFile.detection_format_id || inspectingFile.actual_extension}
-              />
-            ) : modalTab === "audio_intelligence" ? (
-              <AudioIntelligenceView
-                fileId={inspectingFile.id}
-                filename={inspectingFile.original_filename}
-                format={inspectingFile.detection_format_id || inspectingFile.actual_extension}
-              />
-            ) : modalTab === "video_intelligence" ? (
-              <VideoIntelligenceView
-                fileId={inspectingFile.id}
-                filename={inspectingFile.original_filename}
-                format={inspectingFile.detection_format_id || inspectingFile.actual_extension}
-              />
-            ) : modalTab === "image_intelligence" ? (
-              <ImageIntelligenceView
-                fileId={inspectingFile.id}
-                filename={inspectingFile.original_filename}
-                format={inspectingFile.detection_format_id || inspectingFile.extension}
-              />
-            ) : (
-              <div className="space-y-4 text-xs">
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 p-3 rounded-lg bg-background border border-border/60">
-                  <div>
-                    <span className="text-muted-foreground block text-[11px]">Filename:</span>
-                    <span className="font-medium text-foreground">{inspectingFile.original_filename}</span>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground block text-[11px]">File ID:</span>
-                    <span className="font-mono text-[10px] text-foreground">{inspectingFile.id}</span>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground block text-[11px]">Detected MIME:</span>
-                    <span className="font-mono text-foreground">
-                      {inspectingFile.detected_mime_type || "N/A"}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground block text-[11px]">Format & Category:</span>
-                    <span className="font-medium capitalize text-foreground">
-                      {inspectingFile.detection_format_id || "unknown"} (
-                      {inspectingFile.format_category || "unknown"})
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground block text-[11px]">SHA-256 Checksum:</span>
-                    <span className="font-mono text-[10px] truncate block text-foreground">
-                      {inspectingFile.sha256}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground block text-[11px]">Detection Engine:</span>
-                    <span className="text-foreground">
-                      v{inspectingFile.detection_engine_version || "2.0.0"}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Evidence Log */}
-                {inspectingFile.detection_evidence && inspectingFile.detection_evidence.length > 0 && (
-                  <div>
-                    <h4 className="font-semibold text-foreground mb-2 flex items-center gap-1.5">
-                      <CheckCircle className="h-4 w-4 text-emerald-500" />
-                      Detection Evidence Log
-                    </h4>
-                    <div className="space-y-1.5">
-                      {inspectingFile.detection_evidence.map((ev, i) => (
-                        <div
-                          key={i}
-                          className="rounded bg-background p-2 border border-border/40 text-[11px] flex items-center justify-between"
-                        >
-                          <span className="font-semibold uppercase text-foreground">{ev.signal}</span>
-                          <span className="font-mono text-[10px] text-muted-foreground">
-                            {ev.details}
-                          </span>
-                          <span className="text-emerald-600 dark:text-emerald-400 font-medium">
-                            {Math.round(ev.confidence_score * 100)}%
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Metadata */}
-                {inspectingFile.file_metadata && Object.keys(inspectingFile.file_metadata).length > 0 && (
-                  <div>
-                    <h4 className="font-semibold text-foreground mb-1.5">Extracted Header Metadata:</h4>
-                    <pre className="bg-background rounded p-2 text-[10px] font-mono text-muted-foreground overflow-x-auto max-h-36">
-                      {JSON.stringify(inspectingFile.file_metadata, null, 2)}
-                    </pre>
-                  </div>
-                )}
-              </div>
-            )}
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 animate-in fade-in duration-150">
+          <div className="w-full max-w-7xl h-[92vh] flex flex-col">
+            <UniversalFileInspector
+              file={inspectingFile}
+              onClose={() => setInspectingFile(null)}
+              isModal={true}
+            />
           </div>
         </div>
       )}
+
+      {/* Deletion Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={Boolean(fileToDelete)}
+        title="Confirm File Deletion"
+        description={`Are you sure you want to permanently delete "${fileToDelete?.original_filename}"? This will remove the file record and its extracted metadata from storage.`}
+        confirmLabel={isDeleting ? "Deleting..." : "Delete Permanently"}
+        isDestructive={true}
+        onConfirm={handleDeleteFile}
+        onCancel={() => setFileToDelete(null)}
+      />
     </PageContainer>
   );
 };
