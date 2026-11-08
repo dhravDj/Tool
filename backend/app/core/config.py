@@ -101,7 +101,7 @@ class Settings(BaseSettings):
     # 4. Storage Configuration
     STORAGE_BACKEND: str = "local"
     STORAGE_LOCAL_ROOT: str = "./storage"
-    MAX_UPLOAD_SIZE_BYTES: int = 100 * 1024 * 1024  # 100 MB
+    MAX_UPLOAD_SIZE_BYTES: int = 500 * 1024 * 1024  # 500 MB
 
     @property
     def storage_paths(self) -> dict[str, Path]:
@@ -127,8 +127,8 @@ class Settings(BaseSettings):
     OCR_ENGINE: str = "tesseract"
     OCR_CONFIDENCE_THRESHOLD: float = 0.60
     OCR_DENSITY_THRESHOLD_CHARS: int = 40  # Trigger OCR if page text chars < 40
-    MAX_EXTRACTION_PAGE_LIMIT: int = 1000  # Defensive cap against page exhaustion
-    EXTRACTION_TIMEOUT_SECONDS: int = 120
+    MAX_EXTRACTION_PAGE_LIMIT: int = 50000  # Defensive cap: up to 50,000 pages for massive dockets/books
+    EXTRACTION_TIMEOUT_SECONDS: int = 600  # 10 minutes for massive files
 
     # 6. AI Engine Configuration (Local-first & Sovereign)
     AI_MODE: str = "local"  # local | cloud | hybrid

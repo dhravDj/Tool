@@ -110,7 +110,7 @@ class BaseDocumentExtractor(ExtractionEngineInterface):
         limit = (
             max_limit
             if max_limit is not None
-            else int(getattr(settings, "MAX_EXTRACTION_PAGE_LIMIT", 1000))
+            else int(getattr(settings, "MAX_EXTRACTION_PAGE_LIMIT", 50000))
         )
         if page_count > limit:
             raise PageLimitExceededError(

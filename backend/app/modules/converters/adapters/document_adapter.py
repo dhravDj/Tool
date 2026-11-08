@@ -35,7 +35,7 @@ class DocumentAdapter:
             current_page = block.page_number
 
             if block.block_type == BlockType.HEADING:
-                if current_section_content:
+                if current_section_content or (current_section_title and current_section_title != "Introduction"):
                     sections.append(
                         UniversalSection(
                             title=current_section_title,
@@ -84,6 +84,11 @@ class DocumentAdapter:
                     )
                 else:
                     # Fallback text representation of table
+                    paragraphs.append(text)
+                    current_section_content.append(text)
+
+            elif block.block_type == BlockType.IMAGE_REFERENCE:
+                if text:
                     paragraphs.append(text)
                     current_section_content.append(text)
 

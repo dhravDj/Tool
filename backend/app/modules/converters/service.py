@@ -548,7 +548,7 @@ class UniversalConversionService:
             duration = time.perf_counter() - t_start
             file_size = out_path.stat().st_size if out_path.exists() else len(preview_text.encode("utf-8"))
 
-            clean_preview = preview_text.replace("\x00", "")[:50000]
+            clean_preview = preview_text.replace("\x00", "")[:100000]
             clean_filename = out_filename.replace("\x00", "")
             clean_path = str(out_path).replace("\x00", "")
 

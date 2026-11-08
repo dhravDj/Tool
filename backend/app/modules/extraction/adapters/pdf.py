@@ -99,6 +99,7 @@ class PDFExtractor(BaseDocumentExtractor):
             warnings: list[str] = []
             errors: list[str] = []
             global_reading_order = 0
+            seen_image_ocr: dict[int, str] = {}
 
             for page_idx in range(page_count):
                 page_num = page_idx + 1
@@ -202,18 +203,16 @@ class PDFExtractor(BaseDocumentExtractor):
                 if is_scanned:
                     if settings.OCR_ENABLED and self.ocr_router.is_ocr_available():
                         try:
-                            # Render page to image bytes
-                            pixmap = page.get_pixmap(dpi=200)
+                            # Render page to image bytes (150 DPI is fast & accurate)
+                            pixmap = page.get_pixmap(dpi=150)
                             img_bytes = pixmap.tobytes("png")
 
-                            # Execute OCR safely in synchronous thread
-                            ocr_blocks, ocr_warnings = asyncio.run(
-                                self.ocr_router.process_scanned_page(
-                                    page_number=page_num,
-                                    image_bytes=img_bytes,
-                                    start_reading_order=global_reading_order,
-                                    options=options,
-                                )
+                            # Execute OCR safely without async/await
+                            ocr_blocks, ocr_warnings = self.ocr_router.process_scanned_page_sync(
+                                page_number=page_num,
+                                image_bytes=img_bytes,
+                                start_reading_order=global_reading_order,
+                                options=options,
                             )
 
                             warnings.extend(ocr_warnings)
@@ -230,6 +229,66 @@ class PDFExtractor(BaseDocumentExtractor):
                             f"Page {page_num}: Low digital text detected ({total_page_digital_chars} chars), "
                             "page appears scanned or image-based, but OCR is disabled or unavailable."
                         )
+                elif options.get("ocr_enabled", True) and self.ocr_router.is_ocr_available():
+                    # Scan embedded images in the middle of a PDF page
+                    for img_info in image_list:
+                        xref = img_info[0]
+                        if xref in seen_image_ocr:
+                            cached_text = seen_image_ocr[xref]
+                            if cached_text:
+                                img_block = CanonicalBlock(
+                                    block_id=self._generate_block_id(page_num, len(page_blocks)),
+                                    block_type=BlockType.PARAGRAPH,
+                                    text=cached_text,
+                                    reading_order=global_reading_order,
+                                    page_number=page_num,
+                                    confidence=0.90,
+                                    extraction_engine=f"ocr_embedded_{self.ocr_router.adapter.name}",
+                                    provenance="embedded_image_ocr",
+                                )
+                                page_blocks.append(img_block)
+                                all_blocks.append(img_block)
+                                global_reading_order += 1
+                            continue
+
+                        try:
+                            base_img = doc.extract_image(xref)
+                            w = int(base_img.get("width") or 0)
+                            h = int(base_img.get("height") or 0)
+                            # Filter out tiny icons, borders or bullets (< 60px or < 4000 total pixels)
+                            if w >= 60 and h >= 60 and (w * h) >= 4000:
+                                img_bytes = base_img["image"]
+                                if hasattr(self.ocr_router.adapter, "extract_text_sync"):
+                                    extracted_img_text, conf = self.ocr_router.adapter.extract_text_sync(img_bytes, options)
+                                elif hasattr(self.ocr_router.adapter, "_sync_extract"):
+                                    extracted_img_text, conf = self.ocr_router.adapter._sync_extract(img_bytes, options or {})
+                                else:
+                                    extracted_img_text, conf = "", 0.0
+
+                                clean_ocr = extracted_img_text.replace("\x00", "").strip()
+                                if clean_ocr:
+                                    formatted_img_text = f"\n> **[Image Extracted Text (OCR)]**\n> {clean_ocr}\n"
+                                    seen_image_ocr[xref] = formatted_img_text
+                                    img_block = CanonicalBlock(
+                                        block_id=self._generate_block_id(page_num, len(page_blocks)),
+                                        block_type=BlockType.PARAGRAPH,
+                                        text=formatted_img_text,
+                                        reading_order=global_reading_order,
+                                        page_number=page_num,
+                                        confidence=conf,
+                                        extraction_engine=f"ocr_embedded_{self.ocr_router.adapter.name}",
+                                        provenance="embedded_image_ocr",
+                                    )
+                                    page_blocks.append(img_block)
+                                    all_blocks.append(img_block)
+                                    global_reading_order += 1
+                                else:
+                                    seen_image_ocr[xref] = ""
+                            else:
+                                seen_image_ocr[xref] = ""
+                        except Exception as exc:
+                            seen_image_ocr[xref] = ""
+                            logger.debug(f"Embedded image OCR skipped for xref {xref}: {exc}")
 
                 # 4. Image Asset Extraction (Optional)
                 if extract_images and assets_dir:

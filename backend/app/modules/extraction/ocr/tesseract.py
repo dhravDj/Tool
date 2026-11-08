@@ -65,6 +65,17 @@ class TesseractOCRAdapter(OCRAdapterInterface):
             "install_guide": "Install Tesseract via 'sudo apt-get install -y tesseract-ocr tesseract-ocr-eng' on Linux or 'brew install tesseract' on macOS.",
         }
 
+    def extract_text_sync(
+        self,
+        image_bytes: bytes,
+        options: dict[str, Any] | None = None,
+    ) -> tuple[str, float]:
+        """Extract text and confidence score synchronously from image bytes."""
+        if not self.is_available:
+            logger.warning("Tesseract / RapidOCR is not available on this host.")
+            return "", 0.0
+        return self._sync_extract(image_bytes, options or {})
+
     async def extract_text_from_image(
         self,
         image_bytes: bytes,
