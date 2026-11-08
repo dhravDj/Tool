@@ -28,7 +28,7 @@ class DocumentAdapter:
         current_page = 1
 
         for block in doc.blocks:
-            text = block.text.strip()
+            text = block.text.replace("\x00", "").strip()
             if not text and block.block_type != BlockType.TABLE:
                 continue
 

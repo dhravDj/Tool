@@ -163,7 +163,7 @@ class PDFExtractor(BaseDocumentExtractor):
                     ):
                         continue
 
-                    cleaned_text = text.strip()
+                    cleaned_text = text.replace("\x00", "").strip()
                     if not cleaned_text:
                         continue
 
@@ -365,7 +365,7 @@ class PDFExtractor(BaseDocumentExtractor):
             return ""
         lines: list[str] = []
         for row in grid:
-            cells = [str(c if c is not None else "").replace("\n", " ").strip() for c in row]
+            cells = [str(c if c is not None else "").replace("\x00", "").replace("\n", " ").strip() for c in row]
             lines.append("| " + " | ".join(cells) + " |")
         return "\n".join(lines)
 

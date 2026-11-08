@@ -548,17 +548,22 @@ class UniversalConversionService:
             duration = time.perf_counter() - t_start
             file_size = out_path.stat().st_size if out_path.exists() else len(preview_text.encode("utf-8"))
 
+            clean_preview = preview_text.replace("\x00", "")[:50000]
+            clean_filename = out_filename.replace("\x00", "")
+            clean_path = str(out_path).replace("\x00", "")
+
             record.status = ConversionStatus.COMPLETED.value
             record.progress_percent = 100.0
-            record.output_filename = out_filename
-            record.output_path = str(out_path)
+            record.output_filename = clean_filename
+            record.output_path = clean_path
             record.output_size_bytes = file_size
             record.mime_type = mime_type
-            record.preview_content = preview_text[:50000]
+            record.preview_content = clean_preview
             record.duration_seconds = round(duration, 3)
             record.completed_at = datetime.now(UTC)
             if content.warnings:
-                record.warnings = list(set(record.warnings + content.warnings))
+                clean_warnings = [str(w).replace("\x00", "") for w in content.warnings]
+                record.warnings = list(set(record.warnings + clean_warnings))
 
             if session:
                 await session.commit()
@@ -574,12 +579,17 @@ class UniversalConversionService:
             logger.exception(f"Conversion failed for {effective_filename}: {exc}")
             record.status = ConversionStatus.FAILED.value
             record.progress_percent = 100.0
-            record.error_message = str(exc)
+            record.error_message = str(exc).replace("\x00", "")
             record.duration_seconds = round(duration, 3)
             record.completed_at = datetime.now(UTC)
             if session:
-                await session.commit()
-                await session.refresh(record)
+                try:
+                    await session.rollback()
+                    session.add(record)
+                    await session.commit()
+                    await session.refresh(record)
+                except Exception as db_err:
+                    logger.error(f"Failed to persist failed conversion status: {db_err}")
             raise
 
     async def _extract_universal_content(
