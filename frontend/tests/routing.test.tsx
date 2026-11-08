@@ -11,9 +11,7 @@ describe("Frontend Routing and Shell Rendering", () => {
     expect(screen.getByText("Universal SaaS")).toBeInTheDocument();
 
     // Nav links
-    expect(screen.getAllByText("Dashboard").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("Convert Files").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("My Files").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Bulk Converter").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Conversion History").length).toBeGreaterThan(0);
     expect(screen.getAllByText("System Status").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Settings").length).toBeGreaterThan(0);

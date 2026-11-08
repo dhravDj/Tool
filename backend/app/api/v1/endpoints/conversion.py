@@ -1,5 +1,6 @@
 """Universal File Conversion and Content Extraction API endpoints."""
 
+import io
 import os
 import shutil
 import tempfile
@@ -16,10 +17,12 @@ from fastapi import (
     Form,
     HTTPException,
     Query,
+    Response,
     UploadFile,
     status,
 )
 from fastapi.responses import FileResponse
+from pydantic import BaseModel
 from sqlalchemy import desc, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -261,6 +264,59 @@ async def list_conversion_files(
             )
 
     return APIResponse.ok(data=file_items, message="Bundle file listing retrieved.")
+
+
+class BatchDownloadRequest(BaseModel):
+    conversion_ids: list[str]
+
+
+@router.post("/conversions/batch-download")
+async def batch_download_conversions(
+    payload: BatchDownloadRequest,
+    session: AsyncSession = Depends(get_session),
+) -> Response:
+    """Bundle outputs of multiple conversions into a single ZIP archive for bulk download."""
+    if not payload.conversion_ids:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No conversion IDs provided.")
+
+    uuids: list[uuid.UUID] = []
+    for raw_id in payload.conversion_ids:
+        try:
+            uuids.append(uuid.UUID(raw_id))
+        except ValueError:
+            continue
+
+    if not uuids:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid conversion IDs.")
+
+    stmt = select(ConversionRecord).where(ConversionRecord.id.in_(uuids))
+    records = (await session.execute(stmt)).scalars().all()
+
+    if not records:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No matching conversions found.")
+
+    zip_buffer = io.BytesIO()
+    with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zf:
+        seen_names: set[str] = set()
+        for rec in records:
+            if rec.output_path and os.path.exists(rec.output_path):
+                filename = rec.output_filename or Path(rec.output_path).name
+                target_name = filename
+                counter = 1
+                while target_name in seen_names:
+                    stem = Path(filename).stem
+                    ext = Path(filename).suffix
+                    target_name = f"{stem}_{counter}{ext}"
+                    counter += 1
+                seen_names.add(target_name)
+                zf.write(rec.output_path, arcname=target_name)
+
+    zip_buffer.seek(0)
+    return Response(
+        content=zip_buffer.getvalue(),
+        media_type="application/zip",
+        headers={"Content-Disposition": "attachment; filename=converted_files.zip"},
+    )
 
 
 @router.post("/conversions/{conversion_id}/retry", response_model=APIResponse[ConversionResponse])

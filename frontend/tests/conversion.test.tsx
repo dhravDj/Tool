@@ -21,17 +21,14 @@ const renderWithProviders = (component: React.ReactElement) => {
 };
 
 describe("Universal File Converter Pages", () => {
-  it("renders ConvertPage with upload area, mode cards, and target format selectors", () => {
+  it("renders ConvertPage with upload area, format selectors, and bulk queue", () => {
     renderWithProviders(<ConvertPage />);
 
-    expect(screen.getByText("Universal File Converter & Extractor")).toBeInTheDocument();
-    expect(screen.getByText("1. Select Source File")).toBeInTheDocument();
-    expect(screen.getByText("2. Select Extraction Mode")).toBeInTheDocument();
-    expect(screen.getByText("Mode A: Plain Text (.txt)")).toBeInTheDocument();
-    expect(screen.getByText("Mode B: Structured Text (.md)")).toBeInTheDocument();
-    expect(screen.getByText("Mode C: Complete Extraction (.zip)")).toBeInTheDocument();
-    expect(screen.getByText("3. Target Output Format")).toBeInTheDocument();
-    expect(screen.getByText("Convert & Extract Content")).toBeInTheDocument();
+    expect(screen.getByText("Universal Bulk Converter")).toBeInTheDocument();
+    expect(screen.getByText("Target Output Format")).toBeInTheDocument();
+    expect(screen.getByText("Markdown (.md)")).toBeInTheDocument();
+    expect(screen.getByText("Plain Text (.txt)")).toBeInTheDocument();
+    expect(screen.getByText("Drag and drop files here, or click to browse")).toBeInTheDocument();
   });
 
   it("renders ConversionHistoryPage with table headers and filter controls", () => {

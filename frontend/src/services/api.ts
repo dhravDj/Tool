@@ -862,6 +862,18 @@ export const api = {
   getConversionDownloadUrl: (conversionId: string): string =>
     `${API_BASE}/conversions/${encodeURIComponent(conversionId)}/download`,
 
+  downloadBatchZip: async (conversionIds: string[]): Promise<Blob> => {
+    const res = await fetch(`${API_BASE}/conversions/batch-download`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ conversion_ids: conversionIds }),
+    });
+    if (!res.ok) {
+      throw new Error(`Failed to download batch ZIP: ${res.statusText}`);
+    }
+    return res.blob();
+  },
+
   getConversionFiles: (conversionId: string): Promise<ConversionBundleFile[]> =>
     request<ConversionBundleFile[]>(`/conversions/${encodeURIComponent(conversionId)}/files`),
 

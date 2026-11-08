@@ -5,10 +5,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Cpu,
-  FileBox,
-  Files,
-  Layers,
-  LayoutDashboard,
   RefreshCw,
   Server,
   Settings,
@@ -38,27 +34,10 @@ export const Sidebar: React.FC = () => {
 
   const navGroups: NavGroup[] = [
     {
-      name: "Conversion",
+      name: "File Converter",
       items: [
-        { label: "Dashboard", path: "/", icon: <LayoutDashboard className="h-4.5 w-4.5" /> },
-        { label: "Convert Files", path: "/convert", icon: <RefreshCw className="h-4.5 w-4.5 text-blue-500" /> },
-        { label: "My Files", path: "/files", icon: <Files className="h-4.5 w-4.5 text-indigo-500" /> },
+        { label: "Bulk Converter", path: "/", icon: <RefreshCw className="h-4.5 w-4.5 text-blue-500" /> },
         { label: "Conversion History", path: "/history", icon: <Activity className="h-4.5 w-4.5 text-emerald-500" /> },
-      ],
-    },
-    {
-      name: "Processing",
-      items: [
-        {
-          label: "Bulk Processing",
-          path: "/bulk-processing",
-          icon: <Layers className="h-4.5 w-4.5 text-indigo-500" />,
-        },
-        {
-          label: "Processing Jobs",
-          path: "/jobs",
-          icon: <FileBox className="h-4.5 w-4.5 text-pink-500" />,
-        },
       ],
     },
     {

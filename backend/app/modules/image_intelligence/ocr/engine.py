@@ -18,6 +18,13 @@ try:
 except ImportError:
     HAS_PYTESSERACT = False
 
+try:
+    from rapidocr_onnxruntime import RapidOCR
+
+    HAS_RAPIDOCR = True
+except ImportError:
+    HAS_RAPIDOCR = False
+
 
 class ImageOCREngine:
     """Extracts text, word coordinates, confidence scores, and reading order."""
@@ -26,14 +33,19 @@ class ImageOCREngine:
         self.tesseract_cmd = tesseract_cmd or shutil.which("tesseract")
         if self.tesseract_cmd and HAS_PYTESSERACT:
             pytesseract.pytesseract.tesseract_cmd = self.tesseract_cmd
+        self._rapid_ocr = RapidOCR() if HAS_RAPIDOCR else None
 
     @property
     def is_available(self) -> bool:
-        if not (settings.OCR_ENABLED and HAS_PYTESSERACT and self.tesseract_cmd):
+        if not settings.OCR_ENABLED:
             return False
-        import os
+        if HAS_RAPIDOCR and self._rapid_ocr is not None:
+            return True
+        if HAS_PYTESSERACT and self.tesseract_cmd:
+            import os
 
-        return bool(shutil.which(self.tesseract_cmd) or os.path.exists(self.tesseract_cmd))
+            return bool(shutil.which(self.tesseract_cmd) or os.path.exists(self.tesseract_cmd))
+        return False
 
     def extract_regions(
         self,
@@ -47,9 +59,13 @@ class ImageOCREngine:
 
         if not self.is_available:
             warnings.append(
-                "OCR engine (Tesseract) is unavailable on this host; text extraction was skipped."
+                "OCR engine is unavailable on this host; text extraction was skipped."
             )
             return [], "", 0.0, warnings
+
+        # Prefer RapidOCR when system tesseract binary is absent
+        if self._rapid_ocr is not None and not (self.tesseract_cmd and HAS_PYTESSERACT and shutil.which(self.tesseract_cmd)):
+            return self._extract_with_rapidocr(img, options)
 
         try:
             config = options.get("tesseract_config", "--psm 1 --oem 3")
@@ -131,6 +147,68 @@ class ImageOCREngine:
 
         except Exception as exc:
             logger.error(f"OCR execution failure: {exc}")
+            warnings.append(f"OCR processing failed: {exc}")
+            return [], "", 0.0, warnings
+
+    def _extract_with_rapidocr(
+        self,
+        img: Image.Image,
+        options: dict[str, Any] | None = None,
+    ) -> tuple[list[ImageRegion], str, float, list[str]]:
+        """Run RapidOCR on image and return standard ImageRegion list, full text, and confidence."""
+        import numpy as np
+
+        warnings: list[str] = []
+        width, height = img.size
+        try:
+            rgb_img = img.convert("RGB")
+            np_img = np.array(rgb_img)
+            res, _ = self._rapid_ocr(np_img)
+            if not res:
+                return [], "", 0.0, warnings
+
+            regions: list[ImageRegion] = []
+            full_text_lines: list[str] = []
+            confidences: list[float] = []
+
+            for idx, item in enumerate(res):
+                box, text, score = item[0], str(item[1]).strip(), float(item[2])
+                if not text:
+                    continue
+                xs = [p[0] for p in box]
+                ys = [p[1] for p in box]
+                x0, x1 = int(min(xs)), int(max(xs))
+                y0, y1 = int(min(ys)), int(max(ys))
+
+                ymin = round(max(0, y0) / max(1, height), 4)
+                xmin = round(max(0, x0) / max(1, width), 4)
+                ymax = round(min(height, y1) / max(1, height), 4)
+                xmax = round(min(width, x1) / max(1, width), 4)
+
+                conf = round(score, 3)
+                confidences.append(conf)
+                full_text_lines.append(text)
+
+                regions.append(
+                    ImageRegion(
+                        region_id=f"text_line_{idx + 1}",
+                        region_type=RegionType.TEXT,
+                        bounding_box=[ymin, xmin, ymax, xmax],
+                        pixel_box=[x0, y0, x1, y1],
+                        label="text_line",
+                        text=text,
+                        confidence=conf,
+                        provenance="ocr",
+                        reading_order=idx,
+                        attributes={"low_confidence": conf < 0.60},
+                    )
+                )
+
+            full_text = "\n".join(full_text_lines)
+            avg_conf = round(sum(confidences) / len(confidences), 3) if confidences else 0.0
+            return regions, full_text, avg_conf, warnings
+        except Exception as exc:
+            logger.error(f"RapidOCR execution failure: {exc}")
             warnings.append(f"OCR processing failed: {exc}")
             return [], "", 0.0, warnings
 

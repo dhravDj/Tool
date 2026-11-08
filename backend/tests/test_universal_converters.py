@@ -334,3 +334,40 @@ class TestUniversalConversionService:
             assert "name" in rec.preview_content or "Alice" in rec.preview_content
         finally:
             path.unlink(missing_ok=True)
+
+    @pytest.mark.asyncio
+    async def test_convert_image_scan_to_txt_and_md(self):
+        from PIL import Image, ImageDraw
+
+        service = UniversalConversionService()
+
+        img = Image.new("RGB", (400, 100), color="white")
+        d = ImageDraw.Draw(img)
+        d.text((10, 30), "DocuMind Scan OCR", fill="black")
+
+        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as f:
+            img.save(f.name)
+            path = Path(f.name)
+
+        try:
+            # 1. Image scan to TXT
+            rec_txt = await service.convert_file(
+                file_path=path,
+                target_format="txt",
+                original_filename="scan.png",
+            )
+            assert rec_txt.status == ConversionStatus.COMPLETED.value
+            assert rec_txt.output_filename.endswith(".txt")
+            assert "Scan" in rec_txt.preview_content or "OCR" in rec_txt.preview_content
+
+            # 2. Image scan to MD
+            rec_md = await service.convert_file(
+                file_path=path,
+                target_format="md",
+                original_filename="scan.png",
+            )
+            assert rec_md.status == ConversionStatus.COMPLETED.value
+            assert rec_md.output_filename.endswith(".md")
+            assert "Scan" in rec_md.preview_content or "OCR" in rec_md.preview_content
+        finally:
+            path.unlink(missing_ok=True)

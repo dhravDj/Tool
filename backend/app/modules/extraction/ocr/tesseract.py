@@ -17,22 +17,32 @@ try:
 except ImportError:
     HAS_PYTESSERACT = False
 
+try:
+    from rapidocr_onnxruntime import RapidOCR
+
+    HAS_RAPIDOCR = True
+except ImportError:
+    HAS_RAPIDOCR = False
+
 
 class TesseractOCRAdapter(OCRAdapterInterface):
-    """Production Tesseract OCR engine adapter with asynchronous thread execution."""
+    """Production Tesseract and RapidOCR engine adapter with asynchronous thread execution."""
 
     def __init__(self, tesseract_cmd: str | None = None) -> None:
         self._tesseract_cmd = tesseract_cmd or shutil.which("tesseract")
         if self._tesseract_cmd and HAS_PYTESSERACT:
             pytesseract.pytesseract.tesseract_cmd = self._tesseract_cmd
+        self._rapid_ocr = RapidOCR() if HAS_RAPIDOCR else None
 
     @property
     def name(self) -> str:
-        return "tesseract"
+        if self._tesseract_cmd and HAS_PYTESSERACT:
+            return "tesseract"
+        return "rapidocr"
 
     @property
     def is_available(self) -> bool:
-        return bool(HAS_PYTESSERACT and self._tesseract_cmd)
+        return bool((HAS_PYTESSERACT and self._tesseract_cmd) or (HAS_RAPIDOCR and self._rapid_ocr is not None))
 
     def get_diagnostics(self) -> dict[str, Any]:
         """Return comprehensive diagnostic status and language packs."""
@@ -73,6 +83,18 @@ class TesseractOCRAdapter(OCRAdapterInterface):
             img: Image.Image = (
                 raw_img.convert("RGB") if raw_img.mode not in ("RGB", "L") else raw_img
             )
+
+            # If RapidOCR is available and tesseract binary is missing, use RapidOCR
+            if self._rapid_ocr is not None and not (self._tesseract_cmd and HAS_PYTESSERACT):
+                import numpy as np
+                np_img = np.array(img.convert("RGB"))
+                res, _ = self._rapid_ocr(np_img)
+                if not res:
+                    return "", 0.0
+                lines = [str(item[1]).strip() for item in res if str(item[1]).strip()]
+                scores = [float(item[2]) for item in res]
+                avg_conf = round(sum(scores) / len(scores), 3) if scores else 0.0
+                return "\n".join(lines), avg_conf
 
             # Extract detailed OCR data including word-level confidence
             data = pytesseract.image_to_data(

@@ -1,19 +1,21 @@
-import React, { useState, useRef, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import React, { useState, useRef } from "react";
 import {
   UploadCloud,
   FileText,
-  Layers,
   CheckCircle2,
-  AlertTriangle,
+  AlertCircle,
   Download,
-  RefreshCw,
-  ArrowRight,
-  FileBox,
   Eye,
-  FileCheck,
-  CheckSquare,
-  Square,
+  Trash2,
+  RefreshCw,
+  Copy,
+  Check,
+  X,
+  FileCode,
+  Image as ImageIcon,
+  Table as TableIcon,
+  Archive,
+  Layers,
 } from "lucide-react";
 import { PageContainer } from "@/components/ui/PageContainer";
 import { Badge } from "@/components/ui/Badge";
@@ -22,541 +24,592 @@ import { useToast } from "@/context/ToastContext";
 import { api } from "@/services/api";
 import { ConversionRecordDTO } from "@/types/api";
 
+interface QueuedFile {
+  id: string;
+  file: File;
+  format: string;
+  isImage: boolean;
+  status: "queued" | "converting" | "completed" | "failed";
+  progress: number;
+  result?: ConversionRecordDTO;
+  error?: string;
+}
+
 export const ConvertPage: React.FC = () => {
   const { showToast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // States
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [detectedFormat, setDetectedFormat] = useState<string>("");
-  const [extractionMode, setExtractionMode] = useState<"plain_text" | "structured_text" | "complete">("structured_text");
-  const [targetFormat, setTargetFormat] = useState<string>("md");
+  // Target format: "txt" | "md"
+  const [targetFormat, setTargetFormat] = useState<"txt" | "md">("md");
+  const [convertBoth, setConvertBoth] = useState<boolean>(false);
   const [ocrEnabled, setOcrEnabled] = useState<boolean>(true);
-  const [preserveTables, setPreserveTables] = useState<boolean>(true);
-  const [preserveHeadings, setPreserveHeadings] = useState<boolean>(true);
 
-  const [isConverting, setIsConverting] = useState<boolean>(false);
-  const [conversionResult, setConversionResult] = useState<ConversionRecordDTO | null>(null);
-  const [previewTab, setPreviewTab] = useState<"formatted" | "raw" | "files" | "meta">("formatted");
-  const [bundleFiles, setBundleFiles] = useState<Array<{ filename: string; size_bytes: number }>>([]);
+  // Queue of files to convert
+  const [queue, setQueue] = useState<QueuedFile[]>([]);
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
+  const [isDragging, setIsDragging] = useState<boolean>(false);
 
-  // Fetch capabilities
-  const { data: capabilities } = useQuery({
-    queryKey: ["conversionCapabilities"],
-    queryFn: api.getConversionCapabilities,
-  });
+  // Preview modal state
+  const [previewResult, setPreviewResult] = useState<ConversionRecordDTO | null>(null);
+  const [copied, setCopied] = useState<boolean>(false);
 
-  // When file changes, auto-detect format and set default target format
-  useEffect(() => {
-    if (!selectedFile) {
-      setDetectedFormat("");
-      return;
-    }
-    const ext = selectedFile.name.split(".").pop()?.toLowerCase() || "";
-    setDetectedFormat(ext);
-
-    // Pick sensible default target format based on input
-    if (["xlsx", "xls", "csv", "tsv", "ods"].includes(ext)) {
-      setTargetFormat("csv");
-    } else if (["mp3", "wav", "m4a", "flac"].includes(ext)) {
-      setTargetFormat("srt");
-    } else if (["json", "xml", "yaml", "toml"].includes(ext)) {
-      setTargetFormat("json");
-    } else {
-      setTargetFormat("md");
-    }
-  }, [selectedFile]);
-
-  // When extraction mode changes, adapt target format
-  const handleModeChange = (mode: "plain_text" | "structured_text" | "complete") => {
-    setExtractionMode(mode);
-    if (mode === "plain_text") {
-      setTargetFormat("txt");
-    } else if (mode === "structured_text") {
-      setTargetFormat("md");
-    } else if (mode === "complete") {
-      setTargetFormat("zip");
-    }
+  const isImageFile = (ext: string): boolean => {
+    return ["png", "jpg", "jpeg", "webp", "tiff", "bmp", "svg"].includes(ext);
   };
 
-  const handleFileDrop = (e: React.DragEvent<HTMLDivElement>) => {
+  const addFilesToQueue = (newFiles: FileList | File[]) => {
+    const additions: QueuedFile[] = [];
+    for (let i = 0; i < newFiles.length; i++) {
+      const f = newFiles[i];
+      const ext = f.name.split(".").pop()?.toLowerCase() || "bin";
+      additions.push({
+        id: `${f.name}-${Date.now()}-${Math.random()}`,
+        file: f,
+        format: ext,
+        isImage: isImageFile(ext),
+        status: "queued",
+        progress: 0,
+      });
+    }
+    setQueue((prev) => [...prev, ...additions]);
+    showToast({
+      type: "info",
+      title: "Files Added",
+      message: `${additions.length} file(s) staged for conversion.`,
+    });
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(false);
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      setSelectedFile(e.dataTransfer.files[0]);
+      addFilesToQueue(e.dataTransfer.files);
     }
   };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      setSelectedFile(e.target.files[0]);
+      addFilesToQueue(e.target.files);
     }
+    // reset input
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  const handleConvert = async () => {
-    if (!selectedFile) {
-      showToast({ type: "error", title: "No file selected", message: "Please select a file to convert." });
+  const removeFile = (id: string) => {
+    setQueue((prev) => prev.filter((item) => item.id !== id));
+  };
+
+  const clearQueue = () => {
+    if (isProcessing) return;
+    setQueue([]);
+  };
+
+  // Convert a single file
+  const convertSingleFile = async (
+    item: QueuedFile,
+    fmt: "txt" | "md"
+  ): Promise<ConversionRecordDTO> => {
+    const formData = new FormData();
+    formData.append("file", item.file);
+    formData.append("target_format", fmt);
+    formData.append("extraction_mode", fmt === "txt" ? "plain_text" : "structured_text");
+    formData.append("ocr_enabled", String(ocrEnabled));
+
+    return await api.convertFile(formData);
+  };
+
+  // Execute bulk conversion
+  const handleConvertAll = async () => {
+    if (queue.length === 0) {
+      showToast({ type: "warning", title: "Empty Queue", message: "Please add files to convert." });
       return;
     }
 
-    setIsConverting(true);
-    setConversionResult(null);
+    setIsProcessing(true);
+    let successCount = 0;
+    let failCount = 0;
 
-    try {
-      const formData = new FormData();
-      formData.append("file", selectedFile);
-      formData.append("target_format", targetFormat);
-      formData.append("extraction_mode", extractionMode);
-      formData.append("ocr_enabled", String(ocrEnabled));
-      formData.append("preserve_tables", String(preserveTables));
-      formData.append("preserve_headings", String(preserveHeadings));
-
-      const result = await api.convertFile(formData);
-      setConversionResult(result);
-
-      if (result.target_format === "zip") {
-        const files = await api.getConversionFiles(result.id);
-        setBundleFiles(files);
+    for (let i = 0; i < queue.length; i++) {
+      const item = queue[i];
+      if (item.status === "completed") {
+        successCount++;
+        continue;
       }
 
+      // Mark converting
+      setQueue((prev) =>
+        prev.map((q) => (q.id === item.id ? { ...q, status: "converting", progress: 40 } : q))
+      );
+
+      try {
+        const result = await convertSingleFile(item, targetFormat);
+
+        // If also convertBoth is checked, convert secondary format in background
+        if (convertBoth) {
+          const secondaryFormat = targetFormat === "md" ? "txt" : "md";
+          try {
+            await convertSingleFile(item, secondaryFormat);
+          } catch {
+            // secondary conversion optional
+          }
+        }
+
+        setQueue((prev) =>
+          prev.map((q) =>
+            q.id === item.id ? { ...q, status: "completed", progress: 100, result } : q
+          )
+        );
+        successCount++;
+      } catch (err: unknown) {
+        failCount++;
+        const errMsg = err instanceof Error ? err.message : "Conversion failed";
+        setQueue((prev) =>
+          prev.map((q) =>
+            q.id === item.id ? { ...q, status: "failed", progress: 100, error: errMsg } : q
+          )
+        );
+      }
+    }
+
+    setIsProcessing(false);
+    if (failCount === 0) {
       showToast({
         type: "success",
-        title: "Conversion Completed",
-        message: `Converted '${selectedFile.name}' to ${result.output_filename} in ${result.duration_seconds}s.`,
+        title: "Bulk Conversion Complete",
+        message: `Successfully converted ${successCount} file(s) to ${targetFormat.toUpperCase()}.`,
       });
-    } catch (err: unknown) {
-      const errMsg = err instanceof Error ? err.message : "Conversion failed.";
-      showToast({ type: "error", title: "Conversion Error", message: errMsg });
-    } finally {
-      setIsConverting(false);
+    } else {
+      showToast({
+        type: "warning",
+        title: "Batch Finished with Errors",
+        message: `${successCount} succeeded, ${failCount} failed.`,
+      });
     }
   };
 
-  // Find allowed target formats for detected format
-  const matchedCap = capabilities?.find(
-    (c) => c.input_format.toLowerCase() === detectedFormat.toLowerCase()
-  );
-  const allowedOutputs = matchedCap?.allowed_output_formats || ["txt", "md", "json", "html", "zip"];
+  // Download all completed as single ZIP
+  const handleDownloadAllZip = async () => {
+    const completedIds = queue
+      .map((q) => q.result?.id)
+      .filter((id): id is string => Boolean(id));
+
+    if (completedIds.length === 0) {
+      showToast({
+        type: "warning",
+        title: "Nothing to download",
+        message: "No successfully converted files yet.",
+      });
+      return;
+    }
+
+    try {
+      showToast({
+        type: "info",
+        title: "Preparing ZIP",
+        message: "Packaging converted files into a ZIP archive...",
+      });
+      const blob = await api.downloadBatchZip(completedIds);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `converted_files_${targetFormat}.zip`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      showToast({
+        type: "success",
+        title: "Download Started",
+        message: "Your ZIP package is downloading.",
+      });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "ZIP download failed";
+      showToast({ type: "error", title: "Download Failed", message: msg });
+    }
+  };
+
+  const handleCopyPreview = () => {
+    if (!previewResult?.preview_content) return;
+    navigator.clipboard.writeText(previewResult.preview_content);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+    showToast({ type: "success", title: "Copied", message: "Content copied to clipboard." });
+  };
+
+  const formatFileSize = (bytes: number): string => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+  };
+
+  const getFormatIcon = (ext: string, isImage: boolean) => {
+    if (isImage) return <ImageIcon className="h-4 w-4 text-amber-500" />;
+    if (["xlsx", "xls", "csv", "tsv", "ods"].includes(ext))
+      return <TableIcon className="h-4 w-4 text-emerald-500" />;
+    if (["py", "js", "ts", "jsx", "tsx", "c", "cpp", "go", "rs", "sql"].includes(ext))
+      return <FileCode className="h-4 w-4 text-indigo-500" />;
+    if (["zip", "tar", "gz", "7z"].includes(ext))
+      return <Archive className="h-4 w-4 text-purple-500" />;
+    return <FileText className="h-4 w-4 text-blue-500" />;
+  };
+
+  const completedCount = queue.filter((q) => q.status === "completed").length;
 
   return (
     <PageContainer
-      title="Universal File Converter & Extractor"
-      subtitle="Extract authentic content and convert across 60+ document, spreadsheet, media, and code formats."
+      title="Universal Bulk Converter"
+      subtitle="Convert any files directly to clean Plain Text (.txt) or Markdown (.md), with built-in high-accuracy OCR image scanning."
     >
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Left Column: Upload & Configuration */}
-        <div className="lg:col-span-5 space-y-6">
-          {/* File Upload Area */}
-          <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
-            <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
-              <UploadCloud className="w-5 h-5 text-blue-600" />
-              1. Select Source File
-            </h2>
-
-            <div
-              onDragOver={(e) => e.preventDefault()}
-              onDrop={handleFileDrop}
-              onClick={() => fileInputRef.current?.click()}
-              className="border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-blue-500 dark:hover:border-blue-400 rounded-xl p-8 text-center cursor-pointer transition-colors bg-slate-50/50 dark:bg-slate-950/50"
-            >
-              <input
-                ref={fileInputRef}
-                type="file"
-                className="hidden"
-                onChange={handleFileSelect}
-              />
-              <UploadCloud className="w-10 h-10 text-slate-400 mx-auto mb-3" />
-              <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                Drag and drop your file here, or <span className="text-blue-600 dark:text-blue-400">browse</span>
-              </p>
-              <p className="text-xs text-slate-500 mt-1">
-                PDF, Word, Excel, PowerPoint, Images, Audio, Video, Code, Archives up to 500MB
-              </p>
+      <div className="space-y-6 max-w-6xl mx-auto">
+        {/* Controls Card: Target Format & OCR Settings */}
+        <div className="bg-card border border-border rounded-xl p-5 shadow-xs flex flex-wrap items-center justify-between gap-4">
+          <div className="flex flex-wrap items-center gap-6">
+            <div>
+              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-2">
+                Target Output Format
+              </label>
+              <div className="inline-flex rounded-lg border border-border bg-muted/30 p-1">
+                <button
+                  type="button"
+                  onClick={() => setTargetFormat("md")}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                    targetFormat === "md"
+                      ? "bg-primary text-white shadow-xs"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <FileText className="h-4 w-4" />
+                  Markdown (.md)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTargetFormat("txt")}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                    targetFormat === "txt"
+                      ? "bg-primary text-white shadow-xs"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <FileText className="h-4 w-4" />
+                  Plain Text (.txt)
+                </button>
+              </div>
             </div>
 
-            {selectedFile && (
-              <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 rounded-lg flex items-center justify-between">
-                <div className="flex items-center gap-3 overflow-hidden">
-                  <FileText className="w-6 h-6 text-blue-600 shrink-0" />
-                  <div className="truncate">
-                    <p className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">
-                      {selectedFile.name}
-                    </p>
-                    <p className="text-xs text-slate-500">
-                      {(selectedFile.size / 1024).toFixed(1)} KB • Detected:{" "}
-                      <span className="font-semibold text-blue-600 dark:text-blue-400 uppercase">
-                        {detectedFormat}
-                      </span>
-                    </p>
-                  </div>
-                </div>
-                <Badge variant="success" className="shrink-0 uppercase text-[10px]">
-                  Ready
-                </Badge>
-              </div>
+            <div className="flex flex-col gap-2 pt-4 sm:pt-0">
+              <label className="flex items-center gap-2 cursor-pointer text-sm font-medium select-none">
+                <input
+                  type="checkbox"
+                  checked={convertBoth}
+                  onChange={(e) => setConvertBoth(e.target.checked)}
+                  className="rounded border-border text-primary focus:ring-primary h-4 w-4"
+                />
+                <span>Also generate complementary format (Both TXT & MD)</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer text-sm font-medium select-none text-emerald-600 dark:text-emerald-400">
+                <input
+                  type="checkbox"
+                  checked={ocrEnabled}
+                  onChange={(e) => setOcrEnabled(e.target.checked)}
+                  className="rounded border-border text-emerald-600 focus:ring-emerald-500 h-4 w-4"
+                />
+                <span>📷 Enable Image Scan & OCR (Scans text from PNG, JPG, WEBP, Scanned PDF)</span>
+              </label>
+            </div>
+          </div>
+
+          {/* Quick Actions */}
+          <div className="flex items-center gap-2">
+            {completedCount > 0 && (
+              <Button
+                variant="outline"
+                onClick={handleDownloadAllZip}
+                leftIcon={<Download className="h-4 w-4 text-emerald-500" />}
+              >
+                Download All ({completedCount}) as ZIP
+              </Button>
+            )}
+            {queue.length > 0 && (
+              <Button
+                variant="primary"
+                onClick={handleConvertAll}
+                disabled={isProcessing}
+                isLoading={isProcessing}
+                leftIcon={<RefreshCw className="h-4 w-4" />}
+              >
+                Convert All Files ({queue.length})
+              </Button>
             )}
           </div>
-
-          {/* Mode Selection */}
-          <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
-            <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100 mb-3 flex items-center gap-2">
-              <Layers className="w-5 h-5 text-indigo-600" />
-              2. Select Extraction Mode
-            </h2>
-
-            <div className="space-y-3">
-              {/* Mode A */}
-              <div
-                onClick={() => handleModeChange("plain_text")}
-                className={`p-3.5 rounded-lg border cursor-pointer transition-all ${
-                  extractionMode === "plain_text"
-                    ? "border-blue-500 bg-blue-50/50 dark:bg-blue-950/30 ring-1 ring-blue-500"
-                    : "border-slate-200 dark:border-slate-800 hover:border-slate-300"
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-slate-900 dark:text-slate-100">
-                    Mode A: Plain Text (.txt)
-                  </span>
-                  <Badge variant={extractionMode === "plain_text" ? "primary" : "outline"} className="text-[10px]">
-                    Fast
-                  </Badge>
-                </div>
-                <p className="text-xs text-slate-500 mt-1">
-                  Extract pure readable text. Strips unnecessary formatting for LLMs, search, or scripts.
-                </p>
-              </div>
-
-              {/* Mode B */}
-              <div
-                onClick={() => handleModeChange("structured_text")}
-                className={`p-3.5 rounded-lg border cursor-pointer transition-all ${
-                  extractionMode === "structured_text"
-                    ? "border-blue-500 bg-blue-50/50 dark:bg-blue-950/30 ring-1 ring-blue-500"
-                    : "border-slate-200 dark:border-slate-800 hover:border-slate-300"
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-slate-900 dark:text-slate-100">
-                    Mode B: Structured Text (.md)
-                  </span>
-                  <Badge variant={extractionMode === "structured_text" ? "primary" : "outline"} className="text-[10px]">
-                    Recommended
-                  </Badge>
-                </div>
-                <p className="text-xs text-slate-500 mt-1">
-                  Preserve headings, tables, code fences, lists, and slide/sheet boundaries in GitHub Markdown.
-                </p>
-              </div>
-
-              {/* Mode C */}
-              <div
-                onClick={() => handleModeChange("complete")}
-                className={`p-3.5 rounded-lg border cursor-pointer transition-all ${
-                  extractionMode === "complete"
-                    ? "border-blue-500 bg-blue-50/50 dark:bg-blue-950/30 ring-1 ring-blue-500"
-                    : "border-slate-200 dark:border-slate-800 hover:border-slate-300"
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-slate-900 dark:text-slate-100">
-                    Mode C: Complete Extraction (.zip)
-                  </span>
-                  <Badge variant={extractionMode === "complete" ? "primary" : "outline"} className="text-[10px]">
-                    Full Bundle
-                  </Badge>
-                </div>
-                <p className="text-xs text-slate-500 mt-1">
-                  Export full archive with .txt, .md, .json, .html, tables as individual .csv, and manifest.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Output Format Selection */}
-          <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
-            <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100 mb-3 flex items-center gap-2">
-              <FileCheck className="w-5 h-5 text-emerald-600" />
-              3. Target Output Format
-            </h2>
-
-            <div className="grid grid-cols-4 gap-2">
-              {["txt", "md", "json", "csv", "html", "zip", "srt", "vtt"].map((fmt) => {
-                const isAllowed = allowedOutputs.includes(fmt) || extractionMode === "complete";
-                const isSelected = targetFormat === fmt;
-
-                return (
-                  <button
-                    key={fmt}
-                    type="button"
-                    disabled={!isAllowed}
-                    onClick={() => setTargetFormat(fmt)}
-                    className={`py-2 px-3 rounded-lg text-xs font-semibold uppercase transition-all ${
-                      isSelected
-                        ? "bg-blue-600 text-white shadow-sm"
-                        : isAllowed
-                        ? "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
-                        : "bg-slate-50 dark:bg-slate-950 text-slate-300 dark:text-slate-700 cursor-not-allowed border border-transparent"
-                    }`}
-                  >
-                    .{fmt}
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Extraction Options */}
-            <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-800 space-y-2">
-              <p className="text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Conversion Options</p>
-              <div
-                onClick={() => setOcrEnabled(!ocrEnabled)}
-                className="flex items-center gap-2 cursor-pointer text-xs text-slate-600 dark:text-slate-400 select-none"
-              >
-                {ocrEnabled ? (
-                  <CheckSquare className="w-4 h-4 text-blue-600" />
-                ) : (
-                  <Square className="w-4 h-4 text-slate-400" />
-                )}
-                <span>Enable Optical Character Recognition (OCR) for scanned images</span>
-              </div>
-              <div
-                onClick={() => setPreserveTables(!preserveTables)}
-                className="flex items-center gap-2 cursor-pointer text-xs text-slate-600 dark:text-slate-400 select-none"
-              >
-                {preserveTables ? (
-                  <CheckSquare className="w-4 h-4 text-blue-600" />
-                ) : (
-                  <Square className="w-4 h-4 text-slate-400" />
-                )}
-                <span>Preserve tabular structures &amp; column alignments</span>
-              </div>
-              <div
-                onClick={() => setPreserveHeadings(!preserveHeadings)}
-                className="flex items-center gap-2 cursor-pointer text-xs text-slate-600 dark:text-slate-400 select-none"
-              >
-                {preserveHeadings ? (
-                  <CheckSquare className="w-4 h-4 text-blue-600" />
-                ) : (
-                  <Square className="w-4 h-4 text-slate-400" />
-                )}
-                <span>Preserve section headings and document hierarchy</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Action Button */}
-          <Button
-            size="lg"
-            className="w-full text-base font-medium py-3"
-            disabled={!selectedFile || isConverting}
-            onClick={handleConvert}
-          >
-            {isConverting ? (
-              <>
-                <RefreshCw className="w-5 h-5 animate-spin mr-2" />
-                Converting File...
-              </>
-            ) : (
-              <>
-                Convert & Extract Content
-                <ArrowRight className="w-5 h-5 ml-2" />
-              </>
-            )}
-          </Button>
         </div>
 
-        {/* Right Column: Output Preview & Results */}
-        <div className="lg:col-span-7 space-y-6">
-          <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm min-h-[580px] flex flex-col">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-800 mb-4">
-              <div className="flex items-center gap-2">
-                <Eye className="w-5 h-5 text-slate-500" />
-                <h3 className="font-semibold text-slate-900 dark:text-slate-100">
-                  Conversion Preview & Download
+        {/* Drag & Drop Bulk Ingestion Zone */}
+        <div
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+          onClick={() => fileInputRef.current?.click()}
+          className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all ${
+            isDragging
+              ? "border-primary bg-primary/5 scale-[1.005]"
+              : "border-border hover:border-primary/50 hover:bg-muted/30"
+          }`}
+        >
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            className="hidden"
+            onChange={handleFileSelect}
+          />
+          <div className="flex flex-col items-center justify-center space-y-3">
+            <div className="h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+              <UploadCloud className="h-7 w-7" />
+            </div>
+            <div>
+              <h3 className="text-base font-semibold text-foreground">
+                Drag and drop files here, or click to browse
+              </h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                Upload multiple files at once. Supports all document types, spreadsheets, code, and images for OCR.
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
+              <Badge variant="primary" size="sm">PDF, DOCX, DOC</Badge>
+              <Badge variant="success" size="sm">XLSX, CSV, ODS</Badge>
+              <Badge variant="warning" size="sm">📷 PNG, JPG, WEBP (OCR Scan)</Badge>
+              <Badge variant="purple" size="sm">PPTX, Keynotes</Badge>
+              <Badge variant="outline" size="sm">Code & Structured Data</Badge>
+              <Badge variant="default" size="sm">ZIP, Archives</Badge>
+            </div>
+          </div>
+        </div>
+
+        {/* Bulk Queue Table */}
+        {queue.length > 0 && (
+          <div className="bg-card border border-border rounded-xl shadow-xs overflow-hidden">
+            <div className="px-5 py-4 border-b border-border flex items-center justify-between bg-muted/20">
+              <div className="flex items-center gap-3">
+                <Layers className="h-5 w-5 text-primary" />
+                <h3 className="font-semibold text-foreground">
+                  Bulk Conversion Queue ({queue.length} files)
                 </h3>
+                {completedCount > 0 && (
+                  <Badge variant="success" size="sm">
+                    {completedCount} of {queue.length} ready
+                  </Badge>
+                )}
               </div>
-
-              {conversionResult && (
-                <div className="flex items-center gap-2">
-                  <a
-                    href={api.getConversionDownloadUrl(conversionResult.id)}
-                    download={conversionResult.output_filename}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-medium transition-colors shadow-sm"
-                  >
-                    <Download className="w-4 h-4" />
-                    Download {conversionResult.output_filename}
-                  </a>
-                </div>
-              )}
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={clearQueue}
+                  disabled={isProcessing}
+                  leftIcon={<Trash2 className="h-3.5 w-3.5 text-muted-foreground" />}
+                >
+                  Clear Queue
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isProcessing}
+                >
+                  + Add More Files
+                </Button>
+              </div>
             </div>
 
-            {/* If no result yet */}
-            {!conversionResult && !isConverting && (
-              <div className="my-auto text-center py-12">
-                <FileBox className="w-16 h-16 text-slate-300 dark:text-slate-700 mx-auto mb-3" />
-                <h4 className="text-base font-medium text-slate-700 dark:text-slate-300">
-                  Ready to Convert
-                </h4>
-                <p className="text-sm text-slate-500 max-w-md mx-auto mt-1">
-                  Upload a document, spreadsheet, presentation, image, audio, video, code file, or archive.
-                  The converted output will preview here immediately with single-click download.
-                </p>
-              </div>
-            )}
-
-            {/* Converting state */}
-            {isConverting && (
-              <div className="my-auto text-center py-16">
-                <RefreshCw className="w-12 h-12 text-blue-600 animate-spin mx-auto mb-4" />
-                <h4 className="text-base font-semibold text-slate-800 dark:text-slate-200">
-                  Extracting and Normalizing Content...
-                </h4>
-                <p className="text-xs text-slate-500 mt-2">
-                  Running format detection • Parsing AST / Media • Converting to {targetFormat.toUpperCase()}
-                </p>
-              </div>
-            )}
-
-            {/* Results presentation */}
-            {conversionResult && !isConverting && (
-              <div className="flex-1 flex flex-col space-y-4">
-                {/* Status Bar */}
-                <div className="flex flex-wrap items-center justify-between p-3 bg-slate-50 dark:bg-slate-950 rounded-lg border border-slate-200 dark:border-slate-800 text-xs">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                    <span className="font-semibold text-slate-900 dark:text-slate-100">
-                      {conversionResult.output_filename}
+            <div className="divide-y divide-border">
+              {queue.map((item, idx) => (
+                <div
+                  key={item.id}
+                  className="px-5 py-3.5 flex flex-wrap sm:flex-nowrap items-center justify-between gap-4 hover:bg-muted/10 transition-colors"
+                >
+                  {/* File Info */}
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <span className="text-xs font-mono text-muted-foreground w-6 text-right">
+                      {idx + 1}.
                     </span>
-                    <Badge variant="outline" className="uppercase text-[10px]">
-                      {conversionResult.target_format}
-                    </Badge>
+                    <div className="p-2 rounded-lg bg-muted/50 shrink-0">
+                      {getFormatIcon(item.format, item.isImage)}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-foreground truncate block">
+                          {item.file.name}
+                        </span>
+                        {item.isImage && (
+                          <Badge variant="warning" size="sm" className="shrink-0 text-[10px]">
+                            📷 OCR Scan
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
+                        <span>{formatFileSize(item.file.size)}</span>
+                        <span>•</span>
+                        <span className="uppercase font-mono">{item.format}</span>
+                        <span>→</span>
+                        <span className="uppercase font-semibold text-primary">
+                          {targetFormat}
+                        </span>
+                        {item.result && (
+                          <>
+                            <span>•</span>
+                            <span className="text-emerald-600 dark:text-emerald-400">
+                              {item.result.duration_seconds}s
+                            </span>
+                          </>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-3 text-slate-500">
-                    <span>Duration: {conversionResult.duration_seconds}s</span>
-                    <span>Size: {(conversionResult.output_size_bytes / 1024).toFixed(1)} KB</span>
+
+                  {/* Status & Actions */}
+                  <div className="flex items-center gap-3 shrink-0">
+                    {item.status === "queued" && (
+                      <Badge variant="default" size="sm">
+                        Queued
+                      </Badge>
+                    )}
+                    {item.status === "converting" && (
+                      <Badge variant="primary" size="sm" className="animate-pulse">
+                        <RefreshCw className="h-3 w-3 animate-spin mr-1.5" />
+                        Converting...
+                      </Badge>
+                    )}
+                    {item.status === "completed" && item.result && (
+                      <div className="flex items-center gap-2">
+                        <Badge variant="success" size="sm">
+                          <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
+                          Ready ({formatFileSize(item.result.output_size_bytes)})
+                        </Badge>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setPreviewResult(item.result || null)}
+                          title="Preview Extracted Content"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <a
+                          href={api.getConversionDownloadUrl(item.result.id)}
+                          download={item.result.output_filename}
+                          className="inline-flex items-center justify-center p-2 rounded-md hover:bg-muted text-primary transition-colors"
+                          title="Download Converted File"
+                        >
+                          <Download className="h-4 w-4" />
+                        </a>
+                      </div>
+                    )}
+                    {item.status === "failed" && (
+                      <div className="flex items-center gap-2">
+                        <Badge variant="danger" size="sm" title={item.error}>
+                          <AlertCircle className="h-3.5 w-3.5 mr-1" />
+                          Failed
+                        </Badge>
+                      </div>
+                    )}
+
+                    {!isProcessing && item.status !== "converting" && (
+                      <button
+                        type="button"
+                        onClick={() => removeFile(item.id)}
+                        className="text-muted-foreground hover:text-red-500 p-1 rounded-md transition-colors"
+                        title="Remove"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    )}
                   </div>
                 </div>
+              ))}
+            </div>
 
-                {/* Tabs */}
-                <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 text-xs">
-                  <button
-                    onClick={() => setPreviewTab("formatted")}
-                    className={`pb-2 px-3 font-medium transition-colors border-b-2 ${
-                      previewTab === "formatted"
-                        ? "border-blue-600 text-blue-600"
-                        : "border-transparent text-slate-500 hover:text-slate-800"
-                    }`}
-                  >
-                    Preview
-                  </button>
-                  <button
-                    onClick={() => setPreviewTab("raw")}
-                    className={`pb-2 px-3 font-medium transition-colors border-b-2 ${
-                      previewTab === "raw"
-                        ? "border-blue-600 text-blue-600"
-                        : "border-transparent text-slate-500 hover:text-slate-800"
-                    }`}
-                  >
-                    Raw Content
-                  </button>
-                  {conversionResult.target_format === "zip" && (
-                    <button
-                      onClick={() => setPreviewTab("files")}
-                      className={`pb-2 px-3 font-medium transition-colors border-b-2 ${
-                        previewTab === "files"
-                          ? "border-blue-600 text-blue-600"
-                          : "border-transparent text-slate-500 hover:text-slate-800"
-                      }`}
-                    >
-                      Bundle Files ({bundleFiles.length})
-                    </button>
-                  )}
-                  <button
-                    onClick={() => setPreviewTab("meta")}
-                    className={`pb-2 px-3 font-medium transition-colors border-b-2 ${
-                      previewTab === "meta"
-                        ? "border-blue-600 text-blue-600"
-                        : "border-transparent text-slate-500 hover:text-slate-800"
-                    }`}
-                  >
-                    Warnings & Info
-                  </button>
-                </div>
-
-                {/* Tab Contents */}
-                <div className="flex-1 overflow-auto rounded-lg bg-slate-50/50 dark:bg-slate-950/50 p-4 border border-slate-200 dark:border-slate-800 text-xs font-mono">
-                  {previewTab === "formatted" && (
-                    <div className="prose dark:prose-invert max-w-none text-slate-800 dark:text-slate-200 font-sans whitespace-pre-wrap">
-                      {conversionResult.preview_content || "No preview text generated."}
-                    </div>
-                  )}
-
-                  {previewTab === "raw" && (
-                    <pre className="text-slate-800 dark:text-slate-200 whitespace-pre-wrap">
-                      {conversionResult.preview_content}
-                    </pre>
-                  )}
-
-                  {previewTab === "files" && (
-                    <div className="space-y-2 font-sans">
-                      <p className="text-xs font-medium text-slate-700 dark:text-slate-300 mb-2">
-                        Files included in the complete Mode C extraction package:
-                      </p>
-                      <table className="w-full text-left border-collapse text-xs">
-                        <thead>
-                          <tr className="border-b border-slate-300 dark:border-slate-700">
-                            <th className="py-1.5">File Name</th>
-                            <th className="py-1.5 text-right">Size</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {bundleFiles.map((f, i) => (
-                            <tr key={i} className="border-b border-slate-200 dark:border-slate-800/60">
-                              <td className="py-1 font-mono text-blue-600 dark:text-blue-400">
-                                {f.filename}
-                              </td>
-                              <td className="py-1 text-right text-slate-500">
-                                {(f.size_bytes / 1024).toFixed(1)} KB
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
-
-                  {previewTab === "meta" && (
-                    <div className="space-y-3 font-sans text-xs">
-                      <div>
-                        <span className="font-semibold text-slate-700 dark:text-slate-300">Source:</span>{" "}
-                        {conversionResult.original_filename} ({conversionResult.source_format.toUpperCase()})
-                      </div>
-                      <div>
-                        <span className="font-semibold text-slate-700 dark:text-slate-300">Mode:</span>{" "}
-                        {conversionResult.extraction_mode}
-                      </div>
-                      <div>
-                        <span className="font-semibold text-slate-700 dark:text-slate-300">Created At:</span>{" "}
-                        {conversionResult.created_at}
-                      </div>
-                      {conversionResult.warnings.length > 0 && (
-                        <div className="p-3 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-lg text-amber-800 dark:text-amber-200">
-                          <p className="font-semibold mb-1 flex items-center gap-1.5">
-                            <AlertTriangle className="w-4 h-4 text-amber-600" /> Extraction Warnings:
-                          </p>
-                          <ul className="list-disc list-inside space-y-1">
-                            {conversionResult.warnings.map((w, idx) => (
-                              <li key={idx}>{w}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
+            {/* Bottom converted bulk bar */}
+            {completedCount > 0 && (
+              <div className="px-5 py-3.5 bg-emerald-500/5 border-t border-emerald-500/20 flex flex-wrap items-center justify-between gap-4">
+                <span className="text-sm font-medium text-emerald-800 dark:text-emerald-300 flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                  {completedCount} file(s) converted successfully to .{targetFormat}
+                </span>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={handleDownloadAllZip}
+                  leftIcon={<Download className="h-4 w-4" />}
+                >
+                  Download All ({completedCount}) as ZIP
+                </Button>
               </div>
             )}
           </div>
-        </div>
+        )}
+
+        {/* Full Inline Preview Modal */}
+        {previewResult && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs">
+            <div className="bg-card border border-border rounded-xl shadow-xl w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden animate-in fade-in-50 zoom-in-95">
+              {/* Modal Header */}
+              <div className="px-5 py-4 border-b border-border flex items-center justify-between bg-muted/20">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                    <FileText className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-foreground text-sm sm:text-base">
+                      {previewResult.output_filename}
+                    </h3>
+                    <p className="text-xs text-muted-foreground">
+                      Source: {previewResult.original_filename} ({previewResult.source_format.toUpperCase()}) • Duration: {previewResult.duration_seconds}s
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleCopyPreview}
+                    leftIcon={copied ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <Copy className="h-3.5 w-3.5" />}
+                  >
+                    {copied ? "Copied" : "Copy"}
+                  </Button>
+                  <a
+                    href={api.getConversionDownloadUrl(previewResult.id)}
+                    download={previewResult.output_filename}
+                    className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium bg-primary text-white hover:bg-primary/90 transition-all shadow-xs"
+                  >
+                    <Download className="h-3.5 w-3.5" />
+                    Download
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => setPreviewResult(null)}
+                    className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Modal Body */}
+              <div className="p-5 overflow-y-auto flex-1 bg-muted/10 font-mono text-xs leading-relaxed text-foreground select-text whitespace-pre-wrap break-words">
+                {previewResult.preview_content || "(No extracted text available for this file)"}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </PageContainer>
   );

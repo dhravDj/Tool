@@ -235,6 +235,12 @@ class ImageIntelligencePipeline(ProcessingPluginInterface):
         text_regions, ocr_text, ocr_conf, ocr_warnings = self.ocr_engine.extract_regions(
             ocr_img, options=options
         )
+        if not ocr_text and working_img is not None:
+            alt_regions, alt_text, alt_conf, _ = self.ocr_engine.extract_regions(
+                working_img, options=options
+            )
+            if alt_text:
+                text_regions, ocr_text, ocr_conf = alt_regions, alt_text, alt_conf
         warnings.extend(ocr_warnings)
 
         # Stage 4: Vision Scene Understanding & Objects
