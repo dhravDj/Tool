@@ -105,8 +105,8 @@ class DocumentAdapter:
         return UniversalContent(
             source_filename=doc.original_filename,
             source_format=doc.detected_format,
-            title=doc.metadata.get("title", "") or doc.original_filename,
-            author=doc.metadata.get("author", ""),
+            title=str(doc.metadata.get("title") or doc.original_filename or "Document"),
+            author=str(doc.metadata.get("author") or ""),
             page_count=max(1, doc.page_count),
             word_count=word_count,
             paragraphs=paragraphs,

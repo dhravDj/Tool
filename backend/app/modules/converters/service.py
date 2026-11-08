@@ -643,8 +643,6 @@ class UniversalConversionService:
                 file_path=file_path,
                 file_id=str(uuid.uuid4()),
                 original_filename=original_filename,
-                format_id=fmt,
-                options=options,
             )
             return ArchiveAdapter.adapt(archive_doc, original_filename)
 

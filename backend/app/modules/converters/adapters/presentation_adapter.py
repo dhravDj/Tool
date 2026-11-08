@@ -6,7 +6,6 @@ from app.modules.converters.schemas import (
     UniversalTable,
 )
 from app.modules.presentation_intelligence.schemas.presentation_document import (
-    ElementType,
     PresentationDocument,
 )
 
@@ -28,15 +27,19 @@ class PresentationAdapter:
             slide_texts: list[str] = []
 
             for elem in slide.elements:
-                if elem.element_type in (ElementType.TITLE, ElementType.TEXT) and elem.text_frame:
-                    for para in elem.text_frame.paragraphs:
+                if elem.paragraphs:
+                    for para in elem.paragraphs:
                         txt = para.text.strip()
                         if txt:
                             indent = "  " * para.level
-                            prefix = "• " if para.is_bullet else ""
+                            prefix = "• " if getattr(para, "bullet", False) else ""
                             line = f"{indent}{prefix}{txt}"
                             slide_texts.append(line)
                             paragraphs.append(txt)
+                elif elem.text and elem.text.strip():
+                    txt = elem.text.strip()
+                    slide_texts.append(txt)
+                    paragraphs.append(txt)
 
             if slide.speaker_notes:
                 notes_clean = slide.speaker_notes.strip()
