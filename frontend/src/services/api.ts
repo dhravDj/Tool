@@ -837,6 +837,20 @@ export const api = {
       body: formData,
     }),
 
+  convertUrl: (data: { url: string; target_format?: string; extraction_mode?: string }): Promise<ConversionRecordDTO> =>
+    request<ConversionRecordDTO>("/conversions/url", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    }),
+
+  convertDoi: (data: { doi: string; target_format?: string; extraction_mode?: string }): Promise<ConversionRecordDTO> =>
+    request<ConversionRecordDTO>("/conversions/doi", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    }),
+
   convertBatch: (formData: FormData): Promise<ConversionRecordDTO[]> =>
     request<ConversionRecordDTO[]>("/conversions/batch", {
       method: "POST",

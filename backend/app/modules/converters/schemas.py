@@ -99,6 +99,12 @@ class ConversionOptions(BaseModel):
 
     ocr_enabled: bool = True
     ocr_language: str = "eng"
+    ocr_tier: str = "high"
+    ocr_mode: str = "auto"
+    ocr_lang: str = "en"
+    enable_chunking: bool = True
+    chunk_size: int = 700
+    chunk_overlap: int = 100
     preserve_tables: bool = True
     preserve_headings: bool = True
     preserve_page_numbers: bool = True

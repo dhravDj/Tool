@@ -24,11 +24,15 @@ describe("Universal File Converter Pages", () => {
   it("renders ConvertPage with upload area, format selectors, and bulk queue", () => {
     renderWithProviders(<ConvertPage />);
 
-    expect(screen.getByText("Universal Bulk Converter")).toBeInTheDocument();
-    expect(screen.getByText("Target Output Format")).toBeInTheDocument();
+    expect(screen.getByText("Universal File Converter & Content Extractor")).toBeInTheDocument();
+    expect(screen.getByText("Output Format:")).toBeInTheDocument();
     expect(screen.getByText("Markdown (.md)")).toBeInTheDocument();
     expect(screen.getByText("Plain Text (.txt)")).toBeInTheDocument();
-    expect(screen.getByText("Drag and drop files here, or click to browse")).toBeInTheDocument();
+    expect(screen.getByText("JSON (.json)")).toBeInTheDocument();
+    expect(screen.getByText("All Formats (.zip)")).toBeInTheDocument();
+    expect(screen.getByText("Click to browse or drag and drop any files here")).toBeInTheDocument();
+    expect(screen.getByText("Live Webpage URL")).toBeInTheDocument();
+    expect(screen.getByText("Academic Paper DOI")).toBeInTheDocument();
   });
 
   it("renders ConversionHistoryPage with table headers and filter controls", () => {

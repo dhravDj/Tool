@@ -76,12 +76,114 @@ async def get_conversion_capabilities() -> APIResponse[list[FormatCapabilities]]
     )
 
 
+class UrlConversionRequest(BaseModel):
+    url: str
+    target_format: str = "md"
+    extraction_mode: str = "structured_text"
+    enable_chunking: bool = True
+    chunk_size: int = 700
+    chunk_overlap: int = 100
+
+
+class DoiConversionRequest(BaseModel):
+    doi: str
+    target_format: str = "md"
+    extraction_mode: str = "structured_text"
+    metadata_only: bool = False
+    enable_chunking: bool = True
+    chunk_size: int = 700
+    chunk_overlap: int = 100
+
+
+@router.post("/conversions/url", response_model=APIResponse[ConversionResponse])
+async def convert_url(
+    req: UrlConversionRequest,
+    session: AsyncSession = Depends(get_session),
+) -> APIResponse[ConversionResponse]:
+    """Extract content from a live Webpage URL and convert to target format."""
+    clean_url = req.url.strip()
+    if not clean_url.startswith(("http://", "https://")):
+        raise HTTPException(status_code=400, detail="Invalid URL. Must begin with http:// or https://")
+
+    with tempfile.NamedTemporaryFile(suffix=".url", mode="w", delete=False, encoding="utf-8") as tmp:
+        tmp.write(clean_url)
+        tmp_path = Path(tmp.name)
+
+    options = ConversionOptions(
+        enable_chunking=req.enable_chunking,
+        chunk_size=req.chunk_size,
+        chunk_overlap=req.chunk_overlap,
+    )
+
+    try:
+        record = await conversion_service.convert_file(
+            file_path=tmp_path,
+            target_format=req.target_format,
+            extraction_mode=req.extraction_mode,
+            original_filename=clean_url,
+            options=options,
+            session=session,
+        )
+        return APIResponse.ok(
+            data=_to_response_dto(record),
+            message=f"Webpage '{clean_url}' extracted and converted successfully to {req.target_format.upper()}.",
+        )
+    finally:
+        if tmp_path.exists():
+            tmp_path.unlink()
+
+
+@router.post("/conversions/doi", response_model=APIResponse[ConversionResponse])
+async def convert_doi(
+    req: DoiConversionRequest,
+    session: AsyncSession = Depends(get_session),
+) -> APIResponse[ConversionResponse]:
+    """Retrieve an academic research paper via DOI and convert to target format."""
+    clean_doi = req.doi.strip()
+    if not clean_doi:
+        raise HTTPException(status_code=400, detail="DOI cannot be empty.")
+
+    with tempfile.NamedTemporaryFile(suffix=".doi", mode="w", delete=False, encoding="utf-8") as tmp:
+        tmp.write(clean_doi)
+        tmp_path = Path(tmp.name)
+
+    options = ConversionOptions(
+        include_metadata=True,
+        enable_chunking=req.enable_chunking,
+        chunk_size=req.chunk_size,
+        chunk_overlap=req.chunk_overlap,
+    )
+
+    try:
+        record = await conversion_service.convert_file(
+            file_path=tmp_path,
+            target_format=req.target_format,
+            extraction_mode=req.extraction_mode,
+            original_filename=f"doi_{clean_doi.replace('/', '_')}.doi",
+            options=options,
+            session=session,
+        )
+        return APIResponse.ok(
+            data=_to_response_dto(record),
+            message=f"Academic paper '{clean_doi}' retrieved and converted successfully to {req.target_format.upper()}.",
+        )
+    finally:
+        if tmp_path.exists():
+            tmp_path.unlink()
+
+
 @router.post("/conversions", response_model=APIResponse[ConversionResponse])
 async def convert_file(
     file: UploadFile = File(..., description="Source file to convert"),
     target_format: str = Form("txt", description="Target format: txt, md, json, csv, html, zip, srt, vtt"),
     extraction_mode: str = Form("structured_text", description="Extraction mode: plain_text, structured_text, complete"),
     ocr_enabled: bool = Form(True, description="Enable OCR for images and scanned documents"),
+    ocr_tier: str = Form("high", description="OCR tier: high, medium, small, tiny"),
+    ocr_mode: str = Form("auto", description="OCR mode: auto, ocr, native, math"),
+    ocr_lang: str = Form("en", description="OCR language code: en, hi, fr, de, es, ch"),
+    enable_chunking: bool = Form(True, description="Generate semantic RAG chunks"),
+    chunk_size: int = Form(700, description="RAG chunk token count"),
+    chunk_overlap: int = Form(100, description="RAG chunk token overlap"),
     preserve_tables: bool = Form(True, description="Preserve tabular structures"),
     preserve_headings: bool = Form(True, description="Preserve document section headers"),
     session: AsyncSession = Depends(get_session),
@@ -92,6 +194,12 @@ async def convert_file(
 
     options = ConversionOptions(
         ocr_enabled=ocr_enabled,
+        ocr_tier=ocr_tier,
+        ocr_mode=ocr_mode,
+        ocr_lang=ocr_lang,
+        enable_chunking=enable_chunking,
+        chunk_size=chunk_size,
+        chunk_overlap=chunk_overlap,
         preserve_tables=preserve_tables,
         preserve_headings=preserve_headings,
     )
