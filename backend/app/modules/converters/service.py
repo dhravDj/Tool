@@ -1,6 +1,7 @@
 """Universal Conversion Service orchestrating extraction, normalization, and export."""
 
 import logging
+import sys
 import time
 import uuid
 from datetime import UTC, datetime
@@ -25,6 +26,7 @@ from app.modules.converters.adapters import (
     StructuredDataAdapter,
     VideoAdapter,
 )
+from app.modules.converters.adapters.converter_engine_adapter import ConverterEngineAdapter
 from app.modules.converters.schemas import (
     ConversionOptions,
     ConversionStatus,
@@ -50,6 +52,10 @@ from app.modules.presentation_intelligence.pipeline import PresentationIntellige
 from app.modules.spreadsheet_intelligence.pipeline import SpreadsheetIntelligencePipeline
 from app.modules.structured_data_intelligence.pipeline import StructuredDataIntelligencePipeline
 from app.modules.video_intelligence.pipeline import VideoIntelligencePipeline
+
+_converter_engine_path = Path(__file__).resolve().parents[4] / "converter_engine"
+if _converter_engine_path.exists() and str(_converter_engine_path) not in sys.path:
+    sys.path.insert(0, str(_converter_engine_path))
 
 logger = logging.getLogger(__name__)
 
@@ -297,8 +303,50 @@ FORMAT_CAPABILITIES: dict[str, dict[str, Any]] = {
         "supports_ocr": False,
     },
     "html": {
-        "category": "code",
+        "category": "document",
         "display_name": "HTML Document / Source",
+        "allowed_outputs": ["txt", "md", "json", "html", "zip"],
+        "supports_ocr": False,
+    },
+    "htm": {
+        "category": "document",
+        "display_name": "HTML Webpage Document",
+        "allowed_outputs": ["txt", "md", "json", "html", "zip"],
+        "supports_ocr": False,
+    },
+    "xhtml": {
+        "category": "document",
+        "display_name": "Extensible HTML Document",
+        "allowed_outputs": ["txt", "md", "json", "html", "zip"],
+        "supports_ocr": False,
+    },
+    "mhtml": {
+        "category": "document",
+        "display_name": "MIME Encapsulated HTML",
+        "allowed_outputs": ["txt", "md", "json", "html", "zip"],
+        "supports_ocr": False,
+    },
+    "mht": {
+        "category": "document",
+        "display_name": "MIME HTML Archive",
+        "allowed_outputs": ["txt", "md", "json", "html", "zip"],
+        "supports_ocr": False,
+    },
+    "doi": {
+        "category": "document",
+        "display_name": "Academic Paper DOI",
+        "allowed_outputs": ["txt", "md", "json", "html", "zip"],
+        "supports_ocr": False,
+    },
+    "url": {
+        "category": "document",
+        "display_name": "Webpage URL Shortcut",
+        "allowed_outputs": ["txt", "md", "json", "html", "zip"],
+        "supports_ocr": False,
+    },
+    "webpage": {
+        "category": "document",
+        "display_name": "Live Webpage Article",
         "allowed_outputs": ["txt", "md", "json", "html", "zip"],
         "supports_ocr": False,
     },
@@ -482,9 +530,13 @@ class UniversalConversionService:
         # 1. Automatic format detection
         detection = self.detector.detect_file(file_path, effective_filename)
         detected_fmt = detection.format_id.lower().strip()
+        ext = (Path(effective_filename).suffix.lstrip(".") or file_path.suffix.lstrip(".")).lower()
+
+        # Prioritize dedicated web/academic/markup extensions
+        if ext in ("url", "doi", "webloc", "htm", "html", "xhtml", "mhtml", "mht"):
+            detected_fmt = ext
         # Fallback to extension if format_id is generic
-        if detected_fmt in ("unknown", "generic_binary", "text") or not detected_fmt:
-            ext = file_path.suffix.lstrip(".").lower()
+        elif detected_fmt in ("unknown", "generic_binary", "text") or not detected_fmt:
             if ext in FORMAT_CAPABILITIES:
                 detected_fmt = ext
             else:
@@ -623,7 +675,36 @@ class UniversalConversionService:
             )
             return PresentationAdapter.adapt(pres_doc, original_filename)
 
-        # C. Code
+        # C. HTML / XHTML / MHTML using Universal-Converter engine
+        if fmt in ("html", "htm", "xhtml", "mhtml", "mht"):
+            try:
+                from HTML.pipeline import process_html
+                doc = process_html(file_path, output_format="all")
+                return ConverterEngineAdapter.adapt(doc, original_filename, fmt)
+            except Exception as e:
+                logger.warning(f"converter_engine HTML failed ({e}), falling back to code pipeline")
+
+        # Academic DOI using Universal-Converter engine
+        if fmt in ("doi",) or original_filename.lower().endswith(".doi"):
+            try:
+                doi_str = file_path.read_text(encoding="utf-8", errors="ignore").strip()
+                from DOI.pipeline import process_doi
+                paper = process_doi(doi_str, metadata_only=False, output_format="all")
+                return ConverterEngineAdapter.adapt(paper, original_filename, "doi")
+            except Exception as e:
+                logger.warning(f"converter_engine DOI failed: {e}")
+
+        # Webpage URL using Universal-Converter engine
+        if fmt in ("url", "webloc", "webpage"):
+            try:
+                url_str = file_path.read_text(encoding="utf-8", errors="ignore").strip()
+                from WEBPAGE.pipeline import process_webpage
+                doc = process_webpage(url_str, output_format="all")
+                return ConverterEngineAdapter.adapt(doc, original_filename, "webpage")
+            except Exception as e:
+                logger.warning(f"converter_engine Webpage failed: {e}")
+
+        # D. Code
         if fmt in (
             "py", "js", "ts", "jsx", "tsx", "html", "css", "java", "c", "cpp", "go", "rs", "php", "sql"
         ) or category == FormatCategory.CODE.value:
